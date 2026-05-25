@@ -15,6 +15,12 @@ first-class modules rather than afterthoughts.
 
 I separated experiment configuration files into the configs/ folder so future training scripts can load hyperparameters from YAML instead of hard-coding them. I also created requirements.txt to make the Python environment easier to reproduce. The results/ folder is reserved for generated logs and figures, while .gitignore prevents large or frequently changing output files from polluting the Git history.
 
+Reproducibility is important because randomness can affect initialization, data shuffling, train/validation splits, mini-batch order, and eventually the observed training curves or model performance. Without controlling random seeds, it becomes difficult to know whether a result changed because of a real code or modeling decision, or simply because of random variation.
+
+Logging is equally important because it records what happened during an experiment instead of relying only on temporary terminal output. Logs make it easier to debug failures, compare runs, and understand the sequence of training or evaluation steps.
+
+For trustworthy ML, reproducibility is a scientific requirement. If an experiment cannot be repeated or inspected by others, then the result becomes hard to verify or falsify. A model that cannot be reproduced cannot be reliably trusted.
+
 ## 4. Connection to Hidden Technical Debt in ML Systems
 
 TODO: Add notes after reading the paper.
