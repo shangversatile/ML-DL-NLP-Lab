@@ -1,0 +1,3 @@
+seed: 42
+learning_rate: 0.01
+num_epochs: 100
