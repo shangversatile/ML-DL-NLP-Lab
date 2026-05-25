@@ -21,6 +21,10 @@ Logging is equally important because it records what happened during an experime
 
 For trustworthy ML, reproducibility is a scientific requirement. If an experiment cannot be repeated or inspected by others, then the result becomes hard to verify or falsify. A model that cannot be reproduced cannot be reliably trusted.
 
+### Data splitting and preprocessing
+
+`standardize_features()` must compute mean and standard deviation only from `X_train` because the validation set should simulate unseen data. If we use `X_val` to compute preprocessing statistics, information from the validation distribution leaks into the training pipeline, making evaluation overly optimistic. In real deployment, we cannot compute preprocessing parameters using future unseen samples in advance. Therefore, the correct procedure is to fit preprocessing on training data and apply the same transformation to validation or test data.
+
 ## 4. Connection to Hidden Technical Debt in ML Systems
 
 TODO: Add notes after reading the paper.
