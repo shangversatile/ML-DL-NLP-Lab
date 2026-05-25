@@ -25,6 +25,12 @@ For trustworthy ML, reproducibility is a scientific requirement. If an experimen
 
 `standardize_features()` must compute mean and standard deviation only from `X_train` because the validation set should simulate unseen data. If we use `X_val` to compute preprocessing statistics, information from the validation distribution leaks into the training pipeline, making evaluation overly optimistic. In real deployment, we cannot compute preprocessing parameters using future unseen samples in advance. Therefore, the correct procedure is to fit preprocessing on training data and apply the same transformation to validation or test data.
 
+### Why configuration files matter
+
+Experiment parameters should be stored in `configs/*.yaml` instead of being hard-coded in experiment scripts or model files because configuration and code serve different purposes. The source code should define reusable logic, while configuration files should describe the specific settings of one experiment, such as seed, learning rate, number of epochs, dataset size, and noise level.
+
+This separation improves reproducibility because each experiment can be traced back to a concrete configuration file. It also makes experiment comparison easier: changing a learning rate or seed does not require modifying source code, and different runs can be represented by different config files. From a technical debt perspective, config-driven experiments prevent training scripts from becoming messy collections of hard-coded values, which will become especially important when the project scales to more models, datasets, metrics, and trustworthy ML analyses.
+
 ## 4. Connection to Hidden Technical Debt in ML Systems
 
 TODO: Add notes after reading the paper.
