@@ -56,6 +56,12 @@ Placeholder command:
 pytest
 ```
 
+## Run a Week 1 smoke test
+
+```powershell
+python experiments/run_linear_regression.py
+```
+
 Specific placeholder test examples:
 
 ```powershell
