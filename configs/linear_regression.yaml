@@ -13,3 +13,6 @@ training:
 
 logging:
   log_file: results/logs/linear_regression_training.log
+
+output:
+  loss_curve_path: results/figures/linear_regression_loss_curve.png

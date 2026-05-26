@@ -14,6 +14,7 @@ from src.models.linear_regression import LinearRegressionScratch
 from src.optimization.gradient_descent import BatchGradientDescent
 from src.utils.config import load_config
 from src.utils.logging_utils import get_logger
+from src.utils.plotting import plot_loss_curve
 from src.utils.seed import set_seed
 
 
@@ -50,6 +51,7 @@ def main() -> None:
     data_config = config["data"]
     training_config = config["training"]
     log_file = config["logging"]["log_file"]
+    loss_curve_path = config["output"]["loss_curve_path"]
 
     set_seed(seed)
     logger = get_logger("linear_regression_training", log_file=log_file)
@@ -108,6 +110,14 @@ def main() -> None:
         "Recovered parameters are comparable to true parameters because they are "
         "converted back to the original feature space."
     )
+    plot_loss_curve(
+        loss_history,
+        output_path=loss_curve_path,
+        title="Linear Regression Training Loss",
+        xlabel="Epoch",
+        ylabel="MSE Loss",
+    )
+    logger.info("Saved loss curve to: %s", loss_curve_path)
 
     # Keep preprocessing statistics visible for beginner-friendly inspection.
     _ = mean, std
