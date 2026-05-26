@@ -89,17 +89,25 @@ def main() -> None:
 
     final_train_loss = model.compute_loss(X_train_scaled, y_train)
     final_val_loss = model.compute_loss(X_val_scaled, y_val)
+    recovered_weights = model.weights / std
+    recovered_bias = model.bias - mean @ recovered_weights
 
     logger.info("Initial train loss: %.6f", loss_history[0])
     logger.info("Final train loss: %.6f", final_train_loss)
     logger.info("Final validation loss: %.6f", final_val_loss)
+    logger.info("Learned weights in standardized space: %s", model.weights)
+    logger.info("Recovered weights in original feature space: %s", recovered_weights)
     logger.info("True weights: %s", true_weights)
-    logger.info("Learned weights: %s", model.weights)
+    logger.info("Learned bias in standardized space: %.6f", model.bias)
+    logger.info("Recovered bias in original feature space: %.6f", recovered_bias)
     logger.info("True bias: %.6f", true_bias)
-    logger.info("Learned bias: %.6f", model.bias)
     logger.info("Number of epochs: %s", training_config["num_epochs"])
     logger.info("Learning rate: %s", training_config["learning_rate"])
     logger.info("Note: batch gradient descent on standardized synthetic data.")
+    logger.info(
+        "Recovered parameters are comparable to true parameters because they are "
+        "converted back to the original feature space."
+    )
 
     # Keep preprocessing statistics visible for beginner-friendly inspection.
     _ = mean, std
