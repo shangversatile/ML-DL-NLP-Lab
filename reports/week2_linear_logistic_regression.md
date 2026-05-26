@@ -56,7 +56,48 @@ The optimizer should return new weights and bias instead of modifying the origin
 
 Returning new parameters also makes the optimizer easier to test: given fixed inputs `(weights, bias, gradients, learning_rate)`, we can check the exact returned outputs without worrying about unexpected mutation. This design also supports cleaner comparisons between Batch Gradient Descent, SGD, Momentum, and Adam, because different optimizers can operate on the same initial parameters safely.
 
-## 8. Updated open questions
+## 8. Linear regression training loop
+
+I extended `experiments/run_linear_regression.py` from a Week 1 smoke test into a minimal batch gradient descent training loop. The script now loads configuration, sets the random seed, generates synthetic linear regression data, splits train/validation sets, standardizes features using training statistics, initializes `LinearRegressionScratch`, initializes `BatchGradientDescent`, and trains for multiple epochs.
+
+The training loop explicitly performs:
+
+1. compute train loss
+2. compute analytical gradients
+3. call `optimizer.step()`
+4. assign the returned parameters back to the model
+5. record loss history
+
+This keeps the training process transparent and makes the connection between the model, optimizer, and experiment script easy to inspect.
+
+## 9. Training result
+
+The initial train loss was 1.617364 and the final train loss was 0.010139. The final validation loss was 0.012910. Since the synthetic dataset used Gaussian noise with standard deviation 0.1, the noise variance is approximately 0.01, so a final MSE around 0.01 is reasonable. This suggests that the training loop is working and that the model is fitting the learnable linear signal rather than trying to reduce the loss unrealistically to zero.
+
+## 10. Parameter interpretation under feature standardization
+
+The model is trained on standardized features, so the learned weights and bias live in standardized feature space. The data generator's `true_weights` and `true_bias` live in the original feature space. Therefore, the learned parameters should not be directly compared with the true parameters before converting them back.
+
+For standardized features:
+
+X_scaled = (X_original - mean) / std
+
+The original-space parameters can be recovered as:
+
+recovered_weights = learned_weights / std
+
+recovered_bias = learned_bias - mean @ recovered_weights
+
+After recovery, the learned parameters were close to the true parameters:
+
+- Recovered weights: [0.32944361, 1.3954707]
+- True weights: [0.33757455, 1.40748186]
+- Recovered bias: 0.085046
+- True bias: 0.090585
+
+This confirms that the model learned the underlying linear relationship, while also showing why preprocessing changes parameter interpretation.
+
+## 11. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
