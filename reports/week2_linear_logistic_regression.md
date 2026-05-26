@@ -46,3 +46,11 @@ The tests are designed to check both behavior and mathematical correctness. Pred
 - How should optimizers update model parameters while keeping the model and optimizer responsibilities separate?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
 - How should this implementation change when moving from linear regression to logistic regression?
+
+## 7. Batch Gradient Descent optimizer
+
+## Why optimizer step should return new parameters instead of mutating in place
+
+The optimizer should return new weights and bias instead of modifying the original arrays in place because this reduces hidden side effects. If `step()` directly mutates the input weights, it becomes harder to debug whether a parameter changed because of the optimizer, the model, or another part of the training loop.
+
+Returning new parameters also makes the optimizer easier to test: given fixed inputs `(weights, bias, gradients, learning_rate)`, we can check the exact returned outputs without worrying about unexpected mutation. This design also supports cleaner comparisons between Batch Gradient Descent, SGD, Momentum, and Adam, because different optimizers can operate on the same initial parameters safely.
