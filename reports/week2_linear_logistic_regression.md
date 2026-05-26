@@ -8,19 +8,19 @@ I implemented the mathematical core of linear regression from scratch in `src/mo
 
 The linear regression prediction rule is:
 
-ŷ = Xw + b
+y_hat = Xw + b
 
-where `X` has shape `(n_samples, n_features)`, `w` has shape `(n_features,)`, `b` is a scalar, and `ŷ` has shape `(n_samples,)`.
+where `X` has shape `(n_samples, n_features)`, `w` has shape `(n_features,)`, `b` is a scalar, and `y_hat` has shape `(n_samples,)`.
 
 The MSE loss is:
 
-L = mean((ŷ - y)^2)
+L = mean((y_hat - y)^2)
 
 The analytical gradients are:
 
-dw = (2 / n) * X.T @ (ŷ - y)
+dw = (2 / n) * X.T @ (y_hat - y)
 
-db = (2 / n) * sum(ŷ - y)
+db = (2 / n) * sum(y_hat - y)
 
 These formulas are implemented directly in NumPy, which makes the relationship between the math and the code explicit.
 
@@ -40,17 +40,29 @@ For gradients, `error = predictions - y` has shape `(n,)`. Since `X.T` has shape
 
 The tests are designed to check both behavior and mathematical correctness. Prediction is tested with manually assigned weights and bias. Loss is tested with a small example where the MSE can be computed by hand. Gradients are tested using a simple one-dimensional dataset where `dw = -56/3` and `db = -8` can be manually derived.
 
-## 6. Open questions
+## 6. Batch Gradient Descent optimizer
 
-- Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
-- How should optimizers update model parameters while keeping the model and optimizer responsibilities separate?
-- Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
-- How should this implementation change when moving from linear regression to logistic regression?
+I implemented a minimal `BatchGradientDescent` optimizer in `src/optimization/gradient_descent.py`. The optimizer stores a positive learning rate and exposes a `step()` method that updates weights and bias using the rule:
 
-## 7. Batch Gradient Descent optimizer
+w_new = w_old - learning_rate * dw
 
-## Why optimizer step should return new parameters instead of mutating in place
+b_new = b_old - learning_rate * db
+
+This separates the model's mathematical responsibilities from the optimizer's update responsibilities. The linear regression model computes predictions, loss, and gradients, while the optimizer decides how parameters move based on those gradients.
+
+## 7. Why optimizer step returns new parameters
 
 The optimizer should return new weights and bias instead of modifying the original arrays in place because this reduces hidden side effects. If `step()` directly mutates the input weights, it becomes harder to debug whether a parameter changed because of the optimizer, the model, or another part of the training loop.
 
 Returning new parameters also makes the optimizer easier to test: given fixed inputs `(weights, bias, gradients, learning_rate)`, we can check the exact returned outputs without worrying about unexpected mutation. This design also supports cleaner comparisons between Batch Gradient Descent, SGD, Momentum, and Adam, because different optimizers can operate on the same initial parameters safely.
+
+## 8. Updated open questions
+
+- Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
+- Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
+- How should this implementation change when moving from linear regression to logistic regression?
+- How should the training loop connect model gradients and optimizer updates while keeping responsibilities separated?
+- Should the optimizer update model parameters directly, or should the experiment script assign returned parameters back to the model?
+- How can we test that loss actually decreases over multiple gradient descent steps?
+- What learning rates are stable for synthetic linear regression data?
+- How will this optimizer design change for stateful optimizers like Momentum and Adam?
