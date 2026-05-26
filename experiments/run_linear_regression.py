@@ -10,6 +10,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 
 from src.data.datasets import make_linear_regression_data
 from src.data.preprocessing import standardize_features, train_val_split
+from src.evaluation.metrics import mean_squared_error
 from src.models.linear_regression import LinearRegressionScratch
 from src.optimization.gradient_descent import BatchGradientDescent
 from src.utils.config import load_config
@@ -91,12 +92,18 @@ def main() -> None:
 
     final_train_loss = model.compute_loss(X_train_scaled, y_train)
     final_val_loss = model.compute_loss(X_val_scaled, y_val)
+    train_predictions = model.predict(X_train_scaled)
+    val_predictions = model.predict(X_val_scaled)
+    train_mse = mean_squared_error(y_train, train_predictions)
+    val_mse = mean_squared_error(y_val, val_predictions)
     recovered_weights = model.weights / std
     recovered_bias = model.bias - mean @ recovered_weights
 
     logger.info("Initial train loss: %.6f", loss_history[0])
     logger.info("Final train loss: %.6f", final_train_loss)
     logger.info("Final validation loss: %.6f", final_val_loss)
+    logger.info("Evaluation train MSE: %.6f", train_mse)
+    logger.info("Evaluation validation MSE: %.6f", val_mse)
     logger.info("Learned weights in standardized space: %s", model.weights)
     logger.info("Recovered weights in original feature space: %s", recovered_weights)
     logger.info("True weights: %s", true_weights)
