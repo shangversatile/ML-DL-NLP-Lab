@@ -6,5 +6,10 @@ data:
   noise: 0.1
   val_ratio: 0.2
 
+training:
+  learning_rate: 0.05
+  num_epochs: 200
+  log_every: 20
+
 logging:
-  log_file: results/logs/linear_regression_smoke_test.log
+  log_file: results/logs/linear_regression_training.log
