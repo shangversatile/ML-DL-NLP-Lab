@@ -97,7 +97,15 @@ After recovery, the learned parameters were close to the true parameters:
 
 This confirms that the model learned the underlying linear relationship, while also showing why preprocessing changes parameter interpretation.
 
-## 11. Updated open questions
+## 11. Loss curve as a training diagnostic
+
+I added a plotting utility in `src/utils/plotting.py` and used it in `experiments/run_linear_regression.py` to save the linear regression training loss curve. The loss curve is more informative than only reporting final train loss because it shows the training dynamics across epochs.
+
+A final loss value is only a snapshot at the end of training. In contrast, a loss curve can show whether optimization is stable, whether the loss decreases smoothly, whether it oscillates, whether it diverges, or whether it plateaus early. This makes it useful for diagnosing learning rate problems, gradient issues, numerical instability, and convergence behavior.
+
+For this linear regression experiment, the curve should show a rapid drop in loss during early epochs and then a plateau near the noise level. Since the synthetic dataset uses Gaussian noise with standard deviation 0.1, an MSE near 0.01 is expected and suggests that the model is fitting the learnable signal rather than over-interpreting noise.
+
+## 12. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
