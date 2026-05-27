@@ -105,7 +105,15 @@ A final loss value is only a snapshot at the end of training. In contrast, a los
 
 For this linear regression experiment, the curve should show a rapid drop in loss during early epochs and then a plateau near the noise level. Since the synthetic dataset uses Gaussian noise with standard deviation 0.1, an MSE near 0.01 is expected and suggests that the model is fitting the learnable signal rather than over-interpreting noise.
 
-## 12. Updated open questions
+## 12. Separating training loss from evaluation metrics
+
+I implemented `mean_squared_error()` in `src/evaluation/metrics.py` and added unit tests in `tests/test_metrics.py`. The function validates that `y_true` and `y_pred` are NumPy arrays, that both are one-dimensional, and that they have the same shape. It then computes `mean((y_true - y_pred) ** 2)` and returns a Python float.
+
+Although linear regression currently uses MSE both as the training loss and as the evaluation metric, these two uses have different responsibilities. The training loss is part of the optimization process: it is used to compute gradients and update model parameters. The evaluation metric is part of reporting and diagnosis: it tells us how well the trained model performs after or during training.
+
+This separation keeps the project structure cleaner. The model is responsible for prediction, loss, and gradients; the optimizer is responsible for parameter updates; and the evaluation module is responsible for metrics used in reporting and analysis. This will become more important for logistic regression and trustworthy ML, where the training loss may be cross entropy but evaluation may involve accuracy, precision, recall, F1, confusion matrix, calibration error, and error analysis.
+
+## 13. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
