@@ -113,7 +113,15 @@ Although linear regression currently uses MSE both as the training loss and as t
 
 This separation keeps the project structure cleaner. The model is responsible for prediction, loss, and gradients; the optimizer is responsible for parameter updates; and the evaluation module is responsible for metrics used in reporting and analysis. This will become more important for logistic regression and trustworthy ML, where the training loss may be cross entropy but evaluation may involve accuracy, precision, recall, F1, confusion matrix, calibration error, and error analysis.
 
-## 13. Updated open questions
+## 13. Linear regression training integration test
+
+I added an integration test for linear regression training in `tests/test_linear_regression_training.py`. Unlike unit tests that check individual functions, this test verifies whether multiple components work together as a small training pipeline: synthetic data generation, train/validation split, feature standardization, `LinearRegressionScratch`, and `BatchGradientDescent`.
+
+The test checks that training reduces the loss after multiple gradient descent steps and that validation loss remains reasonably low. This is important because individual components can pass their unit tests while still failing when connected together. In ML research code, many bugs appear at the boundaries between modules, such as shape mismatches, incorrect preprocessing assumptions, or parameter updates not being assigned back to the model.
+
+This integration test gives a behavioral guarantee: the system should not only compute formulas correctly in isolation, but should also learn from data when the components are composed.
+
+## 14. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
