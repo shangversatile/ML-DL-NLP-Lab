@@ -121,6 +121,40 @@ The test checks that training reduces the loss after multiple gradient descent s
 
 This integration test gives a behavioral guarantee: the system should not only compute formulas correctly in isolation, but should also learn from data when the components are composed.
 
+## Logistic regression mathematical core
+
+I implemented the core binary logistic regression model in `src/models/logistic_regression.py` and added unit tests in `tests/test_logistic_regression.py`. The model supports parameter initialization, sigmoid probability transformation, probability prediction, threshold-based class prediction, binary cross entropy loss, and analytical gradients.
+
+The model first computes logits:
+
+z = Xw + b
+
+Then it converts logits into probabilities with the sigmoid function:
+
+p = sigmoid(z) = 1 / (1 + exp(-z))
+
+The probability `p` represents the model's estimated probability that a sample belongs to class 1. A hard class prediction is then obtained by comparing this probability with a threshold, usually 0.5.
+
+The binary cross entropy loss is:
+
+L = -mean(y log(p) + (1 - y) log(1 - p))
+
+The gradients are:
+
+dw = (1 / n) * X.T @ (p - y)
+
+db = (1 / n) * sum(p - y)
+
+This implementation is a direct NumPy translation of the mathematical definition, similar to the linear regression implementation but adapted for binary classification.
+
+## Why predict_proba matters
+
+`predict_proba()` is important because logistic regression is not only a hard classifier but also a probabilistic model. The probability output can be interpreted as the model's confidence for the positive class, which gives more information than a direct 0/1 label.
+
+This also allows threshold adjustment. In different applications, predicting class 1 at probability 0.5 may not be appropriate; a medical or risk-sensitive system may require a higher threshold, while a screening system may use a lower threshold to improve recall.
+
+For trustworthy ML, probability outputs are essential for calibration, confidence analysis, error analysis, and monitoring. If we only keep the final hard labels, we lose information about uncertainty and cannot evaluate whether the model is confidently wrong or appropriately uncertain.
+
 ## 14. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
