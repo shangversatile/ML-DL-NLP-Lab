@@ -13,8 +13,10 @@ class LogisticRegressionScratch:
     """
 
     def __init__(self, n_features: int) -> None:
-        if not isinstance(n_features, int) or n_features <= 0:
-            raise ValueError("n_features must be a positive integer.")
+        if type(n_features) is not int:
+            raise TypeError("n_features must be an integer.")
+        if n_features <= 0:
+            raise ValueError("n_features must be positive.")
 
         self.weights = np.zeros(n_features)
         self.bias = 0.0
@@ -41,8 +43,10 @@ class LogisticRegressionScratch:
 
     def predict(self, X: np.ndarray, threshold: float = 0.5) -> np.ndarray:
         """Predict binary class labels."""
-        if not isinstance(threshold, Real) or not 0.0 <= threshold <= 1.0:
-            raise ValueError("threshold must be a number between 0 and 1.")
+        if not isinstance(threshold, Real):
+            raise TypeError("threshold must be numeric.")
+        if not 0.0 <= threshold <= 1.0:
+            raise ValueError("threshold must be between 0 and 1.")
 
         probabilities = self.predict_proba(X)
         return (probabilities >= threshold).astype(int)
@@ -77,7 +81,7 @@ class LogisticRegressionScratch:
 
     def _validate_X(self, X: np.ndarray) -> None:
         if not isinstance(X, np.ndarray):
-            raise ValueError("X must be a NumPy array.")
+            raise TypeError("X must be a NumPy array.")
         if X.ndim != 2:
             raise ValueError("X must be a 2D NumPy array.")
         if X.shape[1] != self.weights.shape[0]:
@@ -85,7 +89,7 @@ class LogisticRegressionScratch:
 
     def _validate_y(self, y: np.ndarray, n_samples: int) -> None:
         if not isinstance(y, np.ndarray):
-            raise ValueError("y must be a NumPy array.")
+            raise TypeError("y must be a NumPy array.")
         if y.shape != (n_samples,):
             raise ValueError("y must have shape (n_samples,).")
         if not np.all((y == 0) | (y == 1)):

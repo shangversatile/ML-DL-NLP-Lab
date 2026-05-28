@@ -86,3 +86,42 @@ def test_invalid_labels() -> None:
 def test_invalid_n_features() -> None:
     with pytest.raises(ValueError):
         LogisticRegressionScratch(n_features=0)
+
+
+def test_invalid_n_features_type() -> None:
+    with pytest.raises(TypeError):
+        LogisticRegressionScratch(n_features="2")
+
+
+def test_invalid_threshold_type() -> None:
+    model = LogisticRegressionScratch(n_features=1)
+    X = np.array([[1.0], [2.0]])
+
+    with pytest.raises(TypeError):
+        model.predict(X, threshold="0.5")
+
+
+def test_invalid_threshold_value() -> None:
+    model = LogisticRegressionScratch(n_features=1)
+    X = np.array([[1.0], [2.0]])
+
+    with pytest.raises(ValueError):
+        model.predict(X, threshold=-0.1)
+
+
+def test_invalid_X_type() -> None:
+    model = LogisticRegressionScratch(n_features=1)
+    X = [[1.0], [2.0]]
+    y = np.array([0, 1])
+
+    with pytest.raises(TypeError):
+        model.compute_loss(X, y)
+
+
+def test_invalid_y_type() -> None:
+    model = LogisticRegressionScratch(n_features=1)
+    X = np.array([[1.0], [2.0]])
+    y = [0, 1]
+
+    with pytest.raises(TypeError):
+        model.compute_loss(X, y)
