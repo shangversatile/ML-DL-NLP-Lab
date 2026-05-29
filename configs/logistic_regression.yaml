@@ -13,3 +13,6 @@ training:
 
 logging:
   log_file: results/logs/logistic_regression_training.log
+
+output:
+  loss_curve_path: results/figures/logistic_regression_loss_curve.png
