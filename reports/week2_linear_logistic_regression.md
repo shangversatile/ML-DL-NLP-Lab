@@ -219,7 +219,17 @@ This change improves the validity of the logistic regression experiment. After t
 
 From a trustworthy ML perspective, this is an example of why we should inspect data distributions before trusting scalar metrics. A model can appear perfect under a flawed validation split, but distribution diagnostics and confusion matrices can reveal that the evaluation setup is incomplete.
 
-## 20. Updated open questions
+## 20. Logistic regression loss curve
+
+I added loss curve plotting for the logistic regression experiment by reusing `plot_loss_curve()` from `src/utils/plotting.py`. The experiment now saves a Binary Cross Entropy training curve to `results/figures/logistic_regression_loss_curve.png`.
+
+The logistic regression loss curve should use Binary Cross Entropy Loss rather than accuracy because BCE is the actual continuous optimization objective used to update the model parameters. Accuracy is a thresholded, discrete metric: it only checks whether predicted labels are correct after converting probabilities into 0/1 decisions.
+
+During training, the model's predicted probabilities may improve substantially even when accuracy stays unchanged. For example, increasing the probability of the correct class from 0.55 to 0.95 does not change accuracy, but it significantly lowers BCE. BCE also penalizes confidently wrong predictions more strongly, which makes it more informative for optimization diagnostics.
+
+Therefore, BCE is more useful for observing training dynamics, learning rate stability, convergence, oscillation, or divergence. Accuracy, precision, recall, F1, and confusion matrix are better treated as evaluation metrics after the model probabilities are converted into class predictions.
+
+## 21. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
