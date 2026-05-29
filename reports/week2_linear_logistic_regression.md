@@ -184,7 +184,32 @@ F1 = 2 * precision * recall / (precision + recall)
 
 Accuracy alone is not enough for binary classification, especially under class imbalance. A model can achieve high accuracy by predicting the majority class while failing to identify the minority class. Precision and recall expose different error types, and the confusion matrix makes false positives and false negatives explicit. This is important for trustworthy ML because different errors can have very different real-world costs.
 
-## 17. Updated open questions
+## 17. Logistic regression training experiment
+
+I implemented a minimal logistic regression training experiment in `experiments/run_logistic_regression.py`. The script loads `configs/logistic_regression.yaml`, sets the random seed, generates synthetic binary classification data, performs train/validation split, standardizes features using training statistics, initializes `LogisticRegressionScratch`, initializes `BatchGradientDescent`, and trains the model with batch gradient descent.
+
+The training loop follows the same explicit structure as linear regression:
+
+1. compute binary cross entropy loss
+2. compute analytical gradients
+3. call optimizer.step()
+4. assign the returned parameters back to the model
+5. record loss history
+
+The initial train loss was approximately 0.693147, which is expected for a binary classifier initialized near probability 0.5. After training, the final train loss decreased to approximately 0.035329, showing that the logistic regression training loop is connected correctly.
+
+## 18. Evaluation caveat: label distribution matters
+
+The validation metrics were accuracy = 1.0, precision = 1.0, recall = 1.0, and F1 = 1.0. However, the validation confusion matrix was:
+
+[[0, 0],
+ [0, 40]]
+
+This means that the validation split contained only positive examples and no negative examples. Therefore, the perfect validation metrics should not be interpreted as strong evidence of generalization across both classes. They mainly show that the current model predicts the positive validation samples correctly.
+
+This is an important trustworthy ML lesson: metrics cannot be interpreted without inspecting class distribution and the confusion matrix. A single scalar metric can look perfect while hiding a weak or incomplete evaluation setup. The next improvement should make the synthetic classification dataset or splitting strategy more balanced so that both positive and negative classes appear in train and validation sets.
+
+## 19. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
