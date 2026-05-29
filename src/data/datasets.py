@@ -47,7 +47,9 @@ def make_binary_classification_data(
     seed: int | None = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """
-    Generate a simple synthetic binary classification dataset.
+    Generate a roughly balanced linearly separable binary classification dataset.
+
+    Labels are created by thresholding logits at the median value.
 
     Return:
     - X: shape (n_samples, n_features)
@@ -59,10 +61,9 @@ def make_binary_classification_data(
     rng = np.random.default_rng(seed)
     X = rng.standard_normal((n_samples, n_features))
     true_weights = rng.standard_normal(n_features)
-    true_bias = float(rng.standard_normal())
 
-    logits = X @ true_weights + true_bias
-    probabilities = 1.0 / (1.0 + np.exp(-logits))
-    y = (probabilities > 0.5).astype(int)
+    logits = X @ true_weights
+    threshold = np.median(logits)
+    y = (logits >= threshold).astype(int)
 
     return X, y

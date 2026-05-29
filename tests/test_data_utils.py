@@ -37,6 +37,27 @@ def test_binary_classification_labels():
     assert set(np.unique(y)).issubset({0, 1})
 
 
+def test_binary_classification_contains_both_classes():
+    _, y = make_binary_classification_data(
+        n_samples=100,
+        n_features=2,
+        seed=42,
+    )
+
+    assert set(np.unique(y)) == {0, 1}
+
+
+def test_binary_classification_is_roughly_balanced():
+    _, y = make_binary_classification_data(
+        n_samples=200,
+        n_features=2,
+        seed=42,
+    )
+
+    positive_rate = y.mean()
+    assert 0.4 <= positive_rate <= 0.6
+
+
 def test_linear_regression_data_reproducibility():
     X_first, y_first, _, _ = make_linear_regression_data(seed=42)
     X_second, y_second, _, _ = make_linear_regression_data(seed=42)
