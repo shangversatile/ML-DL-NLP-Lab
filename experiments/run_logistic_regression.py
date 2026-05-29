@@ -24,6 +24,21 @@ from src.utils.logging_utils import get_logger
 from src.utils.seed import set_seed
 
 
+def summarize_binary_labels(y: np.ndarray) -> dict[str, float]:
+    """Return simple class distribution statistics for binary labels."""
+    num_samples = y.shape[0]
+    num_negative = int(np.sum(y == 0))
+    num_positive = int(np.sum(y == 1))
+
+    return {
+        "num_samples": num_samples,
+        "num_negative": num_negative,
+        "num_positive": num_positive,
+        "negative_rate": num_negative / num_samples,
+        "positive_rate": num_positive / num_samples,
+    }
+
+
 def train_logistic_regression(
     model: LogisticRegressionScratch,
     optimizer: BatchGradientDescent,
@@ -76,6 +91,29 @@ def main() -> None:
         val_ratio=data_config["val_ratio"],
         seed=seed,
     )
+
+    train_label_distribution = summarize_binary_labels(y_train)
+    val_label_distribution = summarize_binary_labels(y_val)
+    logger.info("Train label distribution: %s", train_label_distribution)
+    logger.info("Validation label distribution: %s", val_label_distribution)
+
+    if (
+        train_label_distribution["num_negative"] == 0
+        or train_label_distribution["num_positive"] == 0
+    ):
+        logger.warning(
+            "WARNING: train set contains only one class; "
+            "classification metrics may be misleading."
+        )
+    if (
+        val_label_distribution["num_negative"] == 0
+        or val_label_distribution["num_positive"] == 0
+    ):
+        logger.warning(
+            "WARNING: validation set contains only one class; "
+            "classification metrics may be misleading."
+        )
+
     X_train_scaled, X_val_scaled, mean, std = standardize_features(X_train, X_val)
 
     model = LogisticRegressionScratch(n_features=X_train_scaled.shape[1])
