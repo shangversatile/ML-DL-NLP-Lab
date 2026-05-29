@@ -12,6 +12,7 @@ from src.data.datasets import make_binary_classification_data
 from src.data.preprocessing import standardize_features, train_val_split
 from src.evaluation.metrics import (
     accuracy_score,
+    binary_cross_entropy,
     confusion_matrix,
     f1_score,
     precision_score,
@@ -154,6 +155,8 @@ def main() -> None:
 
     train_probabilities = model.predict_proba(X_train_scaled)
     val_probabilities = model.predict_proba(X_val_scaled)
+    train_bce = binary_cross_entropy(y_train, train_probabilities)
+    val_bce = binary_cross_entropy(y_val, val_probabilities)
     train_predictions = model.predict(X_train_scaled, threshold=threshold)
     val_predictions = model.predict(X_val_scaled, threshold=threshold)
 
@@ -163,6 +166,8 @@ def main() -> None:
     logger.info("Initial train loss: %.6f", loss_history[0])
     logger.info("Final train loss: %.6f", final_train_loss)
     logger.info("Final validation loss: %.6f", final_val_loss)
+    logger.info("Evaluation train BCE: %.6f", train_bce)
+    logger.info("Evaluation validation BCE: %.6f", val_bce)
     logger.info(
         "Train metrics - accuracy: %.6f, precision: %.6f, recall: %.6f, f1: %.6f",
         train_metrics["accuracy"],

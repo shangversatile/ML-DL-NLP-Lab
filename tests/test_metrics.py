@@ -5,6 +5,7 @@ import pytest
 
 from src.evaluation.metrics import (
     accuracy_score,
+    binary_cross_entropy,
     confusion_matrix,
     f1_score,
     mean_squared_error,
@@ -56,6 +57,52 @@ def test_mean_squared_error_non_array_input() -> None:
 
     with pytest.raises(TypeError):
         mean_squared_error(y_true, [1.0, 2.0, 3.0])
+
+
+def test_binary_cross_entropy_exact_value_with_half_probabilities() -> None:
+    y_true = np.array([0, 1])
+    y_prob = np.array([0.5, 0.5])
+
+    loss = binary_cross_entropy(y_true, y_prob)
+
+    assert loss == pytest.approx(0.693147, rel=1e-6)
+
+
+def test_binary_cross_entropy_lower_for_confident_correct_predictions() -> None:
+    y_true = np.array([0, 1])
+    y_prob_good = np.array([0.1, 0.9])
+    y_prob_bad = np.array([0.4, 0.6])
+
+    good_loss = binary_cross_entropy(y_true, y_prob_good)
+    bad_loss = binary_cross_entropy(y_true, y_prob_bad)
+
+    assert good_loss < bad_loss
+
+
+def test_binary_cross_entropy_invalid_probabilities() -> None:
+    y_true = np.array([0, 1])
+
+    with pytest.raises(ValueError):
+        binary_cross_entropy(y_true, np.array([-0.1, 0.9]))
+
+    with pytest.raises(ValueError):
+        binary_cross_entropy(y_true, np.array([0.1, 1.1]))
+
+
+def test_binary_cross_entropy_shape_mismatch() -> None:
+    y_true = np.array([0, 1])
+    y_prob = np.array([0.5])
+
+    with pytest.raises(ValueError):
+        binary_cross_entropy(y_true, y_prob)
+
+
+def test_binary_cross_entropy_non_binary_y_true() -> None:
+    y_true = np.array([0, 2])
+    y_prob = np.array([0.5, 0.5])
+
+    with pytest.raises(ValueError):
+        binary_cross_entropy(y_true, y_prob)
 
 
 def test_confusion_matrix_binary() -> None:

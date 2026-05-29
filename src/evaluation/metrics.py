@@ -18,6 +18,32 @@ def mean_squared_error(y_true: np.ndarray, y_pred: np.ndarray) -> float:
     return float(mse)
 
 
+def binary_cross_entropy(y_true: np.ndarray, y_prob: np.ndarray) -> float:
+    """
+    Compute binary cross entropy between true binary labels and predicted probabilities.
+    """
+    if not isinstance(y_true, np.ndarray):
+        raise TypeError("y_true must be a NumPy array.")
+    if not isinstance(y_prob, np.ndarray):
+        raise TypeError("y_prob must be a NumPy array.")
+    if y_true.ndim != 1 or y_prob.ndim != 1:
+        raise ValueError("y_true and y_prob must be 1D arrays.")
+    if y_true.shape != y_prob.shape:
+        raise ValueError("y_true and y_prob must have the same shape.")
+    if not np.all((y_true == 0) | (y_true == 1)):
+        raise ValueError("y_true must contain only 0 and 1 values.")
+    if not np.all((0.0 <= y_prob) & (y_prob <= 1.0)):
+        raise ValueError("y_prob values must be between 0 and 1.")
+
+    epsilon = 1e-15
+    clipped_probabilities = np.clip(y_prob, epsilon, 1.0 - epsilon)
+    loss = -np.mean(
+        y_true * np.log(clipped_probabilities)
+        + (1 - y_true) * np.log(1.0 - clipped_probabilities)
+    )
+    return float(loss)
+
+
 def _validate_binary_classification_inputs(
     y_true: np.ndarray,
     y_pred: np.ndarray,
