@@ -155,7 +155,36 @@ This also allows threshold adjustment. In different applications, predicting cla
 
 For trustworthy ML, probability outputs are essential for calibration, confidence analysis, error analysis, and monitoring. If we only keep the final hard labels, we lose information about uncertainty and cannot evaluate whether the model is confidently wrong or appropriately uncertain.
 
-## 16. Updated open questions
+## 16. Binary classification metrics
+
+I implemented binary classification metrics in `src/evaluation/metrics.py` and added tests in `tests/test_metrics.py`. The metrics include confusion matrix, accuracy, precision, recall, and F1 score.
+
+The confusion matrix uses the format:
+
+[[TN, FP],
+ [FN, TP]]
+
+where TN is true negative, FP is false positive, FN is false negative, and TP is true positive.
+
+Accuracy measures the overall fraction of correct predictions:
+
+accuracy = (TP + TN) / (TP + TN + FP + FN)
+
+Precision measures how many predicted positives are truly positive:
+
+precision = TP / (TP + FP)
+
+Recall measures how many actual positives are recovered:
+
+recall = TP / (TP + FN)
+
+F1 score summarizes the trade-off between precision and recall:
+
+F1 = 2 * precision * recall / (precision + recall)
+
+Accuracy alone is not enough for binary classification, especially under class imbalance. A model can achieve high accuracy by predicting the majority class while failing to identify the minority class. Precision and recall expose different error types, and the confusion matrix makes false positives and false negatives explicit. This is important for trustworthy ML because different errors can have very different real-world costs.
+
+## 17. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
