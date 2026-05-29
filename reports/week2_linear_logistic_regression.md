@@ -235,7 +235,19 @@ Threshold analysis is part of trustworthy ML evaluation because it studies how p
 
 Therefore, threshold analysis is not merely tuning a number; it evaluates the decision policy built on top of the model. By comparing accuracy, precision, recall, F1, and confusion matrices across thresholds such as 0.3, 0.5, and 0.7, we can understand whether the model remains useful under different risk preferences. This is closely related to ROC/PR-style thinking: instead of trusting one fixed operating point, we examine how the model behaves across multiple decision boundaries.
 
-## 22. Updated open questions
+## 22. Binary cross entropy as an evaluation metric
+
+I implemented `binary_cross_entropy()` in `src/evaluation/metrics.py` and added tests in `tests/test_metrics.py`. This function computes binary cross entropy from true binary labels and predicted probabilities:
+
+BCE = -mean(y log(p) + (1 - y) log(1 - p))
+
+The function validates that labels are binary, probabilities are one-dimensional, shapes match, and probability values lie in [0, 1]. It also clips predicted probabilities with a small epsilon before applying the logarithm to avoid numerical issues from log(0).
+
+Although logistic regression already has `compute_loss()` inside the model, adding `binary_cross_entropy()` to the evaluation module separates training objectives from reporting metrics. The model's loss is used during optimization, while the evaluation metric is used after training to report and compare experiment results.
+
+In the current logistic regression experiment, the final training loss and evaluation train BCE match because they use the same mathematical formula. However, keeping them in separate modules preserves clear responsibilities and prepares the project for future evaluation tools such as calibration error, threshold analysis, and confidence monitoring.
+
+## 23. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
