@@ -209,7 +209,17 @@ This means that the validation split contained only positive examples and no neg
 
 This is an important trustworthy ML lesson: metrics cannot be interpreted without inspecting class distribution and the confusion matrix. A single scalar metric can look perfect while hiding a weak or incomplete evaluation setup. The next improvement should make the synthetic classification dataset or splitting strategy more balanced so that both positive and negative classes appear in train and validation sets.
 
-## 19. Updated open questions
+## 19. Fixing synthetic classification data balance
+
+After adding label distribution diagnostics, I found that the original synthetic binary classification generator produced an all-positive dataset under the current seed. Both the training and validation splits contained only class 1 examples, which made the validation metrics look perfect but not meaningful.
+
+To fix this, I updated `make_binary_classification_data()` so that it generates a roughly balanced linearly separable binary classification dataset. Instead of relying on a randomly sampled bias that can shift all logits to one side, the updated generator computes logits from `X @ true_weights` and thresholds them around the median logit. This makes the dataset contain both class 0 and class 1 examples more reliably.
+
+This change improves the validity of the logistic regression experiment. After the fix, classification metrics such as accuracy, precision, recall, F1, and the confusion matrix are more informative because both classes are represented. The key lesson is that evaluation quality depends not only on the metric formula, but also on whether the evaluation data actually contains the cases the metric is supposed to measure.
+
+From a trustworthy ML perspective, this is an example of why we should inspect data distributions before trusting scalar metrics. A model can appear perfect under a flawed validation split, but distribution diagnostics and confusion matrices can reveal that the evaluation setup is incomplete.
+
+## 20. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
