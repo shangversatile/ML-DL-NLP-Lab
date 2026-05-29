@@ -229,7 +229,13 @@ During training, the model's predicted probabilities may improve substantially e
 
 Therefore, BCE is more useful for observing training dynamics, learning rate stability, convergence, oscillation, or divergence. Accuracy, precision, recall, F1, and confusion matrix are better treated as evaluation metrics after the model probabilities are converted into class predictions.
 
-## 21. Updated open questions
+## 21. Threshold analysis and decision policy
+
+Threshold analysis is part of trustworthy ML evaluation because it studies how probabilistic model outputs are converted into real decisions. A logistic regression model outputs probabilities, but downstream systems must choose a decision threshold to produce class labels. Different thresholds create different false positive and false negative trade-offs, and these errors may have very different real-world costs.
+
+Therefore, threshold analysis is not merely tuning a number; it evaluates the decision policy built on top of the model. By comparing accuracy, precision, recall, F1, and confusion matrices across thresholds such as 0.3, 0.5, and 0.7, we can understand whether the model remains useful under different risk preferences. This is closely related to ROC/PR-style thinking: instead of trusting one fixed operating point, we examine how the model behaves across multiple decision boundaries.
+
+## 22. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?
