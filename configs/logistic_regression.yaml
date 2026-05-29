@@ -11,6 +11,9 @@ training:
   log_every: 50
   threshold: 0.5
 
+evaluation:
+  thresholds: [0.3, 0.5, 0.7]
+
 logging:
   log_file: results/logs/logistic_regression_training.log
 

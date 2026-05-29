@@ -40,6 +40,20 @@ def summarize_binary_labels(y: np.ndarray) -> dict[str, float]:
     }
 
 
+def evaluate_classification_metrics(
+    y_true: np.ndarray,
+    y_pred: np.ndarray,
+) -> dict[str, object]:
+    """Return common binary classification metrics."""
+    return {
+        "accuracy": accuracy_score(y_true, y_pred),
+        "precision": precision_score(y_true, y_pred),
+        "recall": recall_score(y_true, y_pred),
+        "f1": f1_score(y_true, y_pred),
+        "confusion_matrix": confusion_matrix(y_true, y_pred),
+    }
+
+
 def train_logistic_regression(
     model: LogisticRegressionScratch,
     optimizer: BatchGradientDescent,
@@ -72,6 +86,7 @@ def main() -> None:
     seed = config["seed"]
     data_config = config["data"]
     training_config = config["training"]
+    evaluation_config = config["evaluation"]
     log_file = config["logging"]["log_file"]
     loss_curve_path = config["output"]["loss_curve_path"]
 
@@ -142,41 +157,53 @@ def main() -> None:
     train_predictions = model.predict(X_train_scaled, threshold=threshold)
     val_predictions = model.predict(X_val_scaled, threshold=threshold)
 
-    train_accuracy = accuracy_score(y_train, train_predictions)
-    train_precision = precision_score(y_train, train_predictions)
-    train_recall = recall_score(y_train, train_predictions)
-    train_f1 = f1_score(y_train, train_predictions)
-
-    val_accuracy = accuracy_score(y_val, val_predictions)
-    val_precision = precision_score(y_val, val_predictions)
-    val_recall = recall_score(y_val, val_predictions)
-    val_f1 = f1_score(y_val, val_predictions)
-    val_confusion_matrix = confusion_matrix(y_val, val_predictions)
+    train_metrics = evaluate_classification_metrics(y_train, train_predictions)
+    val_metrics = evaluate_classification_metrics(y_val, val_predictions)
 
     logger.info("Initial train loss: %.6f", loss_history[0])
     logger.info("Final train loss: %.6f", final_train_loss)
     logger.info("Final validation loss: %.6f", final_val_loss)
     logger.info(
         "Train metrics - accuracy: %.6f, precision: %.6f, recall: %.6f, f1: %.6f",
-        train_accuracy,
-        train_precision,
-        train_recall,
-        train_f1,
+        train_metrics["accuracy"],
+        train_metrics["precision"],
+        train_metrics["recall"],
+        train_metrics["f1"],
     )
     logger.info(
         "Validation metrics - accuracy: %.6f, precision: %.6f, recall: %.6f, f1: %.6f",
-        val_accuracy,
-        val_precision,
-        val_recall,
-        val_f1,
+        val_metrics["accuracy"],
+        val_metrics["precision"],
+        val_metrics["recall"],
+        val_metrics["f1"],
     )
-    logger.info("Validation confusion matrix:\n%s", val_confusion_matrix)
+    logger.info("Validation confusion matrix:\n%s", val_metrics["confusion_matrix"])
     logger.info("Learned weights in standardized space: %s", model.weights)
     logger.info("Learned bias in standardized space: %.6f", model.bias)
     logger.info("Number of epochs: %s", training_config["num_epochs"])
     logger.info("Learning rate: %s", training_config["learning_rate"])
     logger.info("Threshold: %s", threshold)
     logger.info("Note: logistic regression trained with batch gradient descent.")
+    logger.info("Threshold analysis:")
+    for threshold_value in evaluation_config["thresholds"]:
+        val_predictions_at_threshold = model.predict(
+            X_val_scaled,
+            threshold=threshold_value,
+        )
+        threshold_metrics = evaluate_classification_metrics(
+            y_val,
+            val_predictions_at_threshold,
+        )
+        logger.info(
+            "threshold=%s | accuracy=%.6f precision=%.6f recall=%.6f f1=%.6f",
+            threshold_value,
+            threshold_metrics["accuracy"],
+            threshold_metrics["precision"],
+            threshold_metrics["recall"],
+            threshold_metrics["f1"],
+        )
+        logger.info("confusion matrix:\n%s", threshold_metrics["confusion_matrix"])
+
     plot_loss_curve(
         loss_history,
         output_path=loss_curve_path,
