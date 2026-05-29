@@ -1,3 +1,15 @@
 seed: 42
-learning_rate: 0.01
-num_epochs: 100
+
+data:
+  n_samples: 200
+  n_features: 2
+  val_ratio: 0.2
+
+training:
+  learning_rate: 0.1
+  num_epochs: 300
+  log_every: 50
+  threshold: 0.5
+
+logging:
+  log_file: results/logs/logistic_regression_training.log
