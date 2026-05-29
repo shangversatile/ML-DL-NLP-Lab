@@ -2,78 +2,37 @@
 
 ## Motivation
 
-This repository is a learning-oriented ML research engineering project focused on building foundational ability for Trustworthy ML, AI Systems, and Evaluation/Monitoring.
+This is a learning-oriented ML research engineering project for building foundations in Trustworthy ML, AI Systems, and Evaluation/Monitoring.
 
-The goal is to implement core ML components from scratch while maintaining reproducibility, modularity, tests, logging, configs, and experiment notes. The project is intentionally educational rather than a polished production library.
+The focus is implementing core machine learning components from scratch while keeping the math visible and the project organized with configs, logging, tests, experiment scripts, and weekly notes. This is not intended to be a production-ready ML library.
 
 ## Current Status
 
-Week 1 and major Week 2 foundations are complete.
-
-Completed:
-
-- project structure
-- reproducibility utilities
-- logging utilities
-- YAML config loading
-- synthetic data generation
-- preprocessing
-- linear regression from scratch
-- logistic regression from scratch
-- batch gradient descent optimizer
-- regression metric: MSE
-- classification metrics: accuracy, precision, recall, F1, confusion matrix
-- loss curve plotting
-- linear regression training experiment
-- logistic regression training experiment
-- unit tests and integration tests
-- weekly reports
+Week 1 and Week 2 foundations are complete.
 
 ## Implemented Components
 
-### Data
-
-- synthetic linear regression data
-- roughly balanced synthetic binary classification data
+- synthetic data generation
 - train/validation split
-- feature standardization using training statistics only
-
-### Models
-
+- feature standardization
+- `set_seed`
+- `get_logger`
+- YAML config loading
 - `LinearRegressionScratch`
 - `LogisticRegressionScratch`
-
-### Optimization
-
 - `BatchGradientDescent`
-
-### Evaluation
-
 - `mean_squared_error`
+- `binary_cross_entropy`
 - `accuracy_score`
 - `precision_score`
 - `recall_score`
 - `f1_score`
 - `confusion_matrix`
-- label distribution diagnostics in logistic regression experiment
-
-### Utilities
-
-- `set_seed`
-- `get_logger`
-- `load_config`
-- `plot_loss_curve`
-
-## Repository Structure
-
-```text
-configs/      YAML configuration files for experiments.
-src/          Main Python package for data, models, optimization, evaluation, and utilities.
-experiments/  Entry-point scripts for running training experiments.
-tests/        Unit and integration tests.
-reports/      Weekly learning and engineering notes.
-results/      Generated logs and figures.
-```
+- loss curve plotting
+- linear regression training experiment
+- logistic regression training experiment
+- unit tests and integration tests
+- Week 1 and Week 2 reports
 
 ## Environment Setup
 
@@ -92,8 +51,6 @@ pip install -r requirements.txt
 pytest
 ```
 
-All tests should pass.
-
 ## Run Experiments
 
 ```powershell
@@ -101,26 +58,24 @@ python experiments/run_linear_regression.py
 python experiments/run_logistic_regression.py
 ```
 
-The linear regression experiment saves a loss curve to `results/figures/`. Logs are saved under `results/logs/`. Generated logs and figures are ignored by Git.
+Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
+
+## Design Principles
+
+- separate model, optimizer, evaluation, data, and experiment responsibilities
+- keep mathematical formulas visible in code
+- use unit tests plus integration tests
+- treat evaluation diagnostics as first-class
+- avoid trusting scalar metrics without checking data distribution and confusion matrix
 
 ## Reports
 
 - `reports/week1_setup_notes.md`
 - `reports/week2_linear_logistic_regression.md`
 
-## Current Design Principles
-
-- separate model, optimizer, evaluation, data, and experiment responsibilities
-- keep mathematical formulas visible in code
-- prefer unit tests plus integration tests
-- treat evaluation diagnostics as first-class components
-- avoid trusting scalar metrics without inspecting data distribution and confusion matrix
-
 ## Next Steps
 
-- add logistic regression loss curve plotting
-- add cross entropy metric
-- add threshold analysis
-- add calibration interface
 - implement SGD, Momentum, and Adam
-- implement a small MLP from scratch
+- implement MLP from scratch
+- compare optimizers
+- add calibration and confidence analysis later
