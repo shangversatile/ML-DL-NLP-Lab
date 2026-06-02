@@ -1,5 +1,7 @@
 """Data preprocessing utilities."""
 
+from collections.abc import Iterator
+
 import numpy as np
 
 
@@ -26,6 +28,41 @@ def train_val_split(
     train_indices = indices[n_val:]
 
     return X[train_indices], X[val_indices], y[train_indices], y[val_indices]
+
+
+def iterate_minibatches(
+    X: np.ndarray,
+    y: np.ndarray,
+    batch_size: int,
+    shuffle: bool = True,
+    seed: int | None = None,
+) -> Iterator[tuple[np.ndarray, np.ndarray]]:
+    """
+    Yield mini-batches of X and y.
+
+    The final batch may contain fewer than batch_size samples.
+    """
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array")
+    if not isinstance(y, np.ndarray):
+        raise TypeError("y must be a NumPy array")
+    if X.shape[0] != y.shape[0]:
+        raise ValueError("X and y must have the same number of samples")
+    if not isinstance(batch_size, int) or isinstance(batch_size, bool):
+        raise ValueError("batch_size must be a positive integer")
+    if batch_size <= 0:
+        raise ValueError("batch_size must be a positive integer")
+
+    n_samples = X.shape[0]
+    indices = np.arange(n_samples)
+
+    if shuffle:
+        rng = np.random.default_rng(seed)
+        rng.shuffle(indices)
+
+    for start in range(0, n_samples, batch_size):
+        batch_indices = indices[start : start + batch_size]
+        yield X[batch_indices], y[batch_indices]
 
 
 def standardize_features(

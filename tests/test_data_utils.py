@@ -2,6 +2,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import pytest
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(PROJECT_ROOT))
@@ -10,7 +11,7 @@ from src.data.datasets import (
     make_binary_classification_data,
     make_linear_regression_data,
 )
-from src.data.preprocessing import standardize_features, train_val_split
+from src.data.preprocessing import iterate_minibatches, standardize_features, train_val_split
 
 
 def test_linear_regression_data_shapes():
@@ -76,6 +77,92 @@ def test_train_val_split_shapes():
     assert X_val.shape == (20, 2)
     assert y_train.shape == (80,)
     assert y_val.shape == (20,)
+
+
+def test_iterate_minibatches_without_shuffle():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=False))
+
+    assert len(batches) == 3
+    assert batches[0][0].shape == (2, 2)
+    assert batches[1][0].shape == (2, 2)
+    assert batches[2][0].shape == (1, 2)
+    assert np.array_equal(batches[0][0], np.array([[0, 1], [2, 3]]))
+    assert np.array_equal(batches[0][1], np.array([0, 1]))
+    assert np.array_equal(batches[1][0], np.array([[4, 5], [6, 7]]))
+    assert np.array_equal(batches[1][1], np.array([2, 3]))
+    assert np.array_equal(batches[2][0], np.array([[8, 9]]))
+    assert np.array_equal(batches[2][1], np.array([4]))
+
+
+def test_iterate_minibatches_covers_all_samples_once():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=True, seed=42))
+    yielded_y = np.concatenate([batch_y for _, batch_y in batches])
+
+    assert np.array_equal(np.sort(yielded_y), y)
+    assert len(yielded_y) == len(np.unique(yielded_y))
+
+
+def test_iterate_minibatches_reproducible_shuffling():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    first_batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=True, seed=42))
+    second_batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=True, seed=42))
+    first_order = np.concatenate([batch_y for _, batch_y in first_batches])
+    second_order = np.concatenate([batch_y for _, batch_y in second_batches])
+
+    assert np.array_equal(first_order, second_order)
+
+
+def test_iterate_minibatches_different_shuffle_seeds():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    first_batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=True, seed=42))
+    second_batches = list(iterate_minibatches(X, y, batch_size=2, shuffle=True, seed=43))
+    first_order = np.concatenate([batch_y for _, batch_y in first_batches])
+    second_order = np.concatenate([batch_y for _, batch_y in second_batches])
+
+    assert not np.array_equal(first_order, second_order)
+
+
+def test_iterate_minibatches_batch_size_larger_than_dataset():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    batches = list(iterate_minibatches(X, y, batch_size=10, shuffle=False))
+
+    assert len(batches) == 1
+    assert np.array_equal(batches[0][0], X)
+    assert np.array_equal(batches[0][1], y)
+
+
+def test_iterate_minibatches_invalid_batch_size():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3, 4])
+
+    with pytest.raises(ValueError):
+        list(iterate_minibatches(X, y, batch_size=0))
+
+    with pytest.raises(ValueError):
+        list(iterate_minibatches(X, y, batch_size=-1))
+
+    with pytest.raises(ValueError):
+        list(iterate_minibatches(X, y, batch_size=1.5))
+
+
+def test_iterate_minibatches_mismatched_sample_counts():
+    X = np.arange(10).reshape(5, 2)
+    y = np.array([0, 1, 2, 3])
+
+    with pytest.raises(ValueError):
+        list(iterate_minibatches(X, y, batch_size=2))
 
 
 def test_standardize_features():
