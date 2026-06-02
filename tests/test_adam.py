@@ -101,10 +101,23 @@ def test_second_step_continues_in_same_direction() -> None:
     first_weights, first_bias = optimizer.step(weights, bias, dw, db)
     second_weights, second_bias = optimizer.step(first_weights, first_bias, dw, db)
 
+    assert np.allclose(
+        optimizer.first_moment_weights,
+        np.array([0.019, -0.038]),
+        rtol=1e-12,
+        atol=1e-12,
+    )
+    assert np.allclose(
+        optimizer.second_moment_weights,
+        np.array([0.00001999, 0.00007996]),
+        rtol=1e-12,
+        atol=1e-12,
+    )
+    assert optimizer.first_moment_bias == pytest.approx(0.057, rel=1e-12)
+    assert optimizer.second_moment_bias == pytest.approx(0.00017991, rel=1e-12)
     assert optimizer.time_step == 2
-    assert second_weights[0] < first_weights[0]
-    assert second_weights[1] > first_weights[1]
-    assert second_bias < first_bias
+    assert np.allclose(second_weights, np.array([0.8, 2.2]), rtol=1e-7, atol=1e-7)
+    assert second_bias == pytest.approx(0.3, rel=1e-7, abs=1e-7)
 
 
 def test_step_does_not_modify_original_weights() -> None:
