@@ -380,7 +380,57 @@ If a parameter has very small recent gradients, \(\sqrt{\hat{v}_t}\) can be clos
 
 In most ordinary updates, \(\epsilon\) is much smaller than \(\sqrt{\hat{v}_t}\), so it has little effect. It mainly protects edge cases and floating-point stability.
 
-## 15. Comparing SGD, Momentum, and Adam
+## 15. Adam implementation mapping
+
+I implemented `Adam` in `src/optimization/adam.py` and added unit tests in `tests/test_adam.py`. The optimizer stores:
+
+- `first_moment_weights`
+- `second_moment_weights`
+- `first_moment_bias`
+- `second_moment_bias`
+- `time_step`
+
+The implementation performs the following sequence during every call to `step()`:
+
+1. initialize moment state arrays on the first update
+2. increment the time step
+3. update first-moment estimates
+4. update second-moment estimates
+5. compute bias-corrected moments
+6. divide the corrected first moment by the square root of the corrected second moment plus epsilon
+7. return updated parameters without mutating the original arrays in place
+
+The first moment estimates the smoothed gradient direction. The second moment estimates the typical squared-gradient scale for each parameter. Dividing by the square root of the second moment gives parameter-wise adaptive scaling, while epsilon prevents numerical instability.
+
+## 16. Why Adam needs bias correction
+
+Adam needs bias correction because its first-moment and second-moment estimates are initialized at zero. During the first few optimization steps, the exponential moving averages are systematically biased toward zero, especially when `beta1` and `beta2` are close to one.
+
+For a roughly stationary expected gradient:
+
+$$
+E[m_t] = (1 - \beta_1^t)\mu
+$$
+
+and for the expected squared gradient:
+
+$$
+E[v_t] = (1 - \beta_2^t)\nu
+$$
+
+Therefore, Adam corrects the estimates using:
+
+$$
+\hat{m}_t = \frac{m_t}{1 - \beta_1^t}
+$$
+
+$$
+\hat{v}_t = \frac{v_t}{1 - \beta_2^t}
+$$
+
+Without this correction, the effective update scale during the early training stage would be distorted by zero initialization.
+
+## 17. Comparing SGD, Momentum, and Adam
 
 SGD uses the current gradient directly:
 
@@ -420,7 +470,7 @@ $$
 
 Adam is stateful like Momentum, but it also adapts the effective learning rate for each parameter. This is useful when different parameters have gradients with very different magnitudes.
 
-## 16. Mapping the math to implementation state
+## 18. Mapping the math to implementation state
 
 The implementation state mirrors the Adam equations:
 
@@ -434,11 +484,11 @@ On the first call to `step()`, the moment arrays are initialized with zeros matc
 
 The implementation should compute the weight and bias paths separately but with the same equations. The weight path uses NumPy elementwise operations, while the bias path uses scalar arithmetic. The returned `new_weights` should be a new array, and `new_bias` should be converted to a Python `float`.
 
-## 17. Key intuition summary
+## 19. Key intuition summary
 
 Adam can be read as Momentum plus adaptive scaling. The first moment estimates the useful direction of movement. The second moment estimates the recent gradient scale. Bias correction fixes the early underestimation caused by zero initialization. Dividing by \(\sqrt{\hat{v}_t}\) makes each parameter's update relative to its own recent gradient magnitude, while \(\epsilon\) keeps the denominator numerically safe.
 
-## 18. Open questions
+## 20. Open questions
 
 - How does batch size affect gradient noise and convergence?
 - Why can noisy SGD updates sometimes help optimization?
