@@ -719,7 +719,30 @@ The implementation should compute the weight and bias paths separately but with 
 
 Adam can be read as Momentum plus adaptive scaling. The first moment estimates the useful direction of movement. The second moment estimates the recent gradient scale. Bias correction fixes the early underestimation caused by zero initialization. Dividing by $`\sqrt{\hat{v}_t}`$ makes each parameter's update relative to its own recent gradient magnitude, while $`\epsilon`$ keeps the denominator numerically safe.
 
-## 22. Open questions
+## 22. Teaching-oriented optimizer comparison
+
+I compared Batch Gradient Descent, mini-batch SGD, Momentum, and Adam on the same synthetic binary classification dataset using `LogisticRegressionScratch`.
+
+All methods trained for 100 epochs on the same standardized training data. However, this is not a strict optimizer benchmark. Batch Gradient Descent performs one parameter update per epoch, while the mini-batch methods use a batch size of 32 and perform ten parameter updates per epoch.
+
+The comparison results were:
+
+| Optimizer | Parameter updates | Validation BCE | Validation accuracy |
+|---|---:|---:|---:|
+| Batch Gradient Descent | 100 | 0.259780 | 0.9750 |
+| Mini-batch SGD | 1000 | 0.138172 | 0.9875 |
+| Momentum | 1000 | 0.137438 | 0.9875 |
+| Adam | 1000 | 0.109719 | 0.9875 |
+
+The experiment controls the number of dataset passes, or epoch budget. Each method sees approximately the same total number of training samples. However, it does not control the number of parameter updates, gradient-estimation granularity, learning rate, wall-clock time, or hyperparameter-search budget.
+
+Mini-batch SGD lowers BCE faster than full-batch gradient descent because it updates parameters more frequently during each pass through the dataset. Momentum performs only slightly better than SGD in this simple convex problem, where strong oscillation is limited. Adam achieves the lowest BCE under the current configuration because its adaptive parameter-wise scaling improves probability estimates.
+
+The validation accuracies of SGD, Momentum, and Adam are identical even though their BCE values differ. This illustrates why BCE provides more information than accuracy: accuracy only reflects thresholded class decisions, while BCE also reflects confidence quality.
+
+These results should not be generalized into a universal optimizer ranking. The experiment uses a simple linearly separable synthetic dataset, one random seed, and different optimizer hyperparameters. Its purpose is to build optimization intuition before moving to MLP training.
+
+## 23. Open questions
 
 - How does batch size affect gradient noise and convergence?
 - Why can noisy SGD updates sometimes help optimization?
