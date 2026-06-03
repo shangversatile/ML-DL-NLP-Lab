@@ -8,19 +8,27 @@ I implemented the mathematical core of linear regression from scratch in `src/mo
 
 The linear regression prediction rule is:
 
-y_hat = Xw + b
+$$
+\hat{y} = Xw + b
+$$
 
 where `X` has shape `(n_samples, n_features)`, `w` has shape `(n_features,)`, `b` is a scalar, and `y_hat` has shape `(n_samples,)`.
 
 The MSE loss is:
 
-L = mean((y_hat - y)^2)
+$$
+L = \operatorname{mean}((\hat{y} - y)^2)
+$$
 
 The analytical gradients are:
 
-dw = (2 / n) * X.T @ (y_hat - y)
+$$
+dw = \frac{2}{n} X^\top(\hat{y} - y)
+$$
 
-db = (2 / n) * sum(y_hat - y)
+$$
+db = \frac{2}{n}\sum(\hat{y} - y)
+$$
 
 These formulas are implemented directly in NumPy, which makes the relationship between the math and the code explicit.
 
@@ -44,9 +52,13 @@ The tests are designed to check both behavior and mathematical correctness. Pred
 
 I implemented a minimal `BatchGradientDescent` optimizer in `src/optimization/gradient_descent.py`. The optimizer stores a positive learning rate and exposes a `step()` method that updates weights and bias using the rule:
 
-w_new = w_old - learning_rate * dw
+$$
+w_{\text{new}} = w_{\text{old}} - \text{learning\_rate} \cdot dw
+$$
 
-b_new = b_old - learning_rate * db
+$$
+b_{\text{new}} = b_{\text{old}} - \text{learning\_rate} \cdot db
+$$
 
 This separates the model's mathematical responsibilities from the optimizer's update responsibilities. The linear regression model computes predictions, loss, and gradients, while the optimizer decides how parameters move based on those gradients.
 
@@ -80,13 +92,19 @@ The model is trained on standardized features, so the learned weights and bias l
 
 For standardized features:
 
-X_scaled = (X_original - mean) / std
+$$
+X_{\text{scaled}} = \frac{X_{\text{original}} - \text{mean}}{\text{std}}
+$$
 
 The original-space parameters can be recovered as:
 
-recovered_weights = learned_weights / std
+$$
+\text{recovered\_weights} = \frac{\text{learned\_weights}}{\text{std}}
+$$
 
-recovered_bias = learned_bias - mean @ recovered_weights
+$$
+\text{recovered\_bias} = \text{learned\_bias} - \text{mean} @ \text{recovered\_weights}
+$$
 
 After recovery, the learned parameters were close to the true parameters:
 
@@ -127,23 +145,33 @@ I implemented the core binary logistic regression model in `src/models/logistic_
 
 The model first computes logits:
 
+$$
 z = Xw + b
+$$
 
 Then it converts logits into probabilities with the sigmoid function:
 
-p = sigmoid(z) = 1 / (1 + exp(-z))
+$$
+p = \operatorname{sigmoid}(z) = \frac{1}{1 + \exp(-z)}
+$$
 
 The probability `p` represents the model's estimated probability that a sample belongs to class 1. A hard class prediction is then obtained by comparing this probability with a threshold, usually 0.5.
 
 The binary cross entropy loss is:
 
-L = -mean(y log(p) + (1 - y) log(1 - p))
+$$
+L = -\operatorname{mean}(y \log(p) + (1 - y)\log(1 - p))
+$$
 
 The gradients are:
 
-dw = (1 / n) * X.T @ (p - y)
+$$
+dw = \frac{1}{n} X^\top(p - y)
+$$
 
-db = (1 / n) * sum(p - y)
+$$
+db = \frac{1}{n}\sum(p - y)
+$$
 
 This implementation is a direct NumPy translation of the mathematical definition, similar to the linear regression implementation but adapted for binary classification.
 
@@ -161,26 +189,36 @@ I implemented binary classification metrics in `src/evaluation/metrics.py` and a
 
 The confusion matrix uses the format:
 
+```text
 [[TN, FP],
  [FN, TP]]
+```
 
 where TN is true negative, FP is false positive, FN is false negative, and TP is true positive.
 
 Accuracy measures the overall fraction of correct predictions:
 
-accuracy = (TP + TN) / (TP + TN + FP + FN)
+$$
+\text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+$$
 
 Precision measures how many predicted positives are truly positive:
 
-precision = TP / (TP + FP)
+$$
+\text{precision} = \frac{TP}{TP + FP}
+$$
 
 Recall measures how many actual positives are recovered:
 
-recall = TP / (TP + FN)
+$$
+\text{recall} = \frac{TP}{TP + FN}
+$$
 
 F1 score summarizes the trade-off between precision and recall:
 
-F1 = 2 * precision * recall / (precision + recall)
+$$
+F1 = \frac{2 \cdot \text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}
+$$
 
 Accuracy alone is not enough for binary classification, especially under class imbalance. A model can achieve high accuracy by predicting the majority class while failing to identify the minority class. Precision and recall expose different error types, and the confusion matrix makes false positives and false negatives explicit. This is important for trustworthy ML because different errors can have very different real-world costs.
 
@@ -200,10 +238,12 @@ The initial train loss was approximately 0.693147, which is expected for a binar
 
 ## 18. Evaluation caveat: label distribution matters
 
-The validation metrics were accuracy = 1.0, precision = 1.0, recall = 1.0, and F1 = 1.0. However, the validation confusion matrix was:
+The validation metrics were `accuracy = 1.0`, `precision = 1.0`, `recall = 1.0`, and `F1 = 1.0`. However, the validation confusion matrix was:
 
+```text
 [[0, 0],
  [0, 40]]
+```
 
 This means that the validation split contained only positive examples and no negative examples. Therefore, the perfect validation metrics should not be interpreted as strong evidence of generalization across both classes. They mainly show that the current model predicts the positive validation samples correctly.
 
@@ -239,7 +279,9 @@ Therefore, threshold analysis is not merely tuning a number; it evaluates the de
 
 I implemented `binary_cross_entropy()` in `src/evaluation/metrics.py` and added tests in `tests/test_metrics.py`. This function computes binary cross entropy from true binary labels and predicted probabilities:
 
-BCE = -mean(y log(p) + (1 - y) log(1 - p))
+$$
+BCE = -\operatorname{mean}(y \log(p) + (1 - y)\log(1 - p))
+$$
 
 The function validates that labels are binary, probabilities are one-dimensional, shapes match, and probability values lie in [0, 1]. It also clips predicted probabilities with a small epsilon before applying the logarithm to avoid numerical issues from log(0).
 
