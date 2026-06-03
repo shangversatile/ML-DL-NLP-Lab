@@ -17,7 +17,7 @@ where `X` has shape `(n_samples, n_features)`, `w` has shape `(n_features,)`, `b
 The MSE loss is:
 
 $$
-L = \operatorname{mean}((\hat{y} - y)^2)
+L = \mathrm{mean}((\hat{y} - y)^2)
 $$
 
 The analytical gradients are:
@@ -53,11 +53,11 @@ The tests are designed to check both behavior and mathematical correctness. Pred
 I implemented a minimal `BatchGradientDescent` optimizer in `src/optimization/gradient_descent.py`. The optimizer stores a positive learning rate and exposes a `step()` method that updates weights and bias using the rule:
 
 $$
-w_{\text{new}} = w_{\text{old}} - \text{learning\_rate} \cdot dw
+w_{\mathrm{new}} = w_{\mathrm{old}} - \alpha \, dw
 $$
 
 $$
-b_{\text{new}} = b_{\text{old}} - \text{learning\_rate} \cdot db
+b_{\mathrm{new}} = b_{\mathrm{old}} - \alpha \, db
 $$
 
 This separates the model's mathematical responsibilities from the optimizer's update responsibilities. The linear regression model computes predictions, loss, and gradients, while the optimizer decides how parameters move based on those gradients.
@@ -93,17 +93,17 @@ The model is trained on standardized features, so the learned weights and bias l
 For standardized features:
 
 $$
-X_{\text{scaled}} = \frac{X_{\text{original}} - \text{mean}}{\text{std}}
+X_{\mathrm{scaled}} = \frac{X_{\mathrm{original}} - \mathrm{mean}}{\mathrm{std}}
 $$
 
 The original-space parameters can be recovered as:
 
 $$
-\text{recovered\_weights} = \frac{\text{learned\_weights}}{\text{std}}
+w_{\mathrm{recovered}} = \frac{w_{\mathrm{learned}}}{\mathrm{std}}
 $$
 
 $$
-\text{recovered\_bias} = \text{learned\_bias} - \text{mean} @ \text{recovered\_weights}
+b_{\mathrm{recovered}} = b_{\mathrm{learned}} - \mathrm{mean}^{\top} w_{\mathrm{recovered}}
 $$
 
 After recovery, the learned parameters were close to the true parameters:
@@ -152,7 +152,7 @@ $$
 Then it converts logits into probabilities with the sigmoid function:
 
 $$
-p = \operatorname{sigmoid}(z) = \frac{1}{1 + \exp(-z)}
+p = \mathrm{sigmoid}(z) = \frac{1}{1 + \exp(-z)}
 $$
 
 The probability `p` represents the model's estimated probability that a sample belongs to class 1. A hard class prediction is then obtained by comparing this probability with a threshold, usually 0.5.
@@ -160,7 +160,7 @@ The probability `p` represents the model's estimated probability that a sample b
 The binary cross entropy loss is:
 
 $$
-L = -\operatorname{mean}(y \log(p) + (1 - y)\log(1 - p))
+L = -\mathrm{mean}(y \log(p) + (1 - y)\log(1 - p))
 $$
 
 The gradients are:
@@ -175,7 +175,7 @@ $$
 
 This implementation is a direct NumPy translation of the mathematical definition, similar to the linear regression implementation but adapted for binary classification.
 
-## 15. Why predict_proba matters
+## 15. Why `predict_proba()` matters
 
 `predict_proba()` is important because logistic regression is not only a hard classifier but also a probabilistic model. The probability output can be interpreted as the model's confidence for the positive class, which gives more information than a direct 0/1 label.
 
@@ -199,25 +199,25 @@ where TN is true negative, FP is false positive, FN is false negative, and TP is
 Accuracy measures the overall fraction of correct predictions:
 
 $$
-\text{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\mathrm{accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
 $$
 
 Precision measures how many predicted positives are truly positive:
 
 $$
-\text{precision} = \frac{TP}{TP + FP}
+\mathrm{precision} = \frac{TP}{TP + FP}
 $$
 
 Recall measures how many actual positives are recovered:
 
 $$
-\text{recall} = \frac{TP}{TP + FN}
+\mathrm{recall} = \frac{TP}{TP + FN}
 $$
 
 F1 score summarizes the trade-off between precision and recall:
 
 $$
-F1 = \frac{2 \cdot \text{precision} \cdot \text{recall}}{\text{precision} + \text{recall}}
+F1 = \frac{2 \cdot \mathrm{precision} \cdot \mathrm{recall}}{\mathrm{precision} + \mathrm{recall}}
 $$
 
 Accuracy alone is not enough for binary classification, especially under class imbalance. A model can achieve high accuracy by predicting the majority class while failing to identify the minority class. Precision and recall expose different error types, and the confusion matrix makes false positives and false negatives explicit. This is important for trustworthy ML because different errors can have very different real-world costs.
@@ -280,7 +280,7 @@ Therefore, threshold analysis is not merely tuning a number; it evaluates the de
 I implemented `binary_cross_entropy()` in `src/evaluation/metrics.py` and added tests in `tests/test_metrics.py`. This function computes binary cross entropy from true binary labels and predicted probabilities:
 
 $$
-BCE = -\operatorname{mean}(y \log(p) + (1 - y)\log(1 - p))
+BCE = -\mathrm{mean}(y \log(p) + (1 - y)\log(1 - p))
 $$
 
 The function validates that labels are binary, probabilities are one-dimensional, shapes match, and probability values lie in [0, 1]. It also clips predicted probabilities with a small epsilon before applying the logarithm to avoid numerical issues from log(0).

@@ -5,11 +5,11 @@
 I implemented `SGD` in `src/optimization/sgd.py` and added unit tests in `tests/test_sgd.py`. The optimizer applies the update rule:
 
 $$
-w_{\text{new}} = w_{\text{old}} - \text{learning\_rate} \cdot dw
+w_{\mathrm{new}} = w_{\mathrm{old}} - \alpha \, dw
 $$
 
 $$
-b_{\text{new}} = b_{\text{old}} - \text{learning\_rate} \cdot db
+b_{\mathrm{new}} = b_{\mathrm{old}} - \alpha \, db
 $$
 
 The update formula looks the same as Batch Gradient Descent. The key difference is not the `step()` formula itself, but how gradients are computed. Batch Gradient Descent uses the full training set, classic SGD uses one sample at a time, and mini-batch SGD uses a subset of samples.
@@ -31,10 +31,10 @@ v_t = \beta v_{t-1} + (1 - \beta)g_t
 $$
 
 $$
-\theta_t = \theta_{t-1} - \text{learning\_rate} \cdot v_t
+\theta_t = \theta_{t-1} - \alpha v_t
 $$
 
-where $g_t$ is the current gradient, $v_t$ is the exponentially weighted moving average of recent gradients, and $\beta$ controls how strongly historical gradients are retained.
+where $g_t$ is the current gradient, $v_t$ is the exponentially weighted moving average of recent gradients, $\alpha$ is the learning rate, and $\beta$ controls how strongly historical gradients are retained.
 
 ## 4. Why Momentum reduces oscillation
 
@@ -44,10 +44,10 @@ If the gradient direction remains stable, velocity gradually increases toward th
 
 ## 5. Interpreting beta
 
-The coefficient `beta` controls the effective memory length of Momentum. A useful approximation is:
+The coefficient $\beta$ controls the effective memory length of Momentum. A useful approximation is:
 
 $$
-\text{effective memory length} \approx \frac{1}{1 - \beta}
+\mathrm{effective\ memory\ length} \approx \frac{1}{1 - \beta}
 $$
 
 For example:
@@ -116,7 +116,7 @@ Unlike the first moment, the second moment does not preserve sign. Squaring make
 
 If one parameter often has large gradients and another often has small gradients, their $v_t$ values will differ. Adam uses this difference to scale updates parameter by parameter. Parameters with consistently large gradients receive smaller effective steps, while parameters with consistently small gradients receive relatively larger effective steps.
 
-## 9. Why Adam divides by sqrt(v_t)
+## 9. Why Adam divides by $\sqrt{v_t}$
 
 Adam divides the first-moment direction by the root mean square scale of recent gradients:
 
@@ -139,7 +139,7 @@ $$
 The effective learning rate for each parameter is:
 
 $$
-\alpha_{\text{effective}, t}
+\alpha_{\mathrm{effective}, t}
 =
 \frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}
 $$
@@ -205,7 +205,8 @@ $$
 Taking expectation:
 
 $$
-\mathbb{E}[m_t] =
+\mathbb{E}[m_t]
+=
 (1 - \beta_1)\mathbb{E}[g_t]
 + \beta_1(1 - \beta_1)\mathbb{E}[g_{t-1}]
 + \cdots
@@ -215,7 +216,8 @@ $$
 Using $\mathbb{E}[g_i] = \mu$:
 
 $$
-\mathbb{E}[m_t] =
+\mathbb{E}[m_t]
+=
 (1 - \beta_1)\mu
 \left(1 + \beta_1 + \beta_1^2 + \cdots + \beta_1^{t-1}\right)
 $$
@@ -231,7 +233,8 @@ $$
 Therefore:
 
 $$
-\mathbb{E}[m_t] =
+\mathbb{E}[m_t]
+=
 (1 - \beta_1)\mu
 \left(\frac{1 - \beta_1^t}{1 - \beta_1}\right)
 =
@@ -257,7 +260,8 @@ $$
 Taking expectation and using $\mathbb{E}[g_i^2] = \nu$:
 
 $$
-\mathbb{E}[v_t] =
+\mathbb{E}[v_t]
+=
 (1 - \beta_2)\nu
 \left(1 + \beta_2 + \beta_2^2 + \cdots + \beta_2^{t-1}\right)
 $$
@@ -265,7 +269,8 @@ $$
 Using the geometric sum:
 
 $$
-\mathbb{E}[v_t] =
+\mathbb{E}[v_t]
+=
 (1 - \beta_2)\nu
 \left(\frac{1 - \beta_2^t}{1 - \beta_2}\right)
 =
@@ -303,7 +308,9 @@ $$
 and since $\mathbb{E}[v_t] = (1 - \beta_2^t)\nu$:
 
 $$
-\mathbb{E}[\hat{v}_t] = \nu
+\mathbb{E}[\hat{v}_t]
+=
+\nu
 $$
 
 The correction does not remove all noise from stochastic gradients. It specifically corrects the initialization bias caused by starting the moving averages at zero.
@@ -336,10 +343,12 @@ This physical picture is useful, but it has boundaries. Different momentum metho
 For Adam, the most rigorous description is adaptive diagonal preconditioning. Define:
 
 $$
-D_t =
-\operatorname{diag}
+D_t
+=
+\mathrm{diag}
 \left(
-\frac{1}{\sqrt{\hat{v}_t} + \epsilon}
+\frac{1}
+{\sqrt{\hat{v}_t}+\epsilon}
 \right)
 $$
 
@@ -358,7 +367,7 @@ This says that Adam rescales each coordinate of the bias-corrected first moment 
 An estimator is unbiased for a target quantity when its expectation equals that target:
 
 $$
-\mathbb{E}[\text{estimate}] = \text{target}
+\mathbb{E}[\mathrm{estimate}] = \mathrm{target}
 $$
 
 Unbiased estimation is a general statistical idea, not something invented specifically for Adam. Adam uses this idea because its moving-average estimates start from zero. Zero initialization is natural: before training begins, the optimizer has no gradient history from which to initialize $m_0$ or $v_0$. However, this also means the early exponential moving averages are systematically too small.
@@ -366,13 +375,17 @@ Unbiased estimation is a general statistical idea, not something invented specif
 Assume, as an analytical simplification, that gradients are sampled from a stationary process with:
 
 $$
-\mathbb{E}[g_t] = \mu
+\mathbb{E}[g_t]
+=
+\mu
 $$
 
 and:
 
 $$
-\mathbb{E}[g_t^2] = \nu
+\mathbb{E}[g_t^2]
+=
+\nu
 $$
 
 Starting from $m_0 = 0$, the first moment is:
@@ -556,13 +569,17 @@ Adam needs bias correction because its first-moment and second-moment estimates 
 For a roughly stationary expected gradient:
 
 $$
-\mathbb{E}[m_t] = (1 - \beta_1^t)\mu
+\mathbb{E}[m_t]
+=
+(1 - \beta_1^t)\mu
 $$
 
 and for the expected squared gradient:
 
 $$
-\mathbb{E}[v_t] = (1 - \beta_2^t)\nu
+\mathbb{E}[v_t]
+=
+(1 - \beta_2^t)\nu
 $$
 
 Therefore, Adam corrects the estimates using:
