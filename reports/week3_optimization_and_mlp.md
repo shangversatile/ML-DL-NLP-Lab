@@ -4,13 +4,13 @@
 
 I implemented `SGD` in `src/optimization/sgd.py` and added unit tests in `tests/test_sgd.py`. The optimizer applies the update rule:
 
-$$
+```math
 w_{\mathrm{new}} = w_{\mathrm{old}} - \alpha \, dw
-$$
+```
 
-$$
+```math
 b_{\mathrm{new}} = b_{\mathrm{old}} - \alpha \, db
-$$
+```
 
 The update formula looks the same as Batch Gradient Descent. The key difference is not the `step()` formula itself, but how gradients are computed. Batch Gradient Descent uses the full training set, classic SGD uses one sample at a time, and mini-batch SGD uses a subset of samples.
 
@@ -26,15 +26,15 @@ I implemented `Momentum` in `src/optimization/momentum.py` and added unit tests 
 
 The update rule is:
 
-$$
+```math
 v_t = \beta v_{t-1} + (1 - \beta)g_t
-$$
+```
 
-$$
+```math
 \theta_t = \theta_{t-1} - \alpha v_t
-$$
+```
 
-where $g_t$ is the current gradient, $v_t$ is the exponentially weighted moving average of recent gradients, $\alpha$ is the learning rate, and $\beta$ controls how strongly historical gradients are retained.
+where $`g_t`$ is the current gradient, $`v_t`$ is the exponentially weighted moving average of recent gradients, $`\alpha`$ is the learning rate, and $`\beta`$ controls how strongly historical gradients are retained.
 
 ## 4. Why Momentum reduces oscillation
 
@@ -44,130 +44,158 @@ If the gradient direction remains stable, velocity gradually increases toward th
 
 ## 5. Interpreting beta
 
-The coefficient $\beta$ controls the effective memory length of Momentum. A useful approximation is:
+The coefficient $`\beta`$ controls the effective memory length of Momentum. A useful approximation is:
 
-$$
+```math
 \mathrm{effective\ memory\ length} \approx \frac{1}{1 - \beta}
-$$
+```
 
 For example:
 
-- $\beta = 0.0$ behaves like ordinary SGD
-- $\beta = 0.9$ remembers roughly 10 recent steps
-- $\beta = 0.99$ remembers roughly 100 recent steps
+- $`\beta = 0.0`$ behaves like ordinary SGD
+- $`\beta = 0.9`$ remembers roughly 10 recent steps
+- $`\beta = 0.99`$ remembers roughly 100 recent steps
 
-A larger $\beta$ creates smoother but slower-reacting updates. A smaller $\beta$ responds more strongly to current gradients but performs less smoothing. The common default $\beta = 0.9$ is a practical compromise rather than a universal mathematical optimum.
+A larger $`\beta`$ creates smoother but slower-reacting updates. A smaller $`\beta`$ responds more strongly to current gradients but performs less smoothing. The common default $`\beta = 0.9`$ is a practical compromise rather than a universal mathematical optimum.
 
 ## 6. Adam optimizer overview
 
 Adam combines the main idea of Momentum with an adaptive parameter-wise scaling term. It keeps two exponentially weighted moving averages for each parameter:
 
-$$
-m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t
-$$
+```math
+m_t
+=
+\beta_1 m_{t-1}
++
+(1-\beta_1)g_t
+```
 
-$$
-v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2
-$$
+```math
+v_t
+=
+\beta_2 v_{t-1}
++
+(1-\beta_2)g_t^2
+```
 
-Here, $g_t$ is the current gradient, $m_t$ is the first-moment estimate, and $v_t$ is the second-moment estimate. The square $g_t^2$ is applied elementwise for weights.
+Here, $`g_t`$ is the current gradient, $`m_t`$ is the first-moment estimate, and $`v_t`$ is the second-moment estimate. The square $`g_t^2`$ is applied elementwise for weights.
 
 Adam then applies bias correction:
 
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t}
-$$
+```math
+\hat{m}_t
+=
+\frac{m_t}
+{1-\beta_1^t}
+```
 
-$$
-\hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
+```math
+\hat{v}_t
+=
+\frac{v_t}
+{1-\beta_2^t}
+```
 
 The final update is:
 
-$$
+```math
 \theta_t =
 \theta_{t-1}
 - \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
+```
 
-where $\alpha$ is the learning rate and $\epsilon$ is a small positive constant for numerical stability.
+where $`\alpha`$ is the learning rate and $`\epsilon`$ is a small positive constant for numerical stability.
 
 ## 7. Why Adam tracks the first moment
 
-The first moment is the expected gradient direction. In Adam, $m_t$ plays a role similar to Momentum's velocity:
+The first moment is the expected gradient direction. In Adam, $`m_t`$ plays a role similar to Momentum's velocity:
 
-$$
-m_t = \beta_1 m_{t-1} + (1 - \beta_1) g_t
-$$
+```math
+m_t
+=
+\beta_1 m_{t-1}
++
+(1-\beta_1)g_t
+```
 
 This is an exponentially weighted moving average of recent gradients. If the gradient direction is consistent across steps, the average points strongly in that direction. If the gradient direction alternates, positive and negative gradient components partially cancel.
 
-This makes $m_t$ a smoothed estimate of descent direction. It reduces the impact of noisy mini-batch gradients while still allowing the optimizer to accumulate evidence about directions that are repeatedly useful.
+This makes $`m_t`$ a smoothed estimate of descent direction. It reduces the impact of noisy mini-batch gradients while still allowing the optimizer to accumulate evidence about directions that are repeatedly useful.
 
 ## 8. Why Adam tracks the second moment
 
 The second moment tracks the average squared gradient:
 
-$$
-v_t = \beta_2 v_{t-1} + (1 - \beta_2) g_t^2
-$$
+```math
+v_t
+=
+\beta_2 v_{t-1}
++
+(1-\beta_2)g_t^2
+```
 
-Unlike the first moment, the second moment does not preserve sign. Squaring makes both positive and negative gradients contribute positively. This means $v_t$ estimates the recent magnitude of gradients for each parameter.
+Unlike the first moment, the second moment does not preserve sign. Squaring makes both positive and negative gradients contribute positively. This means $`v_t`$ estimates the recent magnitude of gradients for each parameter.
 
-If one parameter often has large gradients and another often has small gradients, their $v_t$ values will differ. Adam uses this difference to scale updates parameter by parameter. Parameters with consistently large gradients receive smaller effective steps, while parameters with consistently small gradients receive relatively larger effective steps.
+If one parameter often has large gradients and another often has small gradients, their $`v_t`$ values will differ. Adam uses this difference to scale updates parameter by parameter. Parameters with consistently large gradients receive smaller effective steps, while parameters with consistently small gradients receive relatively larger effective steps.
 
-## 9. Why Adam divides by $\sqrt{v_t}$
+## 9. Why Adam divides by $`\sqrt{v_t}`$
 
 Adam divides the first-moment direction by the root mean square scale of recent gradients:
 
-$$
+```math
 \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
+```
 
-This division has a units interpretation. If the gradient $g_t$ has units of loss per parameter, then $g_t^2$ has squared gradient units. Taking $\sqrt{v_t}$ returns the scale back to gradient units. Therefore, $\hat{m}_t / \sqrt{\hat{v}_t}$ is dimensionless up to the small $\epsilon$ term, and the learning rate controls the parameter step size.
+This division has a units interpretation. If the gradient $`g_t`$ has units of loss per parameter, then $`g_t^2`$ has squared gradient units. Taking $`\sqrt{v_t}`$ returns the scale back to gradient units. Therefore, $`\hat{m}_t / \sqrt{\hat{v}_t}`$ is dimensionless up to the small $`\epsilon`$ term, and the learning rate controls the parameter step size.
 
-It also has an RMS normalization interpretation. Since $v_t$ averages squared gradients, $\sqrt{v_t}$ is similar to a running root mean square gradient magnitude. Dividing by this term normalizes the update by recent gradient scale.
+It also has an RMS normalization interpretation. Since $`v_t`$ averages squared gradients, $`\sqrt{v_t}`$ is similar to a running root mean square gradient magnitude. Dividing by this term normalizes the update by recent gradient scale.
 
 This creates parameter-wise adaptive learning rates. The update can be rewritten as:
 
-$$
+```math
 \theta_t =
 \theta_{t-1}
 - \left(\frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}\right)\hat{m}_t
-$$
+```
 
 The effective learning rate for each parameter is:
 
-$$
+```math
 \alpha_{\mathrm{effective}, t}
 =
 \frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}
-$$
+```
 
-Large recent squared gradients make $\sqrt{\hat{v}_t}$ larger, which reduces the effective learning rate. Small recent squared gradients make the denominator smaller, which allows a larger effective learning rate.
+Large recent squared gradients make $`\sqrt{\hat{v}_t}`$ larger, which reduces the effective learning rate. Small recent squared gradients make the denominator smaller, which allows a larger effective learning rate.
 
 ## 10. Why Adam needs bias correction
 
-Adam initializes $m_0 = 0$ and $v_0 = 0$. Early moving averages are therefore biased toward zero because they have not yet accumulated enough history.
+Adam initializes $`m_0 = 0`$ and $`v_0 = 0`$. Early moving averages are therefore biased toward zero because they have not yet accumulated enough history.
 
 For example, on the first step:
 
-$$
+```math
 m_1 = \beta_1 m_0 + (1 - \beta_1)g_1
 = (1 - \beta_1)g_1
-$$
+```
 
-With $\beta_1 = 0.9$, this gives only $10\%$ of the first gradient. Without correction, the early first-moment estimate would be too small. The same issue is stronger for the second moment when $\beta_2 = 0.999$, because the first $v_t$ value contains only $0.1\%$ of $g_t^2$.
+With $`\beta_1 = 0.9`$, this gives only $`10\%`$ of the first gradient. Without correction, the early first-moment estimate would be too small. The same issue is stronger for the second moment when $`\beta_2 = 0.999`$, because the first $`v_t`$ value contains only $`0.1\%`$ of $`g_t^2`$.
 
 Bias correction divides out the missing weight:
 
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t}
-$$
+```math
+\hat{m}_t
+=
+\frac{m_t}
+{1-\beta_1^t}
+```
 
-$$
-\hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
+```math
+\hat{v}_t
+=
+\frac{v_t}
+{1-\beta_2^t}
+```
 
 This makes the early moment estimates comparable to the gradient statistics they are trying to estimate.
 
@@ -175,121 +203,132 @@ This makes the early moment estimates comparable to the gradient statistics they
 
 Assume gradients are sampled from a stationary distribution. Let:
 
-$$
+```math
 \mu = \mathbb{E}[g_t]
-$$
+```
 
 and:
 
-$$
+```math
 \nu = \mathbb{E}[g_t^2]
-$$
+```
 
 For the first moment, start with:
 
-$$
-m_t = \beta_1 m_{t-1} + (1 - \beta_1)g_t
-$$
+```math
+m_t
+=
+\beta_1 m_{t-1}
++
+(1-\beta_1)g_t
+```
 
-Expand recursively from $m_0 = 0$:
+Expand recursively from $`m_0 = 0`$:
 
-$$
+```math
 m_t =
 (1 - \beta_1)g_t
 + \beta_1(1 - \beta_1)g_{t-1}
 + \beta_1^2(1 - \beta_1)g_{t-2}
 + \cdots
 + \beta_1^{t-1}(1 - \beta_1)g_1
-$$
+```
 
 Taking expectation:
 
-$$
+```math
 \mathbb{E}[m_t]
 =
 (1 - \beta_1)\mathbb{E}[g_t]
 + \beta_1(1 - \beta_1)\mathbb{E}[g_{t-1}]
 + \cdots
 + \beta_1^{t-1}(1 - \beta_1)\mathbb{E}[g_1]
-$$
+```
 
-Using $\mathbb{E}[g_i] = \mu$:
+Using $`\mathbb{E}[g_i] = \mu`$:
 
-$$
+```math
 \mathbb{E}[m_t]
 =
 (1 - \beta_1)\mu
 \left(1 + \beta_1 + \beta_1^2 + \cdots + \beta_1^{t-1}\right)
-$$
+```
 
 The finite geometric sum is:
 
-$$
+```math
 1 + \beta_1 + \beta_1^2 + \cdots + \beta_1^{t-1}
 =
 \frac{1 - \beta_1^t}{1 - \beta_1}
-$$
+```
 
 Therefore:
 
-$$
+```math
 \mathbb{E}[m_t]
 =
 (1 - \beta_1)\mu
 \left(\frac{1 - \beta_1^t}{1 - \beta_1}\right)
 =
 (1 - \beta_1^t)\mu
-$$
+```
 
 For the second moment:
 
-$$
-v_t = \beta_2 v_{t-1} + (1 - \beta_2)g_t^2
-$$
+```math
+v_t
+=
+\beta_2 v_{t-1}
++
+(1-\beta_2)g_t^2
+```
 
-With $v_0 = 0$, recursive expansion gives:
+With $`v_0 = 0`$, recursive expansion gives:
 
-$$
+```math
 v_t =
 (1 - \beta_2)g_t^2
 + \beta_2(1 - \beta_2)g_{t-1}^2
 + \cdots
 + \beta_2^{t-1}(1 - \beta_2)g_1^2
-$$
+```
 
-Taking expectation and using $\mathbb{E}[g_i^2] = \nu$:
+Taking expectation and using $`\mathbb{E}[g_i^2] = \nu`$:
 
-$$
+```math
 \mathbb{E}[v_t]
 =
 (1 - \beta_2)\nu
 \left(1 + \beta_2 + \beta_2^2 + \cdots + \beta_2^{t-1}\right)
-$$
+```
 
 Using the geometric sum:
 
-$$
+```math
 \mathbb{E}[v_t]
 =
 (1 - \beta_2)\nu
 \left(\frac{1 - \beta_2^t}{1 - \beta_2}\right)
 =
 (1 - \beta_2^t)\nu
-$$
+```
 
-So the uncorrected estimates are biased low by factors $1 - \beta_1^t$ and $1 - \beta_2^t$.
+So the uncorrected estimates are biased low by factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$.
 
 ## 12. Interpreting the bias-corrected estimates
 
 The corrected first moment is:
 
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t}
-$$
+```math
+\hat{m}_t
+=
+\frac{m_t}
+{1-\beta_1^t}
+```
 
-Since $\mathbb{E}[m_t] = (1 - \beta_1^t)\mu$, the corrected estimate has expectation:
+Since $`\mathbb{E}[m_t] = (1 - \beta_1^t)\mu`$, the corrected estimate has expectation:
 
-$$
+```math
 \mathbb{E}[\hat{m}_t]
 =
 \mathbb{E}\left[\frac{m_t}{1 - \beta_1^t}\right]
@@ -297,52 +336,63 @@ $$
 \frac{\mathbb{E}[m_t]}{1 - \beta_1^t}
 =
 \mu
-$$
+```
 
 Similarly:
 
-$$
-\hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
+```math
+\hat{v}_t
+=
+\frac{v_t}
+{1-\beta_2^t}
+```
 
-and since $\mathbb{E}[v_t] = (1 - \beta_2^t)\nu$:
+and since $`\mathbb{E}[v_t] = (1 - \beta_2^t)\nu`$:
 
-$$
+```math
 \mathbb{E}[\hat{v}_t]
 =
 \nu
-$$
+```
 
 The correction does not remove all noise from stochastic gradients. It specifically corrects the initialization bias caused by starting the moving averages at zero.
 
 ## 13. Physical intuition and mathematical boundaries
 
-The squared gradient $g_t^2$ can be interpreted as a gradient energy scale or signal power scale because it measures magnitude without regard to sign. In signal processing, squaring a signal is a standard way to measure power-like magnitude. In optimization, $g_t^2$ similarly measures how large the local gradient signal is for each parameter.
+The squared gradient $`g_t^2`$ can be interpreted as a gradient energy scale or signal power scale because it measures magnitude without regard to sign. In signal processing, squaring a signal is a standard way to measure power-like magnitude. In optimization, $`g_t^2`$ similarly measures how large the local gradient signal is for each parameter.
 
 This interpretation is a mathematically supported metaphor, not literal physical energy. Adam's second moment does not store mechanical energy. It stores an exponential moving average of squared gradients:
 
-$$
-v_t = \beta_2 v_{t-1} + (1 - \beta_2)g_t^2
-$$
+```math
+v_t
+=
+\beta_2 v_{t-1}
++
+(1-\beta_2)g_t^2
+```
 
-The useful point is that $v_t$ captures a recent squared-gradient scale. It can be described as energy-like or power-like because it is quadratic in the gradient, but the rigorous object is still a statistical moment estimate.
+The useful point is that $`v_t`$ captures a recent squared-gradient scale. It can be described as energy-like or power-like because it is quadratic in the gradient, but the rigorous object is still a statistical moment estimate.
 
 Momentum has a closer connection to physical dynamics. Polyak's heavy-ball method is motivated by damped second-order motion. In continuous time, a common idealized form is:
 
-$$
+```math
 \frac{d^2\theta}{dt^2}
-+ \gamma \frac{d\theta}{dt}
-+ \nabla L(\theta)
-= 0
-$$
++
+\gamma
+\frac{d\theta}{dt}
++
+\nabla L(\theta)
+=
+0
+```
 
-Here $\theta$ is the position in parameter space, $\frac{d\theta}{dt}$ is velocity, $\frac{d^2\theta}{dt^2}$ is acceleration, $\gamma$ is a damping coefficient, and $\nabla L(\theta)$ acts like a force pushing downhill on the loss. The loss $L(\theta)$ can be interpreted as a potential surface because the negative gradient $-\nabla L(\theta)$ points in the direction of steepest decrease, analogous to force derived from a potential.
+Here $`\theta`$ is the position in parameter space, $`\frac{d\theta}{dt}`$ is velocity, $`\frac{d^2\theta}{dt^2}`$ is acceleration, $`\gamma`$ is a damping coefficient, and $`\nabla L(\theta)`$ acts like a force pushing downhill on the loss. The loss $`L(\theta)`$ can be interpreted as a potential surface because the negative gradient $`-\nabla L(\theta)`$ points in the direction of steepest decrease, analogous to force derived from a potential.
 
 This physical picture is useful, but it has boundaries. Different momentum methods, discretizations, learning-rate schedules, and stochastic gradient methods do not all correspond to exactly the same ordinary differential equation. The continuous-time equation is an idealized model that helps explain acceleration and damping, not a unique exact description of every optimizer implementation.
 
 For Adam, the most rigorous description is adaptive diagonal preconditioning. Define:
 
-$$
+```math
 D_t
 =
 \mathrm{diag}
@@ -350,15 +400,16 @@ D_t
 \frac{1}
 {\sqrt{\hat{v}_t}+\epsilon}
 \right)
-$$
+```
 
 Then the Adam update can be written as:
 
-$$
+```math
 \theta_t =
 \theta_{t-1}
-- \alpha D_t \hat{m}_t
-$$
+-
+\eta D_t \hat{m}_t
+```
 
 This says that Adam rescales each coordinate of the bias-corrected first moment by a diagonal matrix built from the bias-corrected second moment. Physical analogies such as variable friction or variable effective mass can be useful for intuition, because parameters with larger recent squared gradients receive smaller effective steps. But those analogies are not the unique rigorous interpretation, and Adam should not be treated as strictly equivalent to one specific variable-mass mechanical system.
 
@@ -366,95 +417,97 @@ This says that Adam rescales each coordinate of the bias-corrected first moment 
 
 An estimator is unbiased for a target quantity when its expectation equals that target:
 
-$$
+```math
 \mathbb{E}[\mathrm{estimate}] = \mathrm{target}
-$$
+```
 
-Unbiased estimation is a general statistical idea, not something invented specifically for Adam. Adam uses this idea because its moving-average estimates start from zero. Zero initialization is natural: before training begins, the optimizer has no gradient history from which to initialize $m_0$ or $v_0$. However, this also means the early exponential moving averages are systematically too small.
+Unbiased estimation is a general statistical idea, not something invented specifically for Adam. Adam uses this idea because its moving-average estimates start from zero. Zero initialization is natural: before training begins, the optimizer has no gradient history from which to initialize $`m_0`$ or $`v_0`$. However, this also means the early exponential moving averages are systematically too small.
 
 Assume, as an analytical simplification, that gradients are sampled from a stationary process with:
 
-$$
+```math
 \mathbb{E}[g_t]
 =
 \mu
-$$
+```
 
 and:
 
-$$
+```math
 \mathbb{E}[g_t^2]
 =
 \nu
-$$
+```
 
-Starting from $m_0 = 0$, the first moment is:
+Starting from $`m_0 = 0`$, the first moment is:
 
-$$
+```math
 m_t =
 (1 - \beta_1)
 \sum_{i=1}^{t}
 \beta_1^{t-i} g_i
-$$
+```
 
 Taking expectation:
 
-$$
+```math
 \mathbb{E}[m_t]
 =
 (1 - \beta_1)
 \sum_{i=1}^{t}
 \beta_1^{t-i} \mathbb{E}[g_i]
-$$
+```
 
-Using $\mathbb{E}[g_i] = \mu$:
+Using:
 
-$$
+```math
+\mathbb{E}[g_i]
+=
+\mu
+```
+
+This gives:
+
+```math
 \mathbb{E}[m_t]
 =
-(1 - \beta_1)\mu
-\sum_{i=1}^{t}
-\beta_1^{t-i}
-=
-(1 - \beta_1^t)\mu
-$$
+(1-\beta_1^t)\mu
+```
 
-Similarly, starting from $v_0 = 0$:
+Similarly, starting from $`v_0 = 0`$:
 
-$$
+```math
 v_t =
 (1 - \beta_2)
 \sum_{i=1}^{t}
 \beta_2^{t-i} g_i^2
-$$
+```
 
-Taking expectation and using $\mathbb{E}[g_i^2] = \nu$:
+Taking expectation and using $`\mathbb{E}[g_i^2] = \nu`$:
 
-$$
+```math
 \mathbb{E}[v_t]
 =
-(1 - \beta_2)\nu
-\sum_{i=1}^{t}
-\beta_2^{t-i}
-=
-(1 - \beta_2^t)\nu
-$$
+(1-\beta_2^t)\nu
+```
 
-The factors $1 - \beta_1^t$ and $1 - \beta_2^t$ are less than one during the early steps, so the raw estimates are biased toward zero. Adam corrects this initialization bias with:
+The factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$ are less than one during the early steps, so the raw estimates are biased toward zero. Adam corrects this initialization bias with:
 
-$$
+```math
 \hat{m}_t =
-\frac{m_t}{1 - \beta_1^t}
-$$
+\frac{m_t}
+{1-\beta_1^t}
+```
 
 and:
 
-$$
+```math
 \hat{v}_t =
-\frac{v_t}{1 - \beta_2^t}
-$$
+\frac{v_t}
+{1-\beta_2^t}
+```
 
-Under the stationary-moment assumption, these corrected estimates have expectations $\mu$ and $\nu$. This does not mean Adam removes every possible source of statistical bias. It corrects the specific bias introduced by initializing the exponential moving averages at zero.
+Under the stationary-moment assumption, these corrected estimates have expectations $`\mu`$ and $`\nu`$. This does not mean Adam removes every possible source of statistical bias. It corrects the specific bias introduced by initializing the exponential moving averages at zero.
 
 In neural-network training, gradients change as parameters change, and the data batches introduce stochastic variation. Therefore, the stationary-moment assumption is an analytical simplification. Bias correction is still useful because it fixes a real early-step underestimation problem, but it does not make Adam universally unbiased throughout a non-stationary optimization process.
 
@@ -462,83 +515,83 @@ In neural-network training, gradients change as parameters change, and the data 
 
 Use a single scalar gradient:
 
-$$
+```math
 g_1 = 0.1
-$$
+```
 
 with:
 
-$$
+```math
 \beta_1 = 0.9,\quad
 \beta_2 = 0.999,\quad
 \alpha = 0.1
-$$
+```
 
-Assume $m_0 = 0$, $v_0 = 0$, and $\epsilon = 10^{-8}$.
+Assume $`m_0 = 0`$, $`v_0 = 0`$, and $`\epsilon = 10^{-8}`$.
 
 First moment:
 
-$$
+```math
 m_1 = 0.9(0) + (1 - 0.9)(0.1) = 0.01
-$$
+```
 
 Second moment:
 
-$$
+```math
 v_1 = 0.999(0) + (1 - 0.999)(0.1^2)
 = 0.001(0.01)
 = 0.00001
-$$
+```
 
 Bias correction:
 
-$$
+```math
 \hat{m}_1 =
 \frac{0.01}{1 - 0.9^1}
 =
 \frac{0.01}{0.1}
 =
 0.1
-$$
+```
 
-$$
+```math
 \hat{v}_1 =
 \frac{0.00001}{1 - 0.999^1}
 =
 \frac{0.00001}{0.001}
 =
 0.01
-$$
+```
 
 The update amount is:
 
-$$
+```math
 \alpha\frac{\hat{m}_1}{\sqrt{\hat{v}_1} + \epsilon}
 =
 0.1 \frac{0.1}{\sqrt{0.01} + 10^{-8}}
 \approx
 0.1
-$$
+```
 
-So for a scalar parameter $\theta_0$:
+So for a scalar parameter $`\theta_0`$:
 
-$$
+```math
 \theta_1 \approx \theta_0 - 0.1
-$$
+```
 
-The first Adam step behaves like a normalized sign step for this scalar example because $\hat{m}_1 = g_1$ and $\sqrt{\hat{v}_1} = |g_1|$.
+The first Adam step behaves like a normalized sign step for this scalar example because $`\hat{m}_1 = g_1`$ and $`\sqrt{\hat{v}_1} = |g_1|`$.
 
 ## 16. Why epsilon is included
 
-The $\epsilon$ term prevents division by zero or division by an extremely small number:
+The $`\epsilon`$ term prevents division by zero or division by an extremely small number:
 
-$$
+```math
 \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
+```
 
-If a parameter has very small recent gradients, $\sqrt{\hat{v}_t}$ can be close to zero. Without $\epsilon$, the effective learning rate could become numerically unstable. With $\epsilon$, the denominator is always positive.
+If a parameter has very small recent gradients, $`\sqrt{\hat{v}_t}`$ can be close to zero. Without $`\epsilon`$, the effective learning rate could become numerically unstable. With $`\epsilon`$, the denominator is always positive.
 
-In most ordinary updates, $\epsilon$ is much smaller than $\sqrt{\hat{v}_t}$, so it has little effect. It mainly protects edge cases and floating-point stability.
+In most ordinary updates, $`\epsilon`$ is much smaller than $`\sqrt{\hat{v}_t}`$, so it has little effect. It mainly protects edge cases and floating-point stability.
 
 ## 17. Adam implementation mapping
 
@@ -568,29 +621,35 @@ Adam needs bias correction because its first-moment and second-moment estimates 
 
 For a roughly stationary expected gradient:
 
-$$
+```math
 \mathbb{E}[m_t]
 =
 (1 - \beta_1^t)\mu
-$$
+```
 
 and for the expected squared gradient:
 
-$$
+```math
 \mathbb{E}[v_t]
 =
 (1 - \beta_2^t)\nu
-$$
+```
 
 Therefore, Adam corrects the estimates using:
 
-$$
-\hat{m}_t = \frac{m_t}{1 - \beta_1^t}
-$$
+```math
+\hat{m}_t
+=
+\frac{m_t}
+{1-\beta_1^t}
+```
 
-$$
-\hat{v}_t = \frac{v_t}{1 - \beta_2^t}
-$$
+```math
+\hat{v}_t
+=
+\frac{v_t}
+{1-\beta_2^t}
+```
 
 Without this correction, the effective update scale during the early training stage would be distorted by zero initialization.
 
@@ -598,39 +657,47 @@ Without this correction, the effective update scale during the early training st
 
 SGD uses the current gradient directly:
 
-$$
+```math
 \theta_t = \theta_{t-1} - \alpha g_t
-$$
+```
 
 It is simple and has no optimizer state beyond the learning rate. Its weakness is that each update can be noisy, especially with small mini-batches.
 
 Momentum smooths the gradient direction:
 
-$$
+```math
 v_t = \beta v_{t-1} + (1 - \beta)g_t
-$$
+```
 
-$$
+```math
 \theta_t = \theta_{t-1} - \alpha v_t
-$$
+```
 
 It is stateful and helps reduce oscillation by averaging recent gradients. It still uses one global learning rate for all parameters.
 
 Adam tracks both direction and scale:
 
-$$
-m_t = \beta_1m_{t-1} + (1 - \beta_1)g_t
-$$
+```math
+m_t
+=
+\beta_1 m_{t-1}
++
+(1-\beta_1)g_t
+```
 
-$$
-v_t = \beta_2v_{t-1} + (1 - \beta_2)g_t^2
-$$
+```math
+v_t
+=
+\beta_2 v_{t-1}
++
+(1-\beta_2)g_t^2
+```
 
-$$
+```math
 \theta_t =
 \theta_{t-1}
 - \alpha \frac{\hat{m}_t}{\sqrt{\hat{v}_t} + \epsilon}
-$$
+```
 
 Adam is stateful like Momentum, but it also adapts the effective learning rate for each parameter. This is useful when different parameters have gradients with very different magnitudes.
 
@@ -638,11 +705,11 @@ Adam is stateful like Momentum, but it also adapts the effective learning rate f
 
 The implementation state mirrors the Adam equations:
 
-- `first_moment_weights` stores $m_t$ for every weight parameter.
-- `second_moment_weights` stores $v_t$ for every weight parameter.
+- `first_moment_weights` stores $`m_t`$ for every weight parameter.
+- `second_moment_weights` stores $`v_t`$ for every weight parameter.
 - `first_moment_bias` stores the scalar first moment for the bias gradient.
 - `second_moment_bias` stores the scalar second moment for the bias gradient.
-- `time_step` stores $t$, which is required for the bias-correction factors $1 - \beta_1^t$ and $1 - \beta_2^t$.
+- `time_step` stores $`t`$, which is required for the bias-correction factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$.
 
 On the first call to `step()`, the moment arrays are initialized with zeros matching the shape of `weights`. Each later call reuses and updates the stored moments. This is why Adam is a stateful optimizer: two calls with the same current gradient can produce different updates depending on the accumulated moment history and `time_step`.
 
@@ -650,7 +717,7 @@ The implementation should compute the weight and bias paths separately but with 
 
 ## 21. Key intuition summary
 
-Adam can be read as Momentum plus adaptive scaling. The first moment estimates the useful direction of movement. The second moment estimates the recent gradient scale. Bias correction fixes the early underestimation caused by zero initialization. Dividing by $\sqrt{\hat{v}_t}$ makes each parameter's update relative to its own recent gradient magnitude, while $\epsilon$ keeps the denominator numerically safe.
+Adam can be read as Momentum plus adaptive scaling. The first moment estimates the useful direction of movement. The second moment estimates the recent gradient scale. Bias correction fixes the early underestimation caused by zero initialization. Dividing by $`\sqrt{\hat{v}_t}`$ makes each parameter's update relative to its own recent gradient magnitude, while $`\epsilon`$ keeps the denominator numerically safe.
 
 ## 22. Open questions
 
