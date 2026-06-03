@@ -1,0 +1,35 @@
+seed: 42
+
+data:
+  n_samples: 400
+  n_features: 2
+  val_ratio: 0.2
+
+training:
+  num_epochs: 100
+  batch_size: 32
+  log_every: 20
+  threshold: 0.5
+
+optimizers:
+  batch_gradient_descent:
+    learning_rate: 0.1
+
+  sgd:
+    learning_rate: 0.05
+
+  momentum:
+    learning_rate: 0.05
+    beta: 0.9
+
+  adam:
+    learning_rate: 0.01
+    beta1: 0.9
+    beta2: 0.999
+    epsilon: 1e-8
+
+output:
+  loss_curve_path: results/figures/optimizer_comparison_loss_curves.png
+
+logging:
+  log_file: results/logs/optimizer_comparison.log
