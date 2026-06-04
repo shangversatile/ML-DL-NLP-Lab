@@ -1,5 +1,7 @@
 # Week 3 Optimization and MLP Notes
 
+Current Week 3 scope: SGD, Momentum, Adam, mini-batch iteration, and optimizer comparison are complete. MLP implementation has not started yet.
+
 ## 1. SGD optimizer
 
 I implemented `SGD` in `src/optimization/sgd.py` and added unit tests in `tests/test_sgd.py`. The optimizer applies the update rule:
@@ -20,7 +22,13 @@ The SGD optimizer should only update parameters from the gradients it receives, 
 
 If mini-batch sampling were embedded inside the optimizer, data iteration logic and optimization logic would become tightly coupled. Keeping them separate makes the system easier to test, debug, and extend to Momentum and Adam.
 
-## 3. Momentum optimizer
+## 3. Mini-batch iterator implementation
+
+`iterate_minibatches()` belongs to the data/preprocessing layer rather than the optimizer layer. It creates sample indices with `np.arange(n_samples)`, optionally shuffles those indices, and slices the index array into batches instead of modifying `X` and `y` in place. Indexing both arrays with the same `batch_indices` keeps features and labels aligned.
+
+The final batch may contain fewer than `batch_size` examples. In the optimizer comparison, the training loop passes `seed + epoch`, so each epoch has a different but reproducible order. The same iterator can be reused by SGD, Momentum, Adam, and future MLP training because it only controls data access, not parameter-update logic.
+
+## 4. Momentum optimizer
 
 I implemented `Momentum` in `src/optimization/momentum.py` and added unit tests in `tests/test_momentum.py`. Unlike SGD, Momentum is a stateful optimizer. It stores `velocity_weights` and `velocity_bias`, which summarize recent gradient directions.
 
@@ -36,13 +44,13 @@ v_t = \beta v_{t-1} + (1 - \beta)g_t
 
 where $`g_t`$ is the current gradient, $`v_t`$ is the exponentially weighted moving average of recent gradients, $`\alpha`$ is the learning rate, and $`\beta`$ controls how strongly historical gradients are retained.
 
-## 4. Why Momentum reduces oscillation
+## 5. Why Momentum reduces oscillation
 
 Momentum helps reduce oscillation because gradients that repeatedly change sign partially cancel each other in the moving average, while gradients that point in a stable direction accumulate. This is useful in narrow optimization valleys, where gradients may oscillate strongly across the steep direction while remaining consistent along the direction toward the minimum.
 
 If the gradient direction remains stable, velocity gradually increases toward that direction. If gradients alternate between positive and negative values, the moving average becomes smaller than the raw gradients. This creates smoother and more stable parameter updates.
 
-## 5. Interpreting beta
+## 6. Interpreting beta
 
 The coefficient $`\beta`$ controls the effective memory length of Momentum. A useful approximation is:
 
@@ -58,7 +66,7 @@ For example:
 
 A larger $`\beta`$ creates smoother but slower-reacting updates. A smaller $`\beta`$ responds more strongly to current gradients but performs less smoothing. The common default $`\beta = 0.9`$ is a practical compromise rather than a universal mathematical optimum.
 
-## 6. Adam optimizer overview
+## 7. Adam optimizer overview
 
 Adam combines the main idea of Momentum with an adaptive parameter-wise scaling term. It keeps two exponentially weighted moving averages for each parameter:
 
@@ -106,9 +114,9 @@ The final update is:
 
 where $`\alpha`$ is the learning rate and $`\epsilon`$ is a small positive constant for numerical stability.
 
-## 7. Why Adam tracks the first moment
+## 8. Why Adam tracks the first moment
 
-The first moment is the expected gradient direction. In Adam, $`m_t`$ plays a role similar to Momentum's velocity:
+The first moment is an exponentially weighted moving average of recent gradients. Under a stationary-gradient approximation, its bias-corrected form estimates the recent mean gradient. It should not be treated as automatically equal to the true expected gradient throughout non-stationary neural-network training. In Adam, $`m_t`$ plays a role similar to Momentum's velocity:
 
 ```math
 m_t
@@ -118,11 +126,11 @@ m_t
 (1-\beta_1)g_t
 ```
 
-This is an exponentially weighted moving average of recent gradients. If the gradient direction is consistent across steps, the average points strongly in that direction. If the gradient direction alternates, positive and negative gradient components partially cancel.
+If the gradient direction is consistent across steps, the moving average points strongly in that direction. If the gradient direction alternates, positive and negative gradient components partially cancel.
 
 This makes $`m_t`$ a smoothed estimate of descent direction. It reduces the impact of noisy mini-batch gradients while still allowing the optimizer to accumulate evidence about directions that are repeatedly useful.
 
-## 8. Why Adam tracks the second moment
+## 9. Why Adam tracks the second moment
 
 The second moment tracks the average squared gradient:
 
@@ -138,7 +146,7 @@ Unlike the first moment, the second moment does not preserve sign. Squaring make
 
 If one parameter often has large gradients and another often has small gradients, their $`v_t`$ values will differ. Adam uses this difference to scale updates parameter by parameter. Parameters with consistently large gradients receive smaller effective steps, while parameters with consistently small gradients receive relatively larger effective steps.
 
-## 9. Why Adam divides by $`\sqrt{v_t}`$
+## 10. Why Adam divides by $`\sqrt{v_t}`$
 
 Adam divides the first-moment direction by the root mean square scale of recent gradients:
 
@@ -158,17 +166,18 @@ This creates parameter-wise adaptive learning rates. The update can be rewritten
 - \left(\frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}\right)\hat{m}_t
 ```
 
-The effective learning rate for each parameter is:
+For parameter coordinate $`i`$, the effective learning rate is:
 
 ```math
-\alpha_{\mathrm{effective}, t}
+\alpha_{\mathrm{effective},t,i}
 =
-\frac{\alpha}{\sqrt{\hat{v}_t} + \epsilon}
+\frac{\alpha}
+{\sqrt{\hat{v}_{t,i}}+\epsilon}
 ```
 
-Large recent squared gradients make $`\sqrt{\hat{v}_t}`$ larger, which reduces the effective learning rate. Small recent squared gradients make the denominator smaller, which allows a larger effective learning rate.
+Here $`i`$ denotes the parameter coordinate. Large recent squared gradients in coordinate $`i`$ make $`\sqrt{\hat{v}_{t,i}}`$ larger, which reduces that coordinate's effective learning rate. Small recent squared gradients make the denominator smaller, which allows a larger effective learning rate for that coordinate.
 
-## 10. Why Adam needs bias correction
+## 11. Why Adam needs bias correction
 
 Adam initializes $`m_0 = 0`$ and $`v_0 = 0`$. Early moving averages are therefore biased toward zero because they have not yet accumulated enough history.
 
@@ -199,7 +208,7 @@ Bias correction divides out the missing weight:
 
 This makes the early moment estimates comparable to the gradient statistics they are trying to estimate.
 
-## 11. Deriving the expected first and second moments
+## 12. Deriving the expected first and second moments
 
 Assume gradients are sampled from a stationary distribution. Let:
 
@@ -315,7 +324,7 @@ Using the geometric sum:
 
 So the uncorrected estimates are biased low by factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$.
 
-## 12. Interpreting the bias-corrected estimates
+## 13. Interpreting the bias-corrected estimates
 
 The corrected first moment is:
 
@@ -357,7 +366,9 @@ and since $`\mathbb{E}[v_t] = (1 - \beta_2^t)\nu`$:
 
 The correction does not remove all noise from stochastic gradients. It specifically corrects the initialization bias caused by starting the moving averages at zero.
 
-## 13. Physical intuition and mathematical boundaries
+In neural-network training, gradients change as parameters change, and data batches introduce stochastic variation. Therefore, the stationary-moment assumption is an analytical simplification. Bias correction fixes the early zero-initialization shrinkage, but it does not make Adam universally unbiased throughout a non-stationary optimization process.
+
+## 14. Physical intuition and mathematical boundaries
 
 The squared gradient $`g_t^2`$ can be interpreted as a gradient energy scale or signal power scale because it measures magnitude without regard to sign. In signal processing, squaring a signal is a standard way to measure power-like magnitude. In optimization, $`g_t^2`$ similarly measures how large the local gradient signal is for each parameter.
 
@@ -386,7 +397,7 @@ Momentum has a closer connection to physical dynamics. Polyak's heavy-ball metho
 0
 ```
 
-Here $`\theta`$ is the position in parameter space, $`\frac{d\theta}{dt}`$ is velocity, $`\frac{d^2\theta}{dt^2}`$ is acceleration, $`\gamma`$ is a damping coefficient, and $`\nabla L(\theta)`$ acts like a force pushing downhill on the loss. The loss $`L(\theta)`$ can be interpreted as a potential surface because the negative gradient $`-\nabla L(\theta)`$ points in the direction of steepest decrease, analogous to force derived from a potential.
+Here $`\theta`$ is the position in parameter space, $`\frac{d\theta}{dt}`$ is velocity, $`\frac{d^2\theta}{dt^2}`$ is acceleration, and $`\gamma`$ is a damping coefficient. The loss $`L(\theta)`$ can be interpreted as a potential surface. The negative gradient $`-\nabla L(\theta)`$ acts like the downhill force induced by that potential surface, while $`\nabla L(\theta)`$ points toward local steepest increase.
 
 This physical picture is useful, but it has boundaries. Different momentum methods, discretizations, learning-rate schedules, and stochastic gradient methods do not all correspond to exactly the same ordinary differential equation. The continuous-time equation is an idealized model that helps explain acceleration and damping, not a unique exact description of every optimizer implementation.
 
@@ -412,104 +423,6 @@ Then the Adam update can be written as:
 ```
 
 This says that Adam rescales each coordinate of the bias-corrected first moment by a diagonal matrix built from the bias-corrected second moment. Physical analogies such as variable friction or variable effective mass can be useful for intuition, because parameters with larger recent squared gradients receive smaller effective steps. But those analogies are not the unique rigorous interpretation, and Adam should not be treated as strictly equivalent to one specific variable-mass mechanical system.
-
-## 14. What bias correction actually corrects
-
-An estimator is unbiased for a target quantity when its expectation equals that target:
-
-```math
-\mathbb{E}[\mathrm{estimate}] = \mathrm{target}
-```
-
-Unbiased estimation is a general statistical idea, not something invented specifically for Adam. Adam uses this idea because its moving-average estimates start from zero. Zero initialization is natural: before training begins, the optimizer has no gradient history from which to initialize $`m_0`$ or $`v_0`$. However, this also means the early exponential moving averages are systematically too small.
-
-Assume, as an analytical simplification, that gradients are sampled from a stationary process with:
-
-```math
-\mathbb{E}[g_t]
-=
-\mu
-```
-
-and:
-
-```math
-\mathbb{E}[g_t^2]
-=
-\nu
-```
-
-Starting from $`m_0 = 0`$, the first moment is:
-
-```math
-m_t =
-(1 - \beta_1)
-\sum_{i=1}^{t}
-\beta_1^{t-i} g_i
-```
-
-Taking expectation:
-
-```math
-\mathbb{E}[m_t]
-=
-(1 - \beta_1)
-\sum_{i=1}^{t}
-\beta_1^{t-i} \mathbb{E}[g_i]
-```
-
-Using:
-
-```math
-\mathbb{E}[g_i]
-=
-\mu
-```
-
-This gives:
-
-```math
-\mathbb{E}[m_t]
-=
-(1-\beta_1^t)\mu
-```
-
-Similarly, starting from $`v_0 = 0`$:
-
-```math
-v_t =
-(1 - \beta_2)
-\sum_{i=1}^{t}
-\beta_2^{t-i} g_i^2
-```
-
-Taking expectation and using $`\mathbb{E}[g_i^2] = \nu`$:
-
-```math
-\mathbb{E}[v_t]
-=
-(1-\beta_2^t)\nu
-```
-
-The factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$ are less than one during the early steps, so the raw estimates are biased toward zero. Adam corrects this initialization bias with:
-
-```math
-\hat{m}_t =
-\frac{m_t}
-{1-\beta_1^t}
-```
-
-and:
-
-```math
-\hat{v}_t =
-\frac{v_t}
-{1-\beta_2^t}
-```
-
-Under the stationary-moment assumption, these corrected estimates have expectations $`\mu`$ and $`\nu`$. This does not mean Adam removes every possible source of statistical bias. It corrects the specific bias introduced by initializing the exponential moving averages at zero.
-
-In neural-network training, gradients change as parameters change, and the data batches introduce stochastic variation. Therefore, the stationary-moment assumption is an analytical simplification. Bias correction is still useful because it fixes a real early-step underestimation problem, but it does not make Adam universally unbiased throughout a non-stationary optimization process.
 
 ## 15. First-step numerical example
 
@@ -595,17 +508,17 @@ In most ordinary updates, $`\epsilon`$ is much smaller than $`\sqrt{\hat{v}_t}`$
 
 ## 17. Adam implementation mapping
 
-I implemented `Adam` in `src/optimization/adam.py` and added unit tests in `tests/test_adam.py`. The optimizer stores:
+I implemented `Adam` in `src/optimization/adam.py` and added unit tests in `tests/test_adam.py`. The implementation state mirrors the Adam equations:
 
-- `first_moment_weights`
-- `second_moment_weights`
-- `first_moment_bias`
-- `second_moment_bias`
-- `time_step`
+- `first_moment_weights` stores $`m_t`$ for every weight parameter.
+- `second_moment_weights` stores $`v_t`$ for every weight parameter.
+- `first_moment_bias` stores the scalar first moment for the bias gradient.
+- `second_moment_bias` stores the scalar second moment for the bias gradient.
+- `time_step` stores $`t`$, which is required for the bias-correction factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$.
 
 The implementation performs the following sequence during every call to `step()`:
 
-1. initialize moment state arrays on the first update
+1. initialize moment state arrays on the first update using arrays shaped like `weights`
 2. increment the time step
 3. update first-moment estimates
 4. update second-moment estimates
@@ -615,43 +528,15 @@ The implementation performs the following sequence during every call to `step()`
 
 The first moment estimates the smoothed gradient direction. The second moment estimates the typical squared-gradient scale for each parameter. Dividing by the square root of the second moment gives parameter-wise adaptive scaling, while epsilon prevents numerical instability.
 
-## 18. Why Adam needs bias correction
+On the first call to `step()`, the moment arrays are initialized with zeros matching the shape of `weights`. Each later call reuses and updates the stored moments. This is why Adam is a stateful optimizer: repeated calls with the same current gradient can still produce different updates depending on accumulated moment history and `time_step`.
 
-Adam needs bias correction because its first-moment and second-moment estimates are initialized at zero. During the first few optimization steps, the exponential moving averages are systematically biased toward zero, especially when `beta1` and `beta2` are close to one.
+The implementation computes the weight and bias paths separately but with the same equations. The weight path uses NumPy elementwise operations, while the bias path uses scalar arithmetic. The returned `new_weights` should be a new array, and `new_bias` should be converted to a Python `float`.
 
-For a roughly stationary expected gradient:
+## 18. Testing stateful optimizers
 
-```math
-\mathbb{E}[m_t]
-=
-(1 - \beta_1^t)\mu
-```
+One-step tests are necessary but insufficient for stateful optimizers. A faulty optimizer may produce the correct first update while incorrectly resetting or misusing internal state later.
 
-and for the expected squared gradient:
-
-```math
-\mathbb{E}[v_t]
-=
-(1 - \beta_2^t)\nu
-```
-
-Therefore, Adam corrects the estimates using:
-
-```math
-\hat{m}_t
-=
-\frac{m_t}
-{1-\beta_1^t}
-```
-
-```math
-\hat{v}_t
-=
-\frac{v_t}
-{1-\beta_2^t}
-```
-
-Without this correction, the effective update scale during the early training stage would be distorted by zero initialization.
+Adam tests should verify the transition from $`state_0`$ to $`state_1`$ to $`state_2`$. The strengthened second-step test checks `first_moment_weights`, `second_moment_weights`, `first_moment_bias`, `second_moment_bias`, `time_step`, updated weights, and updated bias. This protects against errors such as resetting moments each step, mixing `beta1` and `beta2`, omitting gradient squaring, or applying bias correction incorrectly.
 
 ## 19. Comparing SGD, Momentum, and Adam
 
@@ -701,25 +586,11 @@ v_t
 
 Adam is stateful like Momentum, but it also adapts the effective learning rate for each parameter. This is useful when different parameters have gradients with very different magnitudes.
 
-## 20. Mapping the math to implementation state
-
-The implementation state mirrors the Adam equations:
-
-- `first_moment_weights` stores $`m_t`$ for every weight parameter.
-- `second_moment_weights` stores $`v_t`$ for every weight parameter.
-- `first_moment_bias` stores the scalar first moment for the bias gradient.
-- `second_moment_bias` stores the scalar second moment for the bias gradient.
-- `time_step` stores $`t`$, which is required for the bias-correction factors $`1 - \beta_1^t`$ and $`1 - \beta_2^t`$.
-
-On the first call to `step()`, the moment arrays are initialized with zeros matching the shape of `weights`. Each later call reuses and updates the stored moments. This is why Adam is a stateful optimizer: two calls with the same current gradient can produce different updates depending on the accumulated moment history and `time_step`.
-
-The implementation should compute the weight and bias paths separately but with the same equations. The weight path uses NumPy elementwise operations, while the bias path uses scalar arithmetic. The returned `new_weights` should be a new array, and `new_bias` should be converted to a Python `float`.
-
-## 21. Key intuition summary
+## 20. Key intuition summary
 
 Adam can be read as Momentum plus adaptive scaling. The first moment estimates the useful direction of movement. The second moment estimates the recent gradient scale. Bias correction fixes the early underestimation caused by zero initialization. Dividing by $`\sqrt{\hat{v}_t}`$ makes each parameter's update relative to its own recent gradient magnitude, while $`\epsilon`$ keeps the denominator numerically safe.
 
-## 22. Teaching-oriented optimizer comparison
+## 21. Teaching-oriented optimizer comparison
 
 I compared Batch Gradient Descent, mini-batch SGD, Momentum, and Adam on the same synthetic binary classification dataset using `LogisticRegressionScratch`.
 
@@ -736,13 +607,13 @@ The comparison results were:
 
 The experiment controls the number of dataset passes, or epoch budget. Each method sees approximately the same total number of training samples. However, it does not control the number of parameter updates, gradient-estimation granularity, learning rate, wall-clock time, or hyperparameter-search budget.
 
-Mini-batch SGD lowers BCE faster than full-batch gradient descent because it updates parameters more frequently during each pass through the dataset. Momentum performs only slightly better than SGD in this simple convex problem, where strong oscillation is limited. Adam achieves the lowest BCE under the current configuration because its adaptive parameter-wise scaling improves probability estimates.
+Mini-batch SGD lowers BCE faster than full-batch gradient descent because it updates parameters more frequently during each pass through the dataset. Momentum performs only slightly better than SGD in this simple convex problem, where strong oscillation is limited. Adam achieves the lowest BCE under the current configuration. This result is consistent with adaptive parameter-wise scaling being helpful on this task, but the experiment does not isolate a single causal mechanism.
 
 The validation accuracies of SGD, Momentum, and Adam are identical even though their BCE values differ. This illustrates why BCE provides more information than accuracy: accuracy only reflects thresholded class decisions, while BCE also reflects confidence quality.
 
 These results should not be generalized into a universal optimizer ranking. The experiment uses a simple linearly separable synthetic dataset, one random seed, and different optimizer hyperparameters. Its purpose is to build optimization intuition before moving to MLP training.
 
-## 23. Optimizer comparison implementation logic
+## 22. Optimizer comparison implementation logic
 
 The optimizer comparison in `experiments/compare_optimizers.py` uses two training-loop patterns. `train_full_batch()` computes gradients using the entire training set and performs one parameter update per epoch. This matches Batch Gradient Descent: each epoch evaluates the current model on all training examples, computes one averaged gradient, and then calls the optimizer once.
 
@@ -756,7 +627,7 @@ The mini-batch iterator uses `seed + epoch` to create different but reproducible
 
 The current experiment boundary is important. All optimizers train for the same number of epochs, and each optimizer sees approximately the same total number of training examples. However, Batch Gradient Descent performs one update per epoch, while the mini-batch methods perform multiple parameter updates per epoch. This is a teaching-oriented same-epoch comparison, not a strict optimizer benchmark. It does not control update count, wall-clock time, hardware efficiency, or hyperparameter-search budget.
 
-## 24. Loss, cost, empirical risk, and objective function
+## 23. Loss, cost, empirical risk, and objective function
 
 Terminology varies across textbooks, research papers, and software libraries. Some sources distinguish loss, cost, risk, and objective very strictly, while engineering code often uses `loss` for both per-example values and averaged training metrics. Therefore, it is better to define the quantities explicitly instead of assuming universal naming conventions.
 
@@ -799,7 +670,7 @@ R_{\mathrm{emp}}(\theta)
 
 In this expression, $`\Omega(\theta)`$ is a regularization term and $`\lambda`$ controls regularization strength. The objective function $`F(\theta)`$ is the scalar quantity the optimization algorithm minimizes.
 
-## 25. Why the negative gradient is a descent direction
+## 24. Why the negative gradient is a descent direction
 
 For a small perturbation $`\Delta\theta`$, the first-order Taylor approximation around the current parameter point gives:
 
@@ -829,7 +700,7 @@ Here $`\nabla F(\theta_t)`$ determines direction and $`\eta`$ determines how far
 
 Gradient descent is not an arbitrary engineering heuristic. It follows from a local first-order approximation to the objective, although its practical behavior depends strongly on step-size selection and on how well the local approximation describes the objective over the chosen step.
 
-## 26. From per-example gradients to full-batch gradients
+## 25. From per-example gradients to full-batch gradients
 
 Start from the empirical risk:
 
@@ -893,7 +764,7 @@ Conceptually:
 - Classic SGD computes one sampled gradient, updates immediately, and then evaluates the next gradient at a changed parameter point.
 - Mini-batch SGD averages gradients inside the current batch and updates once per batch.
 
-## 27. Statistical meaning of stochastic gradients
+## 26. Statistical meaning of stochastic gradients
 
 SGD is not merely an engineering shortcut. It is a stochastic approximation method with a statistical interpretation. For a fixed training dataset:
 
@@ -1003,7 +874,7 @@ G_t^{(\mathcal{B})}
 
 This proportionality is a simplified intuition, not a universal exact identity under every sampling strategy.
 
-## 28. Two layers of statistical approximation
+## 27. Two layers of statistical approximation
 
 The true population-level goal is expected risk:
 
@@ -1069,7 +940,7 @@ unknown real-world distribution
 
 Mini-batch gradients approximate empirical-risk gradients, and empirical risk approximates expected risk. The goal of training is not merely to reduce one mini-batch loss value. The broader goal is to find parameters that reduce empirical risk in a way that also generalizes to low expected risk on future data from the same underlying distribution.
 
-## 29. Sampling with replacement versus random reshuffling
+## 28. Sampling with replacement versus random reshuffling
 
 The clean introductory unbiased-gradient derivation often assumes that sample indices are drawn independently, uniformly, and with replacement. Under that simplified model, the next sampled index does not depend on which indices were sampled earlier.
 
@@ -1079,7 +950,7 @@ Random reshuffling without replacement is a common practical training strategy, 
 
 The simplified unbiased-gradient derivation remains a useful theoretical entry point because it explains why stochastic gradients can point in the correct direction on average under clear assumptions. The repository implementation should be described more precisely as reproducible random reshuffling without replacement.
 
-## 30. Final conceptual summary
+## 29. Final conceptual summary
 
 - Batch Gradient Descent uses the exact empirical-risk gradient.
 - Classic SGD uses a stochastic estimate based on one sampled observation.
@@ -1091,9 +962,17 @@ The simplified unbiased-gradient derivation remains a useful theoretical entry p
 - Mini-batch gradients approximate empirical-risk gradients.
 - The repository uses reproducible random reshuffling without replacement.
 
+## 30. Further reading
+
+- Adam: A Method for Stochastic Optimization
+- Without-Replacement Sampling for Stochastic Gradient Methods: Convergence Results and Application to Distributed Optimization
+- Why Random Reshuffling Beats Stochastic Gradient Descent
+
 ## 31. Open questions
 
-- How does batch size affect gradient noise and convergence?
-- Why can noisy SGD updates sometimes help optimization?
-- How should Momentum store and update optimizer state?
-- How does Adam combine first-moment and second-moment estimates?
+- How does batch size quantitatively affect gradient variance and optimization speed?
+- How should learning-rate schedules interact with SGD, Momentum, and Adam?
+- How should the optimizer API be generalized from one weight vector and one scalar bias to multiple MLP parameter tensors?
+- How can numerical gradient checking validate an MLP backpropagation implementation?
+- How do optimizer conclusions change when moving from convex logistic regression to a non-convex MLP objective?
+- When does lower BCE reflect better confidence quality, and when is explicit calibration analysis still needed?
