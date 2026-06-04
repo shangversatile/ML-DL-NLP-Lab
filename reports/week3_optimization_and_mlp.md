@@ -744,21 +744,23 @@ These results should not be generalized into a universal optimizer ranking. The 
 
 ## 23. Optimizer comparison implementation logic
 
-The optimizer comparison uses two training-loop patterns. `train_full_batch()` computes gradients using the entire training set and performs one parameter update per epoch. This matches Batch Gradient Descent: each epoch evaluates the current model on all training examples, computes one averaged gradient, and then calls the optimizer once.
+The optimizer comparison in `experiments/compare_optimizers.py` uses two training-loop patterns. `train_full_batch()` computes gradients using the entire training set and performs one parameter update per epoch. This matches Batch Gradient Descent: each epoch evaluates the current model on all training examples, computes one averaged gradient, and then calls the optimizer once.
 
-`train_minibatch()` instead iterates over batches produced by `iterate_minibatches()`. Each mini-batch computes its own gradients at the current parameter values and triggers one optimizer update. As a result, mini-batch SGD, Momentum, and Adam perform multiple updates inside one epoch when the training set contains multiple mini-batches.
+`train_minibatch()` instead iterates over batches produced by `iterate_minibatches()`. Each mini-batch gives the loop an `X_batch` and `y_batch`. The model computes gradients on that mini-batch, producing a gradient estimate at the current parameter values, and the optimizer immediately performs one parameter update. As a result, mini-batch SGD, Momentum, and Adam perform multiple updates inside one epoch when the training set contains multiple mini-batches.
 
-The epoch-level loss curves record full-training-set binary cross-entropy after each epoch, even for mini-batch methods. This gives all optimizers a common reporting scale: every plotted loss is the BCE of the full training set under the model parameters at the end of that epoch. Raw mini-batch losses are useful for debugging training dynamics, but they are noisier and harder to compare directly because each value is computed on a different subset of examples.
+At the end of every epoch, both training loops compute binary cross-entropy using the entire training set. The plotted curves therefore use a common reporting metric: epoch-level full-training-set BCE. Every plotted loss is the BCE of the full training set under the model parameters at the end of that epoch. Raw mini-batch losses are useful for debugging training dynamics, but they are noisier and harder to compare directly because each value is computed on a different subset of examples.
 
-Each optimizer comparison run gets a fresh `LogisticRegressionScratch` model initialized with zero weights and zero bias. This prevents one optimizer from benefiting from parameters learned by a previous optimizer. Stateful optimizers also get fresh optimizer state: Momentum gets a new velocity state, and Adam gets new first-moment, second-moment, and time-step state.
+Each optimizer comparison run gets a fresh `LogisticRegressionScratch` model initialized with zero weights and zero bias. This prevents one optimizer from benefiting from parameters learned by a previous optimizer. Momentum and Adam also receive fresh optimizer objects so that historical state does not leak between experiments. Momentum gets a new velocity state, and Adam gets new first-moment, second-moment, and time-step state.
 
 The mini-batch iterator uses `seed + epoch` to create different but reproducible shuffling each epoch. The shuffle order changes from epoch to epoch, but rerunning the experiment with the same base seed produces the same sequence of epoch-level shuffles.
 
-## 24. Loss, empirical risk, and objective function
+The current experiment boundary is important. All optimizers train for the same number of epochs, and each optimizer sees approximately the same total number of training examples. However, Batch Gradient Descent performs one update per epoch, while the mini-batch methods perform multiple parameter updates per epoch. This is a teaching-oriented same-epoch comparison, not a strict optimizer benchmark. It does not control update count, wall-clock time, hardware efficiency, or hyperparameter-search budget.
 
-Terminology varies across textbooks, papers, and libraries. Some sources distinguish loss, cost, risk, and objective very strictly, while engineering code often uses `loss` for both per-example values and averaged training metrics. Therefore, it is better to define the quantities explicitly instead of assuming universal naming conventions.
+## 24. Loss, cost, empirical risk, and objective function
 
-For one training example, the per-example loss is commonly written as:
+Terminology varies across textbooks, research papers, and software libraries. Some sources distinguish loss, cost, risk, and objective very strictly, while engineering code often uses `loss` for both per-example values and averaged training metrics. Therefore, it is better to define the quantities explicitly instead of assuming universal naming conventions.
+
+A per-example loss measures model error for one observation. For one training example, it is commonly written as:
 
 ```math
 \ell_i(\theta)
@@ -770,7 +772,7 @@ y_i
 \right)
 ```
 
-Here $`f(x_i;\theta)`$ is the model prediction for input $`x_i`$ using parameters $`\theta`$, and $`y_i`$ is the corresponding target.
+Here $`\theta`$ represents the model parameters, $`x_i`$ is the feature vector for sample $`i`$, $`y_i`$ is the target label, and $`f(x_i;\theta)`$ is the model prediction. The scalar $`\ell_i(\theta)`$ measures prediction error for one sample.
 
 The empirical risk is the average loss over the finite training set:
 
@@ -782,7 +784,7 @@ R_{\mathrm{emp}}(\theta)
 \ell_i(\theta)
 ```
 
-Some textbooks call this averaged training quantity a cost function. Modern machine-learning libraries and training scripts often call the same averaged value `loss`, especially when reporting metrics during training.
+Empirical risk is the average loss across the finite training dataset. Some textbooks call this averaged training quantity a cost function. Many engineering codebases also call this averaged quantity `loss`, especially when reporting metrics during training. Naming conventions vary, so the mathematical level matters more than the vocabulary.
 
 With regularization, the optimized objective can be written as:
 
@@ -791,14 +793,15 @@ F(\theta)
 =
 R_{\mathrm{emp}}(\theta)
 +
-\lambda\Omega(\theta)
+\lambda
+\Omega(\theta)
 ```
 
-In this expression, $`\Omega(\theta)`$ is the regularization penalty and $`\lambda`$ controls the strength of regularization. The objective $`F(\theta)`$ is the quantity the optimization algorithm tries to minimize.
+In this expression, $`\Omega(\theta)`$ is a regularization term and $`\lambda`$ controls regularization strength. The objective function $`F(\theta)`$ is the scalar quantity the optimization algorithm minimizes.
 
 ## 25. Why the negative gradient is a descent direction
 
-For a small perturbation $`\Delta\theta`$, the first-order Taylor approximation gives:
+For a small perturbation $`\Delta\theta`$, the first-order Taylor approximation around the current parameter point gives:
 
 ```math
 F(\theta+\Delta\theta)
@@ -809,7 +812,7 @@ F(\theta)
 \Delta\theta
 ```
 
-The inner product $`\nabla F(\theta)^{\mathsf{T}}\Delta\theta`$ describes the local linear change in the objective. Under a fixed Euclidean step length, this quantity is largest when $`\Delta\theta`$ points in the same direction as $`\nabla F(\theta)`$. Therefore, the gradient points in the direction of steepest local increase.
+The inner product $`\nabla F(\theta)^{\mathsf{T}}\Delta\theta`$ describes the local linear change in the objective. Under a fixed Euclidean step length, this quantity is largest when $`\Delta\theta`$ points in the same direction as $`\nabla F(\theta)`$. Therefore, the gradient points in the direction of steepest local increase under the Euclidean norm.
 
 The negative gradient points in the opposite direction, so it gives the steepest local decrease under the same fixed step-length constraint. Gradient descent uses this direction and scales it by a learning rate:
 
@@ -822,7 +825,9 @@ The negative gradient points in the opposite direction, so it gives the steepest
 \nabla F(\theta_t)
 ```
 
-The gradient gives the direction of movement, while `learning_rate` determines how far to move in that direction. If the learning rate is too large, the update can overshoot because the local linear approximation is only accurate near the current parameter value.
+Here $`\nabla F(\theta_t)`$ determines direction and $`\eta`$ determines how far to move. In code, `learning_rate` is the implementation parameter corresponding to $`\eta`$. If $`\eta`$ is too large, the local linear approximation may become inaccurate, which can cause overshooting, oscillation, or divergence. If $`\eta`$ is too small, optimization may be stable but slow.
+
+Gradient descent is not an arbitrary engineering heuristic. It follows from a local first-order approximation to the objective, although its practical behavior depends strongly on step-size selection and on how well the local approximation describes the objective over the chosen step.
 
 ## 26. From per-example gradients to full-batch gradients
 
@@ -848,40 +853,159 @@ R_{\mathrm{emp}}(\theta)
 \ell_i(\theta)
 ```
 
-Batch Gradient Descent computes all sample gradients at the same parameter point $`\theta_t`$, averages them, and then performs one update. Classic SGD computes the gradient for one individual sample and updates immediately after that sample. Mini-batch SGD averages the gradients in the current batch and then performs one update.
-
-Sequential single-sample updates are not mathematically identical to one averaged full-batch update. In full-batch gradient descent, every per-example gradient is evaluated at the same parameter vector. In classic SGD, later gradients in the sequence are evaluated after earlier updates have already changed the parameters.
-
-## 27. Mini-batch gradients as statistical estimates
-
-For a mini-batch $`\mathcal{B}`$, the mini-batch gradient is:
+The full-batch gradient is the average of all per-example gradients. In Batch Gradient Descent, every per-example gradient is evaluated at the same parameter point $`\theta_t`$. The optimizer computes this exact empirical-risk gradient and then updates once:
 
 ```math
-g_{\mathcal{B}}
+\theta_{t+1}
 =
-\frac{1}
-{\lvert\mathcal{B}\rvert}
-\sum_{i\in\mathcal{B}}
+\theta_t
+-
+\eta
+\nabla
+R_{\mathrm{emp}}(\theta_t)
+```
+
+For classic SGD, one sampled example produces:
+
+```math
+G_t
+=
+\nabla
+\ell_{I_t}(\theta_t)
+```
+
+and the model updates immediately:
+
+```math
+\theta_{t+1}
+=
+\theta_t
+-
+\eta
+G_t
+```
+
+Sequential single-sample updates are not mathematically identical to one averaged full-batch update. In full-batch gradient descent, every per-example gradient is evaluated at the same parameter vector. In classic SGD, the next sample gradient is evaluated at a new parameter point after the previous update has already changed the parameters. The two methods therefore follow different optimization trajectories.
+
+Conceptually:
+
+- Batch Gradient Descent computes all sample gradients at one shared parameter point, averages them, and updates once.
+- Classic SGD computes one sampled gradient, updates immediately, and then evaluates the next gradient at a changed parameter point.
+- Mini-batch SGD averages gradients inside the current batch and updates once per batch.
+
+## 27. Statistical meaning of stochastic gradients
+
+SGD is not merely an engineering shortcut. It is a stochastic approximation method with a statistical interpretation. For a fixed training dataset:
+
+```math
+R_{\mathrm{emp}}(\theta)
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
+\ell_i(\theta)
+```
+
+The full-batch gradient is:
+
+```math
+\nabla
+R_{\mathrm{emp}}(\theta)
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
 \nabla
 \ell_i(\theta)
 ```
 
-Under random uniform sampling, the mini-batch gradient is an unbiased estimate of the full empirical-risk gradient:
+This is the exact gradient of the empirical risk for the fixed training dataset.
+
+Now assume sample index $`I_t`$ is drawn uniformly at random. One sampled example produces:
+
+```math
+G_t
+=
+\nabla
+\ell_{I_t}(\theta_t)
+```
+
+Then:
 
 ```math
 \mathbb{E}
 \left[
-g_{\mathcal{B}}
+G_t
+\mid
+\theta_t
 \right]
 =
-g_{\mathrm{full}}
+\nabla
+R_{\mathrm{emp}}(\theta_t)
 ```
 
-This means mini-batch gradients are noisy estimates of full gradients. Smaller batches produce noisier estimates, but they allow more frequent updates and can make each update cheaper. Larger batches produce more stable gradient estimates, but each update is more expensive because it processes more examples before moving the parameters.
+The expectation is conditional on the current parameter value $`\theta_t`$. This matters because $`\theta_t`$ is itself influenced by previous random updates. Conditioned on the current parameter point, the random sample gradient is an unbiased estimator of the empirical-risk gradient under the uniform-sampling assumption.
 
-## 28. Expected risk and empirical risk
+For a mini-batch $`\mathcal{B}_t`$, the mini-batch gradient is:
 
-The expected risk is the population-level quantity defined over the real data-generating distribution:
+```math
+G_t^{(\mathcal{B})}
+=
+\frac{1}
+{\lvert
+\mathcal{B}_t
+\rvert}
+\sum_{i\in\mathcal{B}_t}
+\nabla
+\ell_i(\theta_t)
+```
+
+Under suitable random-sampling assumptions:
+
+```math
+\mathbb{E}
+\left[
+G_t^{(\mathcal{B})}
+\mid
+\theta_t
+\right]
+=
+\nabla
+R_{\mathrm{emp}}(\theta_t)
+```
+
+This means mini-batch gradients estimate the empirical-risk gradient. They introduce sampling variance:
+
+```math
+\mathrm{Var}
+\left(
+G_t^{(\mathcal{B})}
+\mid
+\theta_t
+\right)
+>
+0
+```
+
+Smaller batches produce noisier estimates, but they allow more frequent updates and can make each update cheaper. Larger batches produce more stable gradient estimates, but each update is more expensive because it processes more examples before moving the parameters.
+
+In a simplified independent-sampling setting, variance typically decreases as batch size grows:
+
+```math
+\mathrm{Var}
+\left(
+G_t^{(\mathcal{B})}
+\right)
+\propto
+\frac{1}
+{\lvert
+\mathcal{B}_t
+\rvert}
+```
+
+This proportionality is a simplified intuition, not a universal exact identity under every sampling strategy.
+
+## 28. Two layers of statistical approximation
+
+The true population-level goal is expected risk:
 
 ```math
 R_{\mathrm{exp}}(\theta)
@@ -896,7 +1020,9 @@ Y
 \right]
 ```
 
-In practice, the distribution $`P`$ is unknown, so training uses finite data. The empirical risk approximates expected risk using the available training set:
+Here $`P(X,Y)`$ is the unknown real-world data distribution. Expected risk measures average model error over that unknown distribution. In practice, expected risk cannot usually be computed exactly, so training uses finite data.
+
+The finite training set produces empirical risk:
 
 ```math
 R_{\mathrm{emp}}(\theta)
@@ -910,13 +1036,62 @@ y_i
 \right)
 ```
 
-Mini-batch gradients approximate empirical-risk gradients, and empirical risk approximates expected risk. The hierarchy is:
+Empirical risk estimates expected risk from finite data. The quality of this approximation depends on the dataset and assumptions such as sampling representativeness.
 
-real-world distribution -> expected risk -> empirical risk -> mini-batch gradient estimate -> per-example loss
+There is a second approximation layer during mini-batch training:
 
-The goal of training is not merely to reduce one mini-batch loss value. The broader goal is to find parameters that reduce empirical risk in a way that also generalizes to low expected risk on future data from the same underlying distribution.
+```math
+G_t^{(\mathcal{B})}
+=
+\frac{1}
+{\lvert
+\mathcal{B}_t
+\rvert}
+\sum_{i\in\mathcal{B}_t}
+\nabla
+\ell_i(\theta_t)
+```
 
-## 29. Open questions
+The mini-batch gradient estimates the empirical-risk gradient. This approximation reduces per-update computation cost, but it also introduces gradient noise.
+
+The hierarchy is:
+
+```text
+unknown real-world distribution
+-> expected risk
+-> finite training dataset
+-> empirical risk
+-> random mini-batch
+-> stochastic gradient estimate
+-> optimizer update rule
+-> new parameter state
+```
+
+Mini-batch gradients approximate empirical-risk gradients, and empirical risk approximates expected risk. The goal of training is not merely to reduce one mini-batch loss value. The broader goal is to find parameters that reduce empirical risk in a way that also generalizes to low expected risk on future data from the same underlying distribution.
+
+## 29. Sampling with replacement versus random reshuffling
+
+The clean introductory unbiased-gradient derivation often assumes that sample indices are drawn independently, uniformly, and with replacement. Under that simplified model, the next sampled index does not depend on which indices were sampled earlier.
+
+The current repository uses `iterate_minibatches()` with `shuffle=True` and `seed=seed + epoch`. This means the training dataset is shuffled once per epoch, mini-batches are consumed without replacement inside that epoch, and every sample is covered once per epoch. The sample order changes across epochs, but the sequence remains reproducible because the seed is deterministic.
+
+Random reshuffling without replacement is a common practical training strategy, but it is not mathematically identical to independent sampling with replacement. Later mini-batches in an epoch depend on which samples have already been consumed, so one should not blindly claim that every successive mini-batch is conditionally independent.
+
+The simplified unbiased-gradient derivation remains a useful theoretical entry point because it explains why stochastic gradients can point in the correct direction on average under clear assumptions. The repository implementation should be described more precisely as reproducible random reshuffling without replacement.
+
+## 30. Final conceptual summary
+
+- Batch Gradient Descent uses the exact empirical-risk gradient.
+- Classic SGD uses a stochastic estimate based on one sampled observation.
+- Mini-batch SGD uses a stochastic estimate based on a subset of observations.
+- Mini-batching is both statistically motivated and computationally useful.
+- The gradient gives a local descent direction.
+- The learning rate determines the step size.
+- Empirical risk approximates expected risk.
+- Mini-batch gradients approximate empirical-risk gradients.
+- The repository uses reproducible random reshuffling without replacement.
+
+## 31. Open questions
 
 - How does batch size affect gradient noise and convergence?
 - Why can noisy SGD updates sometimes help optimization?
