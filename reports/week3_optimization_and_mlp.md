@@ -1,6 +1,6 @@
 # Week 3 Optimization and MLP Notes
 
-Current Week 3 scope: SGD, Momentum, Adam, mini-batch iteration, and optimizer comparison are complete. MLP implementation has not started yet.
+Current Week 3 scope: SGD, Momentum, Adam, mini-batch iteration, optimizer comparison, and the MLP forward pass are complete.
 
 ## 1. SGD optimizer
 
@@ -962,13 +962,103 @@ The simplified unbiased-gradient derivation remains a useful theoretical entry p
 - Mini-batch gradients approximate empirical-risk gradients.
 - The repository uses reproducible random reshuffling without replacement.
 
-## 30. Further reading
+## 30. One-hidden-layer MLP forward pass
+
+`BinaryMLPScratch` implements a one-hidden-layer binary classifier. The forward pass computes:
+
+```math
+Z_1 = XW_1 + b_1
+```
+
+```math
+A_1 = \mathrm{ReLU}(Z_1)
+```
+
+```math
+Z_2 = A_1W_2 + b_2
+```
+
+```math
+P = \sigma(Z_2)
+```
+
+| Variable | Shape | Meaning |
+|---|---:|---|
+| `X` | `(n_samples, n_features)` | input features |
+| `W1` | `(n_features, hidden_dim)` | input-to-hidden weights |
+| `b1` | `(hidden_dim,)` | hidden bias |
+| `Z1` | `(n_samples, hidden_dim)` | hidden pre-activation |
+| `A1` | `(n_samples, hidden_dim)` | hidden activation |
+| `W2` | `(hidden_dim, 1)` | hidden-to-output weights |
+| `b2` | `(1,)` | output bias |
+| `Z2` | `(n_samples, 1)` | output logits |
+| `probabilities` | `(n_samples,)` | positive-class probabilities |
+
+NumPy broadcasts `b1` across all sample rows in the hidden layer and broadcasts `b2` across the output rows.
+
+## 31. Why the hidden layer needs a nonlinear activation
+
+Without ReLU, the two affine layers collapse into one affine transformation:
+
+```math
+Z_2
+=
+(XW_1+b_1)W_2+b_2
+```
+
+which can be rewritten as:
+
+```math
+Z_2
+=
+X(W_1W_2)
++
+(b_1W_2+b_2)
+```
+
+With biases, the precise term is affine transformation rather than linear transformation. Stacking affine transformations without a nonlinear activation still produces only one equivalent affine transformation. ReLU breaks this collapsibility, which allows the MLP to represent nonlinear decision boundaries.
+
+## 32. Stable sigmoid computation
+
+The direct sigmoid formula is:
+
+```math
+\sigma(z)=\frac{1}{1+e^{-z}}
+```
+
+For a very negative input, computing `exp(-z)` can overflow because $`-z`$ becomes very large and positive. The implementation uses an equivalent form for negative inputs:
+
+```math
+\sigma(z)=\frac{e^z}{1+e^z}
+```
+
+This avoids computing an enormous exponential value and improves numerical stability. The test with `0.0`, `1000.0`, and `-1000.0` verifies the behavior at ordinary, very positive, and very negative inputs.
+
+## 33. Why forward pass returns a cache
+
+The forward pass returns a cache containing `X`, `Z1`, `A1`, and `Z2`. These intermediate values are needed later during backpropagation: `A1` is needed to compute `dW2`, `Z1` is needed to compute the ReLU derivative, and `X` is needed to compute `dW1`.
+
+Caching avoids recomputing the full forward pass during backpropagation. The trade-off is memory versus computation: storing intermediate arrays uses more memory, but it avoids redundant matrix multiplications and activation computations.
+
+## 34. Why probabilities are reshaped
+
+`Z2` has shape `(n_samples, 1)`, while labels usually have shape `(n_samples,)`. Calling `.reshape(-1)` converts output probabilities to shape `(n_samples,)`, aligning predictions with labels.
+
+This also prevents accidental NumPy broadcasting from producing a `(n_samples, n_samples)` array during loss or gradient computation. Keeping probabilities and labels as matching one-dimensional arrays makes the binary-classification interface less error-prone.
+
+## 35. Forward-pass testing strategy
+
+The forward-pass tests cover parameter shapes, reproducible initialization, different initialization under different seeds, ReLU values, numerically stable sigmoid behavior, forward-pass shapes, manually verifiable forward-pass values, invalid dimensions, and invalid input shape.
+
+Shape tests catch interface errors. Manual-value tests validate the complete mathematical path from input features through hidden activations to output probabilities. Stable-sigmoid tests catch numerical errors that would not necessarily appear in purely symbolic formula checks.
+
+## 36. Further reading
 
 - Adam: A Method for Stochastic Optimization
 - Without-Replacement Sampling for Stochastic Gradient Methods: Convergence Results and Application to Distributed Optimization
 - Why Random Reshuffling Beats Stochastic Gradient Descent
 
-## 31. Open questions
+## 37. Open questions
 
 - How does batch size quantitatively affect gradient variance and optimization speed?
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
