@@ -1058,7 +1058,244 @@ Shape tests catch interface errors. Manual-value tests validate the complete mat
 - Without-Replacement Sampling for Stochastic Gradient Methods: Convergence Results and Application to Distributed Optimization
 - Why Random Reshuffling Beats Stochastic Gradient Descent
 
-## 37. Open questions
+## 37. Binary MLP backpropagation roadmap
+
+The backward pass for the binary MLP computes gradients in reverse order from the scalar batch loss back to the trainable parameters. For the one-hidden-layer network, the required intermediate and parameter gradients are:
+
+- `dZ2`
+- `dW2`
+- `db2`
+- `dA1`
+- `dZ1`
+- `dW1`
+- `db1`
+
+Each gradient is obtained by applying the chain rule from the binary cross-entropy loss backward through the sigmoid output activation, the output affine layer, the ReLU hidden activation, and the input affine layer. This reverse order mirrors the forward computation: first compute the output-layer error, then propagate it into the hidden layer, then compute gradients for the input-layer parameters.
+
+## 38. Why sigmoid and BCE simplify to P minus y
+
+For one training example, the binary cross-entropy loss is:
+
+```math
+\ell_i
+=
+-
+\left[
+y_i\log p_i
++
+(1-y_i)\log(1-p_i)
+\right]
+```
+
+The predicted probability is the sigmoid of the output logit:
+
+```math
+p_i
+=
+\sigma(z_{2,i})
+```
+
+Differentiate the loss with respect to the probability:
+
+```math
+\frac{\partial \ell_i}
+{\partial p_i}
+=
+-
+\left[
+\frac{y_i}{p_i}
+-
+\frac{1-y_i}{1-p_i}
+\right]
+```
+
+Putting the terms over a common denominator gives:
+
+```math
+\frac{\partial \ell_i}
+{\partial p_i}
+=
+\frac{p_i-y_i}
+{p_i(1-p_i)}
+```
+
+The sigmoid derivative is:
+
+```math
+\frac{\partial p_i}
+{\partial z_{2,i}}
+=
+p_i(1-p_i)
+```
+
+By the chain rule:
+
+```math
+\frac{\partial \ell_i}
+{\partial z_{2,i}}
+=
+\frac{\partial \ell_i}
+{\partial p_i}
+\frac{\partial p_i}
+{\partial z_{2,i}}
+```
+
+Substituting the two factors cancels `p_i(1-p_i)`:
+
+```math
+\frac{\partial \ell_i}
+{\partial z_{2,i}}
+=
+\frac{p_i-y_i}
+{p_i(1-p_i)}
+p_i(1-p_i)
+```
+
+Therefore:
+
+```math
+\frac{\partial \ell_i}
+{\partial z_{2,i}}
+=
+p_i-y_i
+```
+
+For batch-average binary cross-entropy, the factor `1 / n` enters at the output logit gradient:
+
+```math
+dZ_2
+=
+\frac{P-y}{n}
+```
+
+The intuition is direct: if the predicted probability is too high, `P - y` is positive and gradient descent pushes the logit downward; if the predicted probability is too low, `P - y` is negative and gradient descent pushes the logit upward; if the prediction is close to the target, the gradient is small.
+
+## 39. Output-layer gradients
+
+The output affine layer is:
+
+```math
+Z_2
+=
+A_1W_2+b_2
+```
+
+Since each output logit is a weighted sum of hidden activations, the weight gradient is the hidden activation matrix transposed times the output-logit gradient:
+
+```math
+dW_2
+=
+A_1^{\mathsf{T}}dZ_2
+```
+
+The bias is shared across all samples in the batch, so every sample contributes to the same bias parameter. Therefore, the bias gradient sums the output-logit gradients across the sample dimension:
+
+```math
+db_2
+=
+\sum_{i=1}^{n}
+dZ_{2,i}
+```
+
+| Gradient |             Shape |
+| -------- | ----------------: |
+| `dZ2`    |  `(n_samples, 1)` |
+| `dW2`    | `(hidden_dim, 1)` |
+| `db2`    |            `(1,)` |
+
+## 40. Backpropagating through ReLU
+
+The output-layer affine operation also sends gradient back into the hidden activations:
+
+```math
+dA_1
+=
+dZ_2W_2^{\mathsf{T}}
+```
+
+The ReLU derivative is `1` when the input is greater than zero. In this implementation, the derivative is `0` when the input is less than or equal to zero.
+
+The hidden pre-activation gradient is:
+
+```math
+dZ_1
+=
+dA_1
+\odot
+\mathbf{1}[Z_1>0]
+```
+
+Here, `\odot` means elementwise multiplication. ReLU blocks gradient flow where the forward pre-activation is non-positive. The cached `Z1` value from the forward pass is needed to construct this mask, because the mask depends on the hidden pre-activation values seen during that same forward pass.
+
+## 41. Input-layer gradients
+
+The input affine layer is:
+
+```math
+Z_1
+=
+XW_1+b_1
+```
+
+By the same affine-layer gradient rule used for the output layer, the input-layer weight gradient is:
+
+```math
+dW_1
+=
+X^{\mathsf{T}}dZ_1
+```
+
+The hidden bias is shared across all samples, so its gradient sums the hidden pre-activation gradients across the sample dimension:
+
+```math
+db_1
+=
+\sum_{i=1}^{n}
+dZ_{1,i}
+```
+
+| Gradient |                      Shape |
+| -------- | -------------------------: |
+| `dA1`    |  `(n_samples, hidden_dim)` |
+| `dZ1`    |  `(n_samples, hidden_dim)` |
+| `dW1`    | `(n_features, hidden_dim)` |
+| `db1`    |            `(hidden_dim,)` |
+
+## 42. Why divide by batch size only once
+
+The training objective is batch-average binary cross-entropy, so the average over samples contributes one factor of `1 / n`. That factor enters through the output-logit gradient:
+
+```math
+dZ_2
+=
+\frac{P-y}{n}
+```
+
+All later gradients inherit this factor through the chain rule. For example, `dW2`, `db2`, `dA1`, `dZ1`, `dW1`, and `db1` are all computed from values that already include the batch-average scaling. Dividing again at each layer would incorrectly shrink the gradients multiple times and would no longer match the derivative of the stated batch-average objective.
+
+## 43. Cache-to-gradient mapping
+
+| Cached variable | Backward use                                  |
+| --------------- | --------------------------------------------- |
+| `X`             | compute `dW1 = X.T @ dZ1`                     |
+| `Z1`            | construct the ReLU mask                       |
+| `A1`            | compute `dW2 = A1.T @ dZ2`                    |
+| `Z2`            | inspect logits or recompute sigmoid if needed |
+
+Caching reduces repeated computation at the cost of additional memory. The cached values preserve the exact forward-pass intermediates needed by the backward pass, avoiding redundant matrix multiplications and activation evaluations.
+
+## 44. Backpropagation shape invariants
+
+| Parameter |            Parameter shape | Gradient |             Gradient shape |
+| --------- | -------------------------: | -------- | -------------------------: |
+| `W1`      | `(n_features, hidden_dim)` | `dW1`    | `(n_features, hidden_dim)` |
+| `b1`      |            `(hidden_dim,)` | `db1`    |            `(hidden_dim,)` |
+| `W2`      |          `(hidden_dim, 1)` | `dW2`    |          `(hidden_dim, 1)` |
+| `b2`      |                     `(1,)` | `db2`    |                     `(1,)` |
+
+Each parameter gradient must have exactly the same shape as its corresponding parameter. This invariant is what allows the optimizer to update parameters element by element without broadcasting mistakes or shape-dependent special cases.
+
+## 45. Open questions
 
 - How does batch size quantitatively affect gradient variance and optimization speed?
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
