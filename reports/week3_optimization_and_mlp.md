@@ -1295,7 +1295,198 @@ Caching reduces repeated computation at the cost of additional memory. The cache
 
 Each parameter gradient must have exactly the same shape as its corresponding parameter. This invariant is what allows the optimizer to update parameters element by element without broadcasting mistakes or shape-dependent special cases.
 
-## 45. Open questions
+## 45. Why sigmoid and BCE produce a logit-space residual
+
+The simplification:
+
+```math
+\frac{\partial \ell_i}
+{\partial z_i}
+=
+p_i-y_i
+```
+
+is not merely an accidental algebraic cancellation. It reflects a clean match between the Bernoulli likelihood model, the binary cross-entropy loss, and the sigmoid link from logits to probabilities.
+
+The output layer first produces a real-valued logit, then sigmoid maps that logit into probability space:
+
+```text
+logit space
+z in the real numbers
+-> sigmoid
+probability space
+p in the interval (0, 1)
+```
+
+The logit corresponding to a probability is:
+
+```math
+z
+=
+\log
+\frac{p}
+{1-p}
+```
+
+and the sigmoid maps back from logit space to probability space:
+
+```math
+p
+=
+\sigma(z)
+=
+\frac{1}
+{1+e^{-z}}
+```
+
+Binary cross-entropy is the negative log-likelihood of a Bernoulli model. For a binary target, the Bernoulli probability assigned to the observed outcome is high when the model assigns high probability to the observed class and low otherwise. Taking the negative logarithm turns high assigned probability into low loss and low assigned probability into high loss.
+
+After substituting the sigmoid expression into binary cross-entropy, the per-example loss can be written directly in logit space:
+
+```math
+\ell(z,y)
+=
+\log(1+e^z)
+-
+yz
+```
+
+Differentiating this logit-space loss gives:
+
+```math
+\frac{\partial \ell}
+{\partial z}
+=
+\frac{e^z}{1+e^z}
+-
+y
+```
+
+Since:
+
+```math
+\frac{e^z}{1+e^z}
+=
+\frac{1}
+{1+e^{-z}}
+=
+\sigma(z)
+```
+
+the derivative is:
+
+```math
+\frac{\partial \ell}
+{\partial z}
+=
+\sigma(z)-y
+=
+p-y
+```
+
+The deeper intuition is that `p` is the model-implied expected positive-class value, while `y` is the observed binary target. Their difference, `p - y`, is the residual in logit space. Binary cross-entropy has strong sensitivity near the edges of probability space, while sigmoid compresses logits into the interval `(0, 1)`. When the gradient is pulled back into logit space, these two effects cancel, leaving a stable and interpretable residual signal.
+
+For one sample, `p_i - y_i` is a per-example residual. For a batch-average objective, the output-logit gradient is:
+
+```math
+dZ_2
+=
+\frac{P-y}{n}
+```
+
+The final parameter gradient then aggregates these residual contributions across samples.
+
+## 46. Why output-layer gradients use `A1.T @ dZ2`
+
+The output affine layer is:
+
+```math
+Z_2
+=
+A_1W_2+b_2
+```
+
+For one sample:
+
+```math
+z_{2,i}
+=
+a_{1,i}^{\mathsf{T}}W_2+b_2
+```
+
+Each output-layer weight scales one hidden activation. Therefore, for output-layer weight coordinate `j`:
+
+```math
+\frac{\partial z_{2,i}}
+{\partial W_{2,j}}
+=
+a_{1,i,j}
+```
+
+Using the chain rule across the batch:
+
+```math
+\frac{\partial L}
+{\partial W_{2,j}}
+=
+\sum_{i=1}^{n}
+dZ_{2,i}
+a_{1,i,j}
+```
+
+Stacking these coordinate-wise derivatives gives the matrix form:
+
+```math
+dW_2
+=
+A_1^{\mathsf{T}}dZ_2
+```
+
+There are three complementary ways to read this formula.
+
+First, the shapes line up with the parameter. `A1.T` has shape `(hidden_dim, n_samples)`, `dZ2` has shape `(n_samples, 1)`, and the result has shape `(hidden_dim, 1)`, which matches `W2`.
+
+Second, each sample contributes its hidden activation vector multiplied by its output residual. The batch gradient sums these per-example contributions. If a sample has a larger output residual, its hidden activation pattern contributes more strongly to the update direction.
+
+Third, the transpose has a linear-map meaning. In the forward pass, parameter values are mapped through `A1 @ W2` into output-logit space. In the backward pass, the transpose map pulls output-space error back into parameter space. The transpose is therefore not merely a shape trick; it is the adjoint direction required by the chain rule for this linear map.
+
+Using the opposite multiplication order gives the transposed orientation:
+
+```math
+dZ_2^{\mathsf{T}}A_1
+=
+dW_2^{\mathsf{T}}
+```
+
+That expression contains the same scalar products, but it produces `(1, hidden_dim)` rather than the `(hidden_dim, 1)` shape of `W2`.
+
+## 47. Why cache `Z1` for ReLU backward
+
+The hidden activation is:
+
+```math
+A_1
+=
+\mathrm{ReLU}(Z_1)
+```
+
+The ReLU backward step is:
+
+```math
+dZ_1
+=
+dA_1
+\odot
+\mathbf{1}[Z_1>0]
+```
+
+`Z1` is the hidden-layer pre-activation. It determines which forward paths were active: non-positive pre-activations block gradient flow, while positive pre-activations allow gradient flow.
+
+There is an important nuance for basic ReLU. If the derivative at exactly `Z1 = 0` is defined as zero, then the masks `Z1 > 0` and `A1 > 0` are equivalent for this specific derivative calculation. In that narrow case, `A1` could technically be sufficient.
+
+Caching `Z1` is still preferable because it preserves more information than `A1`. It supports debugging, activation-distribution analysis, dead-neuron diagnosis, and future replacement with other activation functions whose backward pass may depend directly on pre-activation values. Caching pre-activations also mirrors the chain-rule structure directly: the backward pass through an activation uses the derivative of the activation with respect to its own input.
+
+## 48. Open questions
 
 - How does batch size quantitatively affect gradient variance and optimization speed?
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
