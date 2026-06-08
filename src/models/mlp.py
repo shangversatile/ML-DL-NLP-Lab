@@ -76,6 +76,58 @@ class BinaryMLPScratch:
         }
         return probabilities, cache
 
+    def compute_loss(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+    ) -> float:
+        """
+        Compute mean binary cross entropy loss.
+        """
+        probabilities, _ = self.forward(X)
+        self._validate_y(y, X.shape[0])
+
+        epsilon = 1e-15
+        clipped_probabilities = np.clip(probabilities, epsilon, 1.0 - epsilon)
+        loss = -np.mean(
+            y * np.log(clipped_probabilities)
+            + (1 - y) * np.log(1.0 - clipped_probabilities)
+        )
+
+        return float(loss)
+
+    def compute_gradients(
+        self,
+        X: np.ndarray,
+        y: np.ndarray,
+    ) -> dict[str, np.ndarray]:
+        """
+        Compute analytical gradients using backpropagation.
+        """
+        probabilities, cache = self.forward(X)
+        self._validate_y(y, X.shape[0])
+
+        n_samples = X.shape[0]
+        y_column = y.reshape(-1, 1)
+        probabilities_column = probabilities.reshape(-1, 1)
+
+        dZ2 = (probabilities_column - y_column) / n_samples
+        dW2 = cache["A1"].T @ dZ2
+        db2 = np.sum(dZ2, axis=0)
+
+        dA1 = dZ2 @ self.W2.T
+        dZ1 = dA1 * (cache["Z1"] > 0)
+
+        dW1 = cache["X"].T @ dZ1
+        db1 = np.sum(dZ1, axis=0)
+
+        return {
+            "dW1": dW1,
+            "db1": db1,
+            "dW2": dW2,
+            "db2": db2,
+        }
+
     def _validate_X(self, X: np.ndarray) -> None:
         if not isinstance(X, np.ndarray):
             raise TypeError("X must be a NumPy array.")
@@ -83,3 +135,15 @@ class BinaryMLPScratch:
             raise ValueError("X must be a 2D NumPy array.")
         if X.shape[1] != self.n_features:
             raise ValueError("X must have the same number of columns as n_features.")
+
+    def _validate_y(
+        self,
+        y: np.ndarray,
+        n_samples: int,
+    ) -> None:
+        if not isinstance(y, np.ndarray):
+            raise TypeError("y must be a NumPy array.")
+        if y.shape != (n_samples,):
+            raise ValueError("y must have shape (n_samples,).")
+        if not np.all((y == 0) | (y == 1)):
+            raise ValueError("y must contain only 0 and 1.")
