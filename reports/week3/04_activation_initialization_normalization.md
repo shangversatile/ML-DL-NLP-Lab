@@ -136,13 +136,319 @@ n_{\mathrm{in}}
 ```
 ## 5. Central Limit Theorem analysis of `Z = XW + b`
 
-The summed terms are the products$`U_i=w_ix_i`$. The Central Limit Theorem applies to the sum of many approximately independent finite-variance terms, not to repeated multiplication alone. Under appropriate conditions and sufficiently large fan-in, the distribution of $`Z`$ is approximately Gaussian. The approximation is centered at zero because the terms have zero mean:
+Start with one hidden unit:
+
+```math
+Z
+=
+\sum_{i=1}^{n_{\mathrm{in}}}
+w_i x_i
++
+b
+```
+
+Here `Z` is one hidden unit's pre-activation, `x_i` is an input coordinate, `w_i` is the weight connecting input coordinate `i` to this hidden unit, and `b` is the bias. The Central Limit Theorem applies to the sum of product terms, not to multiplication alone.
+
+### 5.1 Viewpoint A: fixed inputs and Gaussian weights
+
+Treat input coordinates as fixed constants:
+
+```math
+x_1,
+x_2,
+\dots,
+x_{n_{\mathrm{in}}}
+```
+
+Assume independent Gaussian weights:
+
+```math
+w_i
+\sim
+\mathrm{N}
+\left(
+0,
+\sigma_w^2
+\right)
+```
+
+A linear combination of independent Gaussian variables is exactly Gaussian. This conclusion does not require the Central Limit Theorem. Conditional on the input vector:
+
+```math
+Z
+\mid
+x
+\sim
+\mathrm{N}
+\left(
+b,
+\sigma_w^2
+\sum_{i=1}^{n_{\mathrm{in}}}
+x_i^2
+\right)
+```
+
+Equivalently:
+
+```math
+Z
+\mid
+x
+\sim
+\mathrm{N}
+\left(
+b,
+\sigma_w^2
+\lVert x\rVert_2^2
+\right)
+```
+
+This is the conditional distribution of the hidden pre-activation given the input vector. If `b = 0`, the conditional mean is zero.
+
+If input coordinates have an average squared scale approximately equal to $`\sigma_x^2`$:
+
+```math
+\frac{1}
+{n_{\mathrm{in}}}
+\sum_{i=1}^{n_{\mathrm{in}}}
+x_i^2
+\approx
+\sigma_x^2
+```
+
+then:
+
+```math
+\sum_{i=1}^{n_{\mathrm{in}}}
+x_i^2
+\approx
+n_{\mathrm{in}}
+\sigma_x^2
+```
+
+and therefore:
+
+```math
+Z
+\mid
+x
+\approx
+\mathrm{N}
+\left(
+b,
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+\right)
+```
+
+### 5.2 Viewpoint B: random inputs and random weights
+
+Define:
+
+```math
+U_i
+=
+w_i x_i
+```
+
+Assume $`\mathbb{E}[w_i] = 0`$, $`\mathrm{Var}(w_i) = \sigma_w^2`$, $`\mathbb{E}[x_i] = 0`$, $`\mathrm{Var}(x_i) = \sigma_x^2`$, weights and inputs are independent, product terms are independent or sufficiently weakly dependent across coordinates, and second moments are finite.
+
+Derive the mean:
+
+```math
+\mathbb{E}[U_i]
+=
+\mathbb{E}[w_i x_i]
+```
+
+```math
+\mathbb{E}[U_i]
+=
+\mathbb{E}[w_i]
+\mathbb{E}[x_i]
+```
+
+```math
+\mathbb{E}[U_i]
+=
+0
+```
+
+Then derive the variance:
+
+```math
+\mathrm{Var}(U_i)
+=
+\mathbb{E}[U_i^2]
+-
+\mathbb{E}[U_i]^2
+```
+
+```math
+\mathrm{Var}(U_i)
+=
+\mathbb{E}[w_i^2 x_i^2]
+```
+
+```math
+\mathrm{Var}(U_i)
+=
+\mathbb{E}[w_i^2]
+\mathbb{E}[x_i^2]
+```
+
+```math
+\mathrm{Var}(U_i)
+=
+\sigma_w^2
+\sigma_x^2
+```
+
+Now write:
+
+```math
+Z-b
+=
+\sum_{i=1}^{n_{\mathrm{in}}}
+U_i
+```
+
+Under the independence assumptions:
+
+```math
+\mathbb{E}[Z-b]
+=
+0
+```
+
+```math
+\mathrm{Var}(Z-b)
+=
+\sum_{i=1}^{n_{\mathrm{in}}}
+\mathrm{Var}(U_i)
+```
+
+```math
+\mathrm{Var}(Z-b)
+=
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+```
+
+If `b = 0`:
+
+```math
+\mathbb{E}[Z]
+=
+0
+```
+
+```math
+\mathrm{Var}(Z)
+=
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+```
+
+Then the CLT approximation is:
 
 ```math
 Z \approx \mathcal{N}\left(0, n_{\mathrm{in}}\sigma_w^2\sigma_x^2\right)
 ```
 
-There is an important distinction between two viewpoints. If inputs are treated as fixed constants and weights are independent Gaussian random variables, then $`Z`$ is exactly Gaussian as a linear combination of Gaussian variables. If both inputs and weights are random, the Central Limit Theorem provides an approximation under suitable assumptions. Real neural-network activations may be correlated, so this derivation is an idealized initialization analysis rather than a universal exact law.
+The summed random variables are $`U_i = w_i x_i`$. The CLT applies to their sum. Sufficiently large fan-in helps the approximation, but finite variance and the absence of a dominating coordinate are also important. This is an approximation, not a universal exact identity.
+
+### 5.3 Effect of the bias term
+
+If:
+
+```math
+b=0
+```
+
+then:
+
+```math
+\mathbb{E}[Z]
+=
+0
+```
+
+If `b` is a fixed constant:
+
+```math
+Z
+\approx
+\mathrm{N}
+\left(
+b,
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+\right)
+```
+
+If `b` is an independent random variable with:
+
+```math
+\mathbb{E}[b]
+=
+\mu_b
+```
+
+```math
+\mathrm{Var}(b)
+=
+\sigma_b^2
+```
+
+then:
+
+```math
+\mathbb{E}[Z]
+=
+\mu_b
+```
+
+```math
+\mathrm{Var}(Z)
+=
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
++
+\sigma_b^2
+```
+
+The current educational MLP initializes biases to zero. This keeps the initialization analysis simple, and zero bias helps maintain a centered pre-activation distribution initially.
+
+### 5.4 Why the Gaussian approximation has limits
+
+Real neural-network activations are not guaranteed to be independent. Input coordinates can be correlated, hidden units can become dependent during training, weight updates alter the initialization-time assumptions, and nonlinear activations change later-layer distributions.
+
+The derivation is an idealized initialization analysis. It is still useful because it explains the design logic behind Xavier and He initialization: the initial weight scale is chosen to keep activation and gradient magnitudes from growing or shrinking too aggressively across layers.
+
+### 5.5 Connection to ReLU half-zero activations
+
+If the pre-activation distribution is approximately symmetric around zero, then the probability of a positive or negative pre-activation is approximately one half:
+
+```math
+\mathbb{P}(Z>0)
+\approx
+\frac{1}{2}
+```
+
+```math
+\mathbb{P}(Z<0)
+\approx
+\frac{1}{2}
+```
+
+This motivates the following ReLU sparsity analysis. It does not mean that half of all neurons are permanently dead.
+
 ## 6. Why ReLU produces approximately half-zero activations at initialization
 
 Assume:
@@ -150,7 +456,7 @@ Assume:
 ```math
 Z
 \approx
-\mathcal{N}(0,q)
+\mathrm{N}(0,q)
 ```
 
 or more generally that the distribution of $`Z`$ is symmetric around zero. Then:
@@ -338,7 +644,7 @@ For the code mapping, start with:
 ```math
 G
 \sim
-\mathcal{N}(0,1)
+\mathrm{N}(0,1)
 ```
 
 Let:
@@ -409,8 +715,8 @@ Batch Normalization computes mini-batch-normalized activations during training:
 ```math
 \hat{Z}
 =
-\frac{Z-\mu_{\mathcal{B}}}
-{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}
+\frac{Z-\mu_{\mathrm{B}}}
+{\sqrt{\sigma_{\mathrm{B}}^2+\epsilon}}
 ```
 
 ```math
@@ -421,7 +727,7 @@ Z_{\mathrm{out}}
 \beta
 ```
 
-Here $`\mu_{\mathcal{B}}`$ and $`\sigma_{\mathcal{B}}^2`$ are mini-batch statistics during training, while $`\gamma`$ and $`\beta`$ are learnable affine parameters. Normalization changes activation scale while learnable affine parameters restore representational flexibility. This does not guarantee exact reconstruction of every original activation tensor under changing batch statistics.
+Here $`\mu_{\mathrm{B}}`$ and $`\sigma_{\mathrm{B}}^2`$ are mini-batch statistics during training, while $`\gamma`$ and $`\beta`$ are learnable affine parameters. Normalization changes activation scale while learnable affine parameters restore representational flexibility. This does not guarantee exact reconstruction of every original activation tensor under changing batch statistics.
 
 The original BatchNorm motivation emphasized reducing internal covariate shift. Later research argued that smoother optimization landscapes and more stable gradients are a more fundamental part of the explanation. It is also too strong to claim that BatchNorm always turns the landscape into a perfectly isotropic circular bowl. BatchNorm can improve optimization stability, but its behavior depends on architecture, batch size, data, and training regime.
 
