@@ -139,15 +139,7 @@ n_{\mathrm{in}}
 The summed terms are the products$`U_i=w_ix_i`$. The Central Limit Theorem applies to the sum of many approximately independent finite-variance terms, not to repeated multiplication alone. Under appropriate conditions and sufficiently large fan-in, the distribution of $`Z`$ is approximately Gaussian. The approximation is centered at zero because the terms have zero mean:
 
 ```math
-Z
-\approx
-\mathcal{N}
-\left(
-0,
-n_{\mathrm{in}}
-\sigma_w^2
-\sigma_x^2
-\right)
+Z \approx \mathcal{N}\left(0, n_{\mathrm{in}}\sigma_w^2\sigma_x^2\right)
 ```
 
 There is an important distinction between two viewpoints. If inputs are treated as fixed constants and weights are independent Gaussian random variables, then $`Z`$ is exactly Gaussian as a linear combination of Gaussian variables. If both inputs and weights are random, the Central Limit Theorem provides an approximation under suitable assumptions. Real neural-network activations may be correlated, so this derivation is an idealized initialization analysis rather than a universal exact law.
