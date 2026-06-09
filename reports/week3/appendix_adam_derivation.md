@@ -301,7 +301,7 @@ The correction does not remove all noise from stochastic gradients. It specifica
 In neural-network training, gradients change as parameters change, and data batches introduce stochastic variation. Therefore, the stationary-moment assumption is an analytical simplification. Bias correction fixes the early zero-initialization shrinkage, but it does not make Adam universally unbiased throughout a non-stationary optimization process.
 ## 9. Initialization-bias boundary
 
-Bias correction addresses the initialization bias caused by starting $`m_0`$ and $`v_0`$ at zero. Under the stationary-gradient approximation, dividing by $`1-eta_1^t`$ and $`1-eta_2^t`$ removes the early shrinkage in the expected moment estimates.
+Bias correction addresses the initialization bias caused by starting $`m_0`$ and $`v_0`$ at zero. Under the stationary-gradient approximation, dividing by $`1-\beta_1^t`$ and $`1-\beta_2^t`$ removes the early shrinkage in the expected moment estimates.
 
 This is not a claim that Adam is universally unbiased during neural-network training. Gradients change as parameters change, mini-batches introduce stochastic variation, and the optimization process is non-stationary. The correction is specifically about zero-initialized exponential moving averages.
 ## 10. First-step numerical example
