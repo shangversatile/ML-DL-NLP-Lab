@@ -1018,7 +1018,458 @@ X(W_1W_2)
 
 With biases, the precise term is affine transformation rather than linear transformation. Stacking affine transformations without a nonlinear activation still produces only one equivalent affine transformation. ReLU breaks this collapsibility, which allows the MLP to represent nonlinear decision boundaries.
 
-## 32. Stable sigmoid computation
+## 32. Geometric meaning of nonlinear activations
+
+A fully connected layer with bias is an affine transformation:
+
+```math
+Z = XW+b
+```
+
+For multiple affine layers without nonlinear activations, the composition collapses into one affine transformation. For two layers:
+
+```math
+Z_2
+=
+(XW_1+b_1)W_2+b_2
+```
+
+```math
+Z_2
+=
+X(W_1W_2)
++
+(b_1W_2+b_2)
+```
+
+For many layers, the same pattern gives:
+
+```math
+Y
+=
+XW_{\mathrm{effective}}
++
+b_{\mathrm{effective}}
+```
+
+The mathematical reason is that matrix multiplication is associative, and affine maps preserve the affine structure of the space. Without nonlinear activations, depth alone cannot represent nonlinear decision boundaries. The final classification boundary remains affine, such as a hyperplane in the relevant representation space.
+
+Geometrically, affine maps can stretch, rotate, shear, and translate space. This intuition is useful, but the mathematical claim is narrower: affine maps do not create curved or piecewise-folded decision geometry by themselves.
+
+## 33. ReLU and sigmoid as different geometric transformations
+
+ReLU is defined coordinate-wise by:
+
+```math
+\mathrm{ReLU}(z)
+=
+\max(0,z)
+```
+
+ReLU is piecewise linear and introduces a hinge at zero. A ReLU network is therefore piecewise affine: for a fixed pattern of active and inactive ReLU units, the network reduces locally to an affine map. Different activation masks correspond to different local affine regions.
+
+The origami or folding-space picture is a useful geometric metaphor, as long as it is kept separate from the exact claim. A finite ReLU network has finitely many linear regions. Increasing width and depth can increase representational capacity and can create more complex piecewise-linear geometry.
+
+The sigmoid function is:
+
+```math
+\sigma(z)
+=
+\frac{1}
+{1+e^{-z}}
+```
+
+Sigmoid maps the real line into the interval `(0, 1)`. Applied coordinate-wise, it maps a vector into a bounded hypercube. The central region is more responsive, while the tails saturate. Saturation compresses large-magnitude logits and can reduce gradient magnitudes.
+
+ReLU and sigmoid introduce nonlinearity in different ways. ReLU creates piecewise-affine regions; sigmoid smoothly compresses unbounded coordinates into bounded probabilities or activations.
+
+## 34. Distribution of hidden pre-activations
+
+For one hidden unit:
+
+```math
+Z
+=
+\sum_{i=1}^{n_{\mathrm{in}}}
+w_ix_i
++
+b
+```
+
+First analyze the common initialization setting:
+
+```math
+b=0
+```
+
+Assume $`x_i`$ are approximately independent across coordinates, $`\mathbb{E}[x_i]=0`$, $`\mathrm{Var}(x_i)=\sigma_x^2`$, $`w_i`$ are independent across coordinates, $`\mathbb{E}[w_i]=0`$, $`\mathrm{Var}(w_i)=\sigma_w^2`$, weights and inputs are independent, and second moments are finite.
+
+Define:
+
+```math
+U_i = w_ix_i
+```
+
+Then:
+
+```math
+\mathbb{E}[U_i]
+=
+\mathbb{E}[w_i]
+\mathbb{E}[x_i]
+=
+0
+```
+
+Also:
+
+```math
+\mathrm{Var}(U_i)
+=
+\mathbb{E}[w_i^2x_i^2]
+-
+\mathbb{E}[w_ix_i]^2
+```
+
+Using independence and zero means:
+
+```math
+\mathrm{Var}(U_i)
+=
+\mathbb{E}[w_i^2]
+\mathbb{E}[x_i^2]
+=
+\sigma_w^2\sigma_x^2
+```
+
+Therefore:
+
+```math
+\mathrm{Var}(Z)
+=
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+```
+
+The summed terms are the products $`U_i=w_ix_i`$. The Central Limit Theorem applies to the sum of many approximately independent finite-variance terms, not to repeated multiplication alone. Under appropriate conditions and sufficiently large fan-in, the distribution of $`Z`$ is approximately Gaussian. The approximation is centered at zero because the terms have zero mean:
+
+```math
+Z
+\approx
+\mathcal{N}
+\left(
+0,
+n_{\mathrm{in}}
+\sigma_w^2
+\sigma_x^2
+\right)
+```
+
+There is an important distinction between two viewpoints. If inputs are treated as fixed constants and weights are independent Gaussian random variables, then $`Z`$ is exactly Gaussian as a linear combination of Gaussian variables. If both inputs and weights are random, the Central Limit Theorem provides an approximation under suitable assumptions. Real neural-network activations may be correlated, so this derivation is an idealized initialization analysis rather than a universal exact law.
+
+## 35. Why ReLU produces approximately half-zero activations at initialization
+
+Assume:
+
+```math
+Z
+\approx
+\mathcal{N}(0,q)
+```
+
+or more generally that the distribution of $`Z`$ is symmetric around zero. Then:
+
+```math
+\mathbb{P}(Z>0)
+=
+\mathbb{P}(Z<0)
+=
+\frac{1}{2}
+```
+
+For:
+
+```math
+A
+=
+\mathrm{ReLU}(Z)
+```
+
+negative pre-activations become zero, and positive pre-activations remain positive. Under the symmetry assumption, approximately half of activation entries are zero at initialization.
+
+This is an initialization-time statistical expectation. It does not mean that half of neurons are permanently dead. Different inputs activate different units, training changes the weight distribution and activation pattern, and a dead ReLU refers to a stronger failure mode where a unit remains inactive across relevant inputs.
+
+For symmetric Gaussian $`Z`$:
+
+```math
+\mathbb{E}
+\left[
+\mathrm{ReLU}(Z)^2
+\right]
+=
+\frac{1}{2}
+\mathbb{E}[Z^2]
+=
+\frac{q}{2}
+```
+
+He initialization tracks the second moment or activation-energy scale. This is not identical to claiming that ReLU output variance is exactly one-half of input variance. More precisely, for Gaussian $`Z`$:
+
+```math
+\mathbb{E}
+\left[
+\mathrm{ReLU}(Z)
+\right]
+=
+\sqrt{
+\frac{q}
+{2\pi}
+}
+```
+
+```math
+\mathrm{Var}
+\left(
+\mathrm{ReLU}(Z)
+\right)
+=
+q
+\left(
+\frac{1}{2}
+-
+\frac{1}
+{2\pi}
+\right)
+```
+
+The second moment is $`\mathbb{E}[A^2]`$. The variance is $`\mathbb{E}[A^2] - \mathbb{E}[A]^2`$. Because ReLU outputs have positive mean under a symmetric nondegenerate input distribution, these two quantities are not the same.
+
+## 36. Sparse activation intuition and its limits
+
+ReLU activation masks create input-dependent active paths. Different inputs can activate different subsets of hidden units. This supports a useful conditional-subnetwork intuition, and zero activations can reduce unnecessary activity and create sparse intermediate representations.
+
+The boundary of the claim matters. Sparse ReLU activations do not by themselves prove feature disentanglement, and they do not prove that semantic concepts automatically separate into different neurons. Biological-neuron analogies may be motivational, but they are not a mathematical justification for ReLU.
+
+## 37. Variance propagation through an affine layer
+
+Start with:
+
+```math
+Y
+=
+\sum_{i=1}^{n_{\mathrm{in}}}
+w_ix_i
+```
+
+Under the same idealized assumptions:
+
+```math
+\mathrm{Var}(Y)
+=
+n_{\mathrm{in}}
+\mathrm{Var}(w)
+\mathrm{Var}(x)
+```
+
+If weight variance is too large, activation scale can grow rapidly across layers. If weight variance is too small, activation scale can shrink toward zero. Initialization aims to preserve a stable signal scale across depth. This is a mean-field-style idealization, not an exact description of all trained neural networks.
+
+## 38. Xavier-style initialization
+
+For approximately linear activations near the operating region, a forward-scale preservation condition is:
+
+```math
+\mathrm{Var}(Y)
+\approx
+\mathrm{Var}(x)
+```
+
+Using:
+
+```math
+\mathrm{Var}(Y)
+=
+n_{\mathrm{in}}
+\mathrm{Var}(w)
+\mathrm{Var}(x)
+```
+
+gives:
+
+```math
+\mathrm{Var}(w)
+\approx
+\frac{1}
+{n_{\mathrm{in}}}
+```
+
+An analogous backward-flow argument gives:
+
+```math
+\mathrm{Var}(w)
+\approx
+\frac{1}
+{n_{\mathrm{out}}}
+```
+
+The common compromise is:
+
+```math
+\mathrm{Var}(W)
+=
+\frac{2}
+{n_{\mathrm{in}}+n_{\mathrm{out}}}
+```
+
+This compromise balances forward and backward signal scales. Xavier-style initialization is especially natural for approximately symmetric activations such as `tanh`, but it is not a universal optimum for every architecture.
+
+## 39. He-style initialization for ReLU
+
+ReLU approximately preserves half of the pre-activation second moment:
+
+```math
+\mathbb{E}
+\left[
+\mathrm{ReLU}(Z)^2
+\right]
+\approx
+\frac{1}{2}
+\mathbb{E}[Z^2]
+```
+
+To preserve activation-energy scale across a ReLU layer, require:
+
+```math
+\frac{1}{2}
+n_{\mathrm{in}}
+\mathrm{Var}(W)
+\approx
+1
+```
+
+Then:
+
+```math
+\mathrm{Var}(W)
+\approx
+\frac{2}
+{n_{\mathrm{in}}}
+```
+
+This is the fan-in form. A backward-flow analysis leads to a corresponding fan-out form. Choosing fan-in prioritizes forward activation-scale preservation, while choosing fan-out prioritizes backward gradient-scale preservation. These conditions improve initialization stability but do not guarantee convergence for every architecture or optimization problem.
+
+For the code mapping, start with:
+
+```math
+G
+\sim
+\mathcal{N}(0,1)
+```
+
+Let:
+
+```math
+W=cG
+```
+
+Then:
+
+```math
+\mathrm{Var}(W)
+=
+c^2
+\mathrm{Var}(G)
+=
+c^2
+```
+
+Set the target variance:
+
+```math
+c^2
+=
+\frac{2}
+{n_{\mathrm{in}}}
+```
+
+Then:
+
+```math
+c
+=
+\sqrt{
+\frac{2}
+{n_{\mathrm{in}}}
+}
+```
+
+This maps directly to the repository code:
+
+```python
+self.W1 = rng.standard_normal((n_features, hidden_dim)) * np.sqrt(
+    2.0 / n_features
+)
+```
+
+and:
+
+```python
+self.W2 = rng.standard_normal((hidden_dim, 1)) * np.sqrt(
+    2.0 / hidden_dim
+)
+```
+
+`rng.standard_normal()` creates standard-normal entries. Multiplying by the square-root factor changes standard deviation, so the resulting variance becomes the intended He-style value.
+
+He-style scaling is especially motivated for weights feeding into or used with rectifier activations. The current educational implementation uses the same explicit scaling pattern for both weight matrices to keep initialization consistent and inspectable. Future experiments may compare initialization strategies for the sigmoid output layer.
+
+## 40. Initialization is only the starting condition
+
+Xavier and He initialization control signal scale at the beginning of training. Parameter updates change weight distributions over time, and signal statistics can drift during training. Initialization is necessary but not sufficient for very deep networks.
+
+This motivates a brief preview of normalization layers, which dynamically influence activation statistics during training rather than only setting the initial parameter scale.
+
+## 41. Normalization layers as a preview
+
+Batch Normalization computes mini-batch-normalized activations during training:
+
+```math
+\hat{Z}
+=
+\frac{Z-\mu_{\mathcal{B}}}
+{\sqrt{\sigma_{\mathcal{B}}^2+\epsilon}}
+```
+
+```math
+Z_{\mathrm{out}}
+=
+\gamma\hat{Z}
++
+\beta
+```
+
+Here $`\mu_{\mathcal{B}}`$ and $`\sigma_{\mathcal{B}}^2`$ are mini-batch statistics during training, while $`\gamma`$ and $`\beta`$ are learnable affine parameters. Normalization changes activation scale while learnable affine parameters restore representational flexibility. This does not guarantee exact reconstruction of every original activation tensor under changing batch statistics.
+
+The original BatchNorm motivation emphasized reducing internal covariate shift. Later research argued that smoother optimization landscapes and more stable gradients are a more fundamental part of the explanation. It is also too strong to claim that BatchNorm always turns the landscape into a perfectly isotropic circular bowl. BatchNorm can improve optimization stability, but its behavior depends on architecture, batch size, data, and training regime.
+
+LayerNorm and RMSNorm are related normalization methods. They normalize different dimensions or statistics, and they should be studied separately later rather than treated as identical to BatchNorm.
+
+The current repository does not implement normalization yet; this section records the conceptual bridge from initialization to future deep-network engineering.
+
+## 42. Initialization and normalization conceptual summary
+
+- Affine layers alone collapse into one affine map.
+- Nonlinear activations prevent collapse.
+- ReLU creates piecewise-affine geometry and sparse activation masks.
+- Pre-activation distributions can be approximated statistically under idealized assumptions.
+- Initialization controls early signal scale.
+- Xavier balances fan-in and fan-out for approximately symmetric activations.
+- He compensates for ReLU second-moment reduction.
+- `sqrt(2 / fan_in)` is a standard-deviation scaling factor derived from the target variance.
+- Normalization layers dynamically influence activation statistics during training.
+- All derivations rely on assumptions that should be stated explicitly.
+
+## 43. Stable sigmoid computation
 
 The direct sigmoid formula is:
 
@@ -1034,31 +1485,31 @@ For a very negative input, computing `exp(-z)` can overflow because $`-z`$ becom
 
 This avoids computing an enormous exponential value and improves numerical stability. The test with `0.0`, `1000.0`, and `-1000.0` verifies the behavior at ordinary, very positive, and very negative inputs.
 
-## 33. Why forward pass returns a cache
+## 44. Why forward pass returns a cache
 
 The forward pass returns a cache containing `X`, `Z1`, `A1`, and `Z2`. These intermediate values are needed later during backpropagation: `A1` is needed to compute `dW2`, `Z1` is needed to compute the ReLU derivative, and `X` is needed to compute `dW1`.
 
 Caching avoids recomputing the full forward pass during backpropagation. The trade-off is memory versus computation: storing intermediate arrays uses more memory, but it avoids redundant matrix multiplications and activation computations.
 
-## 34. Why probabilities are reshaped
+## 45. Why probabilities are reshaped
 
 `Z2` has shape `(n_samples, 1)`, while labels usually have shape `(n_samples,)`. Calling `.reshape(-1)` converts output probabilities to shape `(n_samples,)`, aligning predictions with labels.
 
 This also prevents accidental NumPy broadcasting from producing a `(n_samples, n_samples)` array during loss or gradient computation. Keeping probabilities and labels as matching one-dimensional arrays makes the binary-classification interface less error-prone.
 
-## 35. Forward-pass testing strategy
+## 46. Forward-pass testing strategy
 
 The forward-pass tests cover parameter shapes, reproducible initialization, different initialization under different seeds, ReLU values, numerically stable sigmoid behavior, forward-pass shapes, manually verifiable forward-pass values, invalid dimensions, and invalid input shape.
 
 Shape tests catch interface errors. Manual-value tests validate the complete mathematical path from input features through hidden activations to output probabilities. Stable-sigmoid tests catch numerical errors that would not necessarily appear in purely symbolic formula checks.
 
-## 36. Further reading
+## 47. Further reading
 
 - Adam: A Method for Stochastic Optimization
 - Without-Replacement Sampling for Stochastic Gradient Methods: Convergence Results and Application to Distributed Optimization
 - Why Random Reshuffling Beats Stochastic Gradient Descent
 
-## 37. Binary MLP backpropagation roadmap
+## 48. Binary MLP backpropagation roadmap
 
 The backward pass for the binary MLP computes gradients in reverse order from the scalar batch loss back to the trainable parameters. For the one-hidden-layer network, the required intermediate and parameter gradients are:
 
@@ -1072,7 +1523,7 @@ The backward pass for the binary MLP computes gradients in reverse order from th
 
 Each gradient is obtained by applying the chain rule from the binary cross-entropy loss backward through the sigmoid output activation, the output affine layer, the ReLU hidden activation, and the input affine layer. This reverse order mirrors the forward computation: first compute the output-layer error, then propagate it into the hidden layer, then compute gradients for the input-layer parameters.
 
-## 38. Why sigmoid and BCE simplify to P minus y
+## 49. Why sigmoid and BCE simplify to P minus y
 
 For one training example, the binary cross-entropy loss is:
 
@@ -1170,7 +1621,7 @@ dZ_2
 
 The intuition is direct: if the predicted probability is too high, `P - y` is positive and gradient descent pushes the logit downward; if the predicted probability is too low, `P - y` is negative and gradient descent pushes the logit upward; if the prediction is close to the target, the gradient is small.
 
-## 39. Output-layer gradients
+## 50. Output-layer gradients
 
 The output affine layer is:
 
@@ -1203,7 +1654,7 @@ dZ_{2,i}
 | `dW2`    | `(hidden_dim, 1)` |
 | `db2`    |            `(1,)` |
 
-## 40. Backpropagating through ReLU
+## 51. Backpropagating through ReLU
 
 The output-layer affine operation also sends gradient back into the hidden activations:
 
@@ -1227,7 +1678,7 @@ dA_1
 
 Here, `\odot` means elementwise multiplication. ReLU blocks gradient flow where the forward pre-activation is non-positive. The cached `Z1` value from the forward pass is needed to construct this mask, because the mask depends on the hidden pre-activation values seen during that same forward pass.
 
-## 41. Input-layer gradients
+## 52. Input-layer gradients
 
 The input affine layer is:
 
@@ -1261,7 +1712,7 @@ dZ_{1,i}
 | `dW1`    | `(n_features, hidden_dim)` |
 | `db1`    |            `(hidden_dim,)` |
 
-## 42. Why divide by batch size only once
+## 53. Why divide by batch size only once
 
 The training objective is batch-average binary cross-entropy, so the average over samples contributes one factor of `1 / n`. That factor enters through the output-logit gradient:
 
@@ -1273,7 +1724,7 @@ dZ_2
 
 All later gradients inherit this factor through the chain rule. For example, `dW2`, `db2`, `dA1`, `dZ1`, `dW1`, and `db1` are all computed from values that already include the batch-average scaling. Dividing again at each layer would incorrectly shrink the gradients multiple times and would no longer match the derivative of the stated batch-average objective.
 
-## 43. Cache-to-gradient mapping
+## 54. Cache-to-gradient mapping
 
 | Cached variable | Backward use                                  |
 | --------------- | --------------------------------------------- |
@@ -1284,7 +1735,7 @@ All later gradients inherit this factor through the chain rule. For example, `dW
 
 Caching reduces repeated computation at the cost of additional memory. The cached values preserve the exact forward-pass intermediates needed by the backward pass, avoiding redundant matrix multiplications and activation evaluations.
 
-## 44. Backpropagation shape invariants
+## 55. Backpropagation shape invariants
 
 | Parameter |            Parameter shape | Gradient |             Gradient shape |
 | --------- | -------------------------: | -------- | -------------------------: |
@@ -1295,7 +1746,7 @@ Caching reduces repeated computation at the cost of additional memory. The cache
 
 Each parameter gradient must have exactly the same shape as its corresponding parameter. This invariant is what allows the optimizer to update parameters element by element without broadcasting mistakes or shape-dependent special cases.
 
-## 45. Why sigmoid and BCE produce a logit-space residual
+## 56. Why sigmoid and BCE produce a logit-space residual
 
 The simplification:
 
@@ -1396,7 +1847,7 @@ dZ_2
 
 The final parameter gradient then aggregates these residual contributions across samples.
 
-## 46. Why output-layer gradients use `A1.T @ dZ2`
+## 57. Why output-layer gradients use `A1.T @ dZ2`
 
 The output affine layer is:
 
@@ -1460,7 +1911,7 @@ dW_2^{\mathsf{T}}
 
 That expression contains the same scalar products, but it produces `(1, hidden_dim)` rather than the `(hidden_dim, 1)` shape of `W2`.
 
-## 47. Why cache `Z1` for ReLU backward
+## 58. Why cache `Z1` for ReLU backward
 
 The hidden activation is:
 
@@ -1486,7 +1937,7 @@ There is an important nuance for basic ReLU. If the derivative at exactly `Z1 = 
 
 Caching `Z1` is still preferable because it preserves more information than `A1`. It supports debugging, activation-distribution analysis, dead-neuron diagnosis, and future replacement with other activation functions whose backward pass may depend directly on pre-activation values. Caching pre-activations also mirrors the chain-rule structure directly: the backward pass through an activation uses the derivative of the activation with respect to its own input.
 
-## 48. Open questions
+## 59. Open questions
 
 - How does batch size quantitatively affect gradient variance and optimization speed?
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
