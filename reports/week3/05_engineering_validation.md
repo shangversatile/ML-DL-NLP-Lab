@@ -218,7 +218,44 @@ Verification commands:
 Analytical backpropagation obtains all parameter gradients in one backward pass. Numerical checking requires approximately two loss evaluations per parameter element because each coordinate needs a positive and negative perturbation.
 
 This computational cost grows rapidly as parameter count increases. Numerical gradient checking is appropriate for small deterministic debugging cases, not formal model training.
-## 21. Open questions
+## 21. Defensive copies for explicit parameter transitions
+
+NumPy arrays are mutable. If `get_parameters()` returned shared references to model arrays, a caller could accidentally change model state by mutating the returned dictionary. If `set_parameters()` stored shared references, a caller could mutate model state later by changing arrays that were already passed into the model.
+
+`get_parameters()` returns copies, and `set_parameters()` stores copies. This protects the educational API from hidden aliasing and makes parameter transitions easier to inspect and test: the caller explicitly obtains parameters, computes updated arrays, and then explicitly installs those arrays.
+
+Mature frameworks may choose different trade-offs for performance and memory efficiency. In this project, clear state ownership is more important than avoiding small array copies.
+## 22. Optimizer-state compatibility checks
+
+Stateful optimizers accumulate history across calls. `ParameterMomentum` stores one velocity tensor per parameter. `ParameterAdam` stores one first-moment tensor, one second-moment tensor, and a scalar `time_step`.
+
+State keys and shapes must remain compatible with the current parameter dictionary. Silent reinitialization can hide model-structure changes or wiring bugs, such as replacing `W1` with a differently shaped tensor while keeping stale optimizer state. Incompatible keys or shapes should raise errors.
+
+An intentional architecture change should create fresh optimizer state or explicitly reconfigure the existing optimizer state. That makes the state transition visible instead of letting an optimizer silently discard or mismatch history.
+## 23. Task 5E testing strategy
+
+`tests/test_parameter_optimizers.py` uses a deterministic two-parameter case with `W1` and `b1`. For `ParameterSGD` with `learning_rate=0.1`, the exact expected update is:
+
+| Parameter | Expected updated value |
+| --------- | ---------------------- |
+| `W1` | `[[0.99, 2.02], [2.97, 4.04]]` |
+| `b1` | `[0.48, -0.49]` |
+
+The Momentum tests check the first-step velocity and the second-step accumulated velocity:
+
+| Parameter | First-step state | Second-step state |
+| --------- | ---------------- | ----------------- |
+| `W1` | `[[0.01, -0.02], [0.03, -0.04]]` | `[[0.019, -0.038], [0.057, -0.076]]` |
+| `b1` | `[0.02, -0.01]` | `[0.038, -0.019]` |
+
+The Adam tests verify that state dictionaries start empty with `time_step == 0`, that the first call sets `time_step == 1`, that first moments equal `(1 - beta1) * gradient`, and that second moments equal `(1 - beta2) * gradient ** 2`. The second-step test verifies `time_step == 2`, first moments equal `0.19 * gradient`, second moments equal `0.001999 * gradient ** 2`, and separate parameter tensors maintain separate state arrays with compatible shapes.
+
+The optimizer tests also verify that input parameter and gradient dictionaries remain unchanged, missing or extra keys raise `ValueError`, shape mismatches raise `ValueError`, non-array values raise `TypeError`, non-finite values raise `ValueError`, invalid hyperparameters are rejected, and manually corrupted optimizer state raises `ValueError`.
+
+The MLP tests verify that `get_parameters()` returns exactly `W1`, `b1`, `W2`, and `b2` with matching shapes, that `get_parameters()` returns copies, that `set_parameters()` updates model arrays, and that `set_parameters()` stores copies. They also reject missing MLP parameter keys, wrong replacement shapes, and non-finite replacement values.
+
+Testing the second optimizer step is essential because a stateful optimizer may appear correct on its first update while resetting or corrupting history later.
+## 24. Open questions
 
 - How can numerical gradient checking validate an MLP backpropagation implementation?
 - Which tolerances should be used for finite-difference checks in float64 experiments?

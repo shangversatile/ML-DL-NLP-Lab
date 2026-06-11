@@ -12,11 +12,11 @@ Complete Week 3 modules:
 - MLP forward pass
 - MLP backpropagation derivation
 - MLP analytical backpropagation implementation
-- numerical gradient checking
+- MLP numerical gradient checking
+- generic parameter-dictionary optimizer API
 
 Next modules:
 
-- optimizer API generalization for multiple parameter tensors
 - MLP training loop
 
 ## 2. Learning map
@@ -37,11 +37,11 @@ Engineering validation
 
 ## 3. Table of contents
 
-- [Optimization Algorithms](week3/01_optimization_algorithms.md): SGD, Momentum, Adam, and the optimizer-comparison experiment.
+- [Optimization Algorithms](week3/01_optimization_algorithms.md): SGD, Momentum, Adam, the optimizer-comparison experiment, and the generic parameter-dictionary optimizer API.
 - [Gradient, Risk, and Sampling](week3/02_gradient_risk_and_sampling.md): loss terminology, empirical risk, expected risk, stochastic gradients, and sampling assumptions.
 - [MLP Forward Pass and Backpropagation](week3/03_mlp_forward_and_backprop.md): one-hidden-layer MLP equations, shapes, caches, and backpropagation derivations.
 - [Activation, Initialization, and Normalization](week3/04_activation_initialization_normalization.md): nonlinear geometry, activation statistics, Xavier/He initialization, and a normalization preview.
-- [Engineering Validation](week3/05_engineering_validation.md): mini-batch iterator behavior, optimizer-state testing, numerical stability, shape tests, and Task 5D gradient checking.
+- [Engineering Validation](week3/05_engineering_validation.md): mini-batch iterator behavior, optimizer-state testing, numerical stability, shape tests, Task 5D gradient checking, and Task 5E parameter-optimizer tests.
 - [Appendix: Adam Derivation](week3/appendix_adam_derivation.md): detailed Adam moment, bias-correction, implementation, and testing derivations.
 
 ## 4. Key Week 3 takeaways
@@ -53,18 +53,19 @@ Engineering validation
 - MLP nonlinear activations prevent affine-layer collapse.
 - Backpropagation is repeated application of the chain rule.
 - Numerical gradient checking validates MLP backpropagation on a deterministic local case.
+- Parameter-dictionary optimizers can update multiple MLP tensors without depending on layer semantics.
 - Correct shapes, numerical stability, and state-transition tests are part of the mathematical implementation.
 
 ## 5. Next task
 
-`Task 5E: Generalize the optimizer API for multiple MLP parameter tensors.`
+`Task 5F-A: Implement the reusable MLP training loop and train the MLP on a nonlinear XOR-style dataset.`
 
 ## 6. Open questions
 
 Detailed open questions are tracked in the modular notes:
 
-- [Optimization open questions](week3/01_optimization_algorithms.md#14-open-questions)
+- [Optimization open questions](week3/01_optimization_algorithms.md#18-open-questions)
 - [Gradient, risk, and sampling open questions](week3/02_gradient_risk_and_sampling.md#9-open-questions)
 - [MLP forward/backpropagation open questions](week3/03_mlp_forward_and_backprop.md#20-open-questions)
 - [Activation and initialization open questions](week3/04_activation_initialization_normalization.md#16-open-questions)
-- [Engineering validation open questions](week3/05_engineering_validation.md#21-open-questions)
+- [Engineering validation open questions](week3/05_engineering_validation.md#24-open-questions)

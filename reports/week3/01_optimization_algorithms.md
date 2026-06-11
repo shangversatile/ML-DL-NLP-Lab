@@ -257,7 +257,90 @@ The current experiment boundary is important. All optimizers train for the same 
 The optimizer comparison is designed for teaching, not for a universal optimizer ranking. It uses a simple synthetic binary-classification dataset, one seed, fixed hyperparameters, and a same-epoch budget. Because mini-batch methods perform more updates per epoch than full-batch gradient descent, the experiment mixes optimizer choice with gradient-estimation granularity and update count.
 
 A stricter benchmark would separately control same-update budget, same sample-processing budget, same wall-clock budget, and hyperparameter-search budget. The current result is still useful because it shows how SGD, Momentum, and Adam behave under one transparent training-loop configuration.
-## 14. Open questions
+## 14. From scalar-pair optimizers to parameter dictionaries
+
+The earlier optimizers update one weight array and one scalar bias:
+
+```python
+new_weights, new_bias = optimizer.step(
+    weights,
+    bias,
+    weight_gradients,
+    bias_gradient,
+)
+```
+
+That API is sufficient for linear regression and logistic regression because those models expose exactly one weight vector and one bias scalar. A one-hidden-layer MLP has multiple trainable tensors:
+
+```text
+W1
+b1
+W2
+b2
+```
+
+For that case, the optimizer needs a generic parameter-dictionary interface:
+
+```python
+updated_parameters = optimizer.step(
+    parameters,
+    gradients,
+)
+```
+
+The `parameters` and `gradients` inputs are dictionaries. Matching keys define the update contract, and each dictionary value is a NumPy parameter tensor. With this boundary, `ParameterSGD`, `ParameterMomentum`, and `ParameterAdam` do not depend on layer names, hidden-layer semantics, or MLP-specific structure.
+## 15. Why `ParameterSGD` covers both full-batch and mini-batch updates
+
+The SGD-style parameter update remains:
+
+```math
+\theta_{t+1}
+=
+\theta_t
+-
+\eta g_t
+```
+
+The update rule is identical for full-batch gradient descent and mini-batch SGD. The difference lies in the source of $`g_t`$. Full-batch training passes the empirical-risk gradient computed from the full training set. Mini-batch training passes a stochastic gradient estimate computed from a subset of examples.
+
+Data sampling belongs to the training loop, not the optimizer. `ParameterSGD` only receives parameter tensors and gradient tensors and applies the update it was given.
+## 16. Per-parameter state in Momentum and Adam
+
+Each trainable tensor needs an independent optimizer-state tensor with the same shape. For Momentum, the state is the velocity:
+
+```math
+v_t
+=
+\beta v_{t-1}
++
+(1-\beta)g_t
+```
+
+For Adam, the state includes first and second moments:
+
+```math
+m_t
+=
+\beta_1m_{t-1}
++
+(1-\beta_1)g_t
+```
+
+```math
+v_t
+=
+\beta_2v_{t-1}
++
+(1-\beta_2)g_t^2
+```
+
+`W1`, `b1`, `W2`, and `b2` have different shapes, and their gradients have different coordinate-wise histories. A single global state array would mix unrelated parameter coordinates. State dictionaries preserve one state array per parameter tensor, so each parameter keeps history that matches its own shape and gradient stream.
+## 17. Generic optimizer API boundary
+
+The generic optimizer does not infer that `dW1` corresponds to `W1`, or that `db1` corresponds to `b1`. The training layer performs explicit gradient-key mapping before calling the optimizer.
+
+The optimizer receives matching parameter and gradient keys, validates that contract, and then applies the update tensor by tensor. This avoids hidden naming conventions and keeps the optimizer reusable for future models whose parameter names may not look like MLP layer names.
+## 18. Open questions
 
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
 - How do optimizer conclusions change when moving from convex logistic regression to a non-convex MLP objective?
