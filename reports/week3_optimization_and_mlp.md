@@ -11,13 +11,13 @@ Complete Week 3 modules:
 - optimizer comparison
 - MLP forward pass
 - MLP backpropagation derivation
+- MLP analytical backpropagation implementation
+- numerical gradient checking
 
 Next modules:
 
-- MLP analytical gradient implementation
-- numerical gradient checking
-- MLP training loop
 - optimizer API generalization for multiple parameter tensors
+- MLP training loop
 
 ## 2. Learning map
 
@@ -41,7 +41,7 @@ Engineering validation
 - [Gradient, Risk, and Sampling](week3/02_gradient_risk_and_sampling.md): loss terminology, empirical risk, expected risk, stochastic gradients, and sampling assumptions.
 - [MLP Forward Pass and Backpropagation](week3/03_mlp_forward_and_backprop.md): one-hidden-layer MLP equations, shapes, caches, and backpropagation derivations.
 - [Activation, Initialization, and Normalization](week3/04_activation_initialization_normalization.md): nonlinear geometry, activation statistics, Xavier/He initialization, and a normalization preview.
-- [Engineering Validation](week3/05_engineering_validation.md): mini-batch iterator behavior, optimizer-state testing, numerical stability, shape tests, and future gradient checking.
+- [Engineering Validation](week3/05_engineering_validation.md): mini-batch iterator behavior, optimizer-state testing, numerical stability, shape tests, and Task 5D gradient checking.
 - [Appendix: Adam Derivation](week3/appendix_adam_derivation.md): detailed Adam moment, bias-correction, implementation, and testing derivations.
 
 ## 4. Key Week 3 takeaways
@@ -52,11 +52,12 @@ Engineering validation
 - Mini-batch gradients estimate empirical-risk gradients.
 - MLP nonlinear activations prevent affine-layer collapse.
 - Backpropagation is repeated application of the chain rule.
+- Numerical gradient checking validates MLP backpropagation on a deterministic local case.
 - Correct shapes, numerical stability, and state-transition tests are part of the mathematical implementation.
 
 ## 5. Next task
 
-`Task 5C: Implement BinaryMLPScratch.compute_loss() and BinaryMLPScratch.compute_gradients().`
+`Task 5E: Generalize the optimizer API for multiple MLP parameter tensors.`
 
 ## 6. Open questions
 
@@ -66,4 +67,4 @@ Detailed open questions are tracked in the modular notes:
 - [Gradient, risk, and sampling open questions](week3/02_gradient_risk_and_sampling.md#9-open-questions)
 - [MLP forward/backpropagation open questions](week3/03_mlp_forward_and_backprop.md#20-open-questions)
 - [Activation and initialization open questions](week3/04_activation_initialization_normalization.md#16-open-questions)
-- [Engineering validation open questions](week3/05_engineering_validation.md#12-open-questions)
+- [Engineering validation open questions](week3/05_engineering_validation.md#21-open-questions)

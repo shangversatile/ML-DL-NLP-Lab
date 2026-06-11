@@ -64,7 +64,7 @@ Plotting code should use a headless-safe Matplotlib backend such as `Agg` when f
 This keeps experiment visualization reproducible and prevents plotting from depending on a local interactive GUI session.
 ## 10. Future task: numerical gradient checking
 
-Numerical gradient checking is the next major validation step for MLP backpropagation. The idea is to compare analytical gradients from `compute_gradients()` with finite-difference approximations of the loss.
+Numerical gradient checking is the independent validation step for MLP backpropagation. The idea is to compare analytical gradients from `compute_gradients()` with finite-difference approximations of the loss.
 
 A centered finite difference for one parameter coordinate is:
 
@@ -85,8 +85,140 @@ If the analytical gradient and numerical gradient agree within tolerance, the ch
 - Use manual-value tests for small deterministic examples.
 - Use tolerance-based floating-point assertions with `np.allclose()` or `pytest.approx()`.
 - Include numerical-stability tests for sigmoid and adaptive optimizers.
-- Add numerical gradient checking before trusting MLP backpropagation in a training loop.
-## 12. Open questions
+- Use numerical gradient checking before trusting MLP backpropagation in a training loop.
+## 12. Numerical gradient checking for MLP backpropagation
+
+Analytical backpropagation computes all parameter gradients efficiently by applying the chain rule from the loss back through the output layer, hidden activation, and input-to-hidden layer. This is fast enough for training because one backward pass obtains the full set of gradients needed by the optimizer.
+
+That efficiency does not guarantee correctness. A backpropagation implementation can contain silent bugs in matrix orientation, broadcasting, activation derivatives, or averaging conventions while still returning arrays with plausible shapes. Numerical gradient checking provides an independent debugging reference by estimating each partial derivative directly from loss values.
+
+The repository keeps numerical checking outside the model class. `BinaryMLPScratch` remains responsible for forward computation, loss computation, and analytical gradients, while `src/utils/gradient_check.py` owns the diagnostic finite-difference procedure. This preserves separation of responsibilities and keeps training code separate from slow validation utilities.
+
+The utility verifies the four trainable MLP parameter tensors:
+
+| Parameter | Role |
+| --------- | ---- |
+| `W1` | input-to-hidden weights |
+| `b1` | hidden-layer bias |
+| `W2` | hidden-to-output weights |
+| `b2` | output bias |
+
+The implemented check compares analytical gradients returned by `BinaryMLPScratch.compute_gradients()` against numerical gradients returned by `compute_numerical_gradients()`. `compare_gradients()` then reports one relative L2 error per parameter tensor.
+## 13. Central finite differences
+
+For a scalar parameter coordinate $`\theta_j`$, central finite differences approximate the local derivative with two nearby loss evaluations:
+
+```math
+\frac{\partial L}
+{\partial \theta_j}
+\approx
+\frac{
+L(\theta_j+\epsilon)
+-
+L(\theta_j-\epsilon)
+}
+{2\epsilon}
+```
+
+One parameter element is perturbed at a time, while all other parameter values are held fixed. `loss_plus` evaluates the loss after applying the positive perturbation, and `loss_minus` evaluates the loss after applying the negative perturbation.
+
+The implementation uses central finite differences rather than one-sided differences. Under suitable smoothness assumptions, the approximation error is typically second order in $`\epsilon`$, or $`O(\epsilon^2)`$.
+
+This numerical approximation is slow. Its value is diagnostic reliability, not training efficiency.
+## 14. Why parameters must be restored after perturbation
+
+Each numerical partial derivative must be evaluated around the same original model state. After computing `loss_plus` and `loss_minus`, the perturbed parameter entry must be restored to its original value.
+
+Without restoration, later checks would use a polluted parameter state that includes earlier perturbations. That would violate the definition of a partial derivative, which varies one coordinate while holding the others fixed.
+## 15. Choosing epsilon
+
+The finite-difference step size $`\epsilon`$ has a practical trade-off. If $`\epsilon`$ is too large, the approximation is not sufficiently local and may no longer represent the derivative at the original parameter value. If $`\epsilon`$ is too small, the subtraction between nearly equal floating-point loss values can suffer from cancellation and rounding error.
+
+The repository uses:
+
+```python
+epsilon = 1e-5
+```
+
+This is a practical debugging choice rather than a universal optimum.
+## 16. Relative L2 error
+
+The gradient checker summarizes disagreement with a relative L2 error:
+
+```math
+\mathrm{relative\_error}
+=
+\frac{
+\lVert
+g_{\mathrm{analytical}}
+-
+g_{\mathrm{numerical}}
+\rVert_2
+}{
+\lVert
+g_{\mathrm{analytical}}
+\rVert_2
++
+\lVert
+g_{\mathrm{numerical}}
+\rVert_2
++
+\delta
+}
+```
+
+The numerator measures disagreement between the analytical and numerical gradients. The denominator normalizes that disagreement by the scale of both gradients, and $`\delta`$ prevents division by zero.
+
+Relative error is more informative than raw absolute error when gradient magnitudes differ substantially across parameter tensors.
+## 17. ReLU nondifferentiability boundary
+
+ReLU is not differentiable at zero. A finite-difference perturbation can accidentally move a hidden pre-activation across the ReLU kink. In that case, numerical and analytical gradients may disagree even when the implementation is correct away from the kink.
+
+The deterministic test case intentionally keeps hidden pre-activations away from zero. Gradient checking therefore validates the smooth local region selected by the test case.
+## 18. What gradient checking proves and does not prove
+
+A passing gradient check supports these conclusions for the tested deterministic case:
+
+- The analytical gradient implementation agrees with finite differences.
+- Parameter restoration works.
+- Gradient shapes are correct.
+- The backpropagation chain is numerically consistent for the tested local region.
+
+It does not prove:
+
+- The MLP is universally correct for every possible input.
+- Training will converge.
+- The optimizer API is correct.
+- The model generalizes.
+- ReLU kink behavior is fully tested.
+- Numerical stability is guaranteed under every parameter scale.
+- Future architectural extensions will be correct automatically.
+## 19. Task 5D verification result
+
+The experiment script reports the following relative L2 errors:
+
+| Parameter | Relative L2 error |
+| --------- | ----------------: |
+| `W1`      | 6.621473229226e-12 |
+| `b1`      | 1.002889783682e-11 |
+| `W2`      | 1.105453073646e-11 |
+| `b2`      | 4.319531650001e-12 |
+
+All errors are below the configured tolerance of `1e-6`, and the gradient check passed.
+
+Verification commands:
+
+| Command | Result |
+| ------- | ------ |
+| `pytest tests/test_gradient_check.py -v` | 9 passed |
+| `pytest` | 120 passed |
+| `python experiments/check_mlp_gradients.py` | `Gradient check passed: True` |
+## 20. Why numerical gradient checking is not used for training
+
+Analytical backpropagation obtains all parameter gradients in one backward pass. Numerical checking requires approximately two loss evaluations per parameter element because each coordinate needs a positive and negative perturbation.
+
+This computational cost grows rapidly as parameter count increases. Numerical gradient checking is appropriate for small deterministic debugging cases, not formal model training.
+## 21. Open questions
 
 - How can numerical gradient checking validate an MLP backpropagation implementation?
 - Which tolerances should be used for finite-difference checks in float64 experiments?
