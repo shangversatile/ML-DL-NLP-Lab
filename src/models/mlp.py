@@ -117,6 +117,34 @@ class BinaryMLPScratch:
         }
         return probabilities, cache
 
+    def predict_proba(
+        self,
+        X: np.ndarray,
+    ) -> np.ndarray:
+        """
+        Return positive-class probabilities.
+        """
+        probabilities, _ = self.forward(X)
+        return probabilities
+
+    def predict(
+        self,
+        X: np.ndarray,
+        threshold: float = 0.5,
+    ) -> np.ndarray:
+        """
+        Return thresholded binary predictions.
+        """
+        if isinstance(threshold, (bool, np.bool_)):
+            raise TypeError("threshold must be numeric and not boolean.")
+        if not isinstance(threshold, (int, float, np.integer, np.floating)):
+            raise TypeError("threshold must be numeric.")
+        if threshold < 0.0 or threshold > 1.0:
+            raise ValueError("threshold must be between 0.0 and 1.0.")
+
+        probabilities = self.predict_proba(X)
+        return (probabilities >= threshold).astype(int)
+
     def compute_loss(
         self,
         X: np.ndarray,

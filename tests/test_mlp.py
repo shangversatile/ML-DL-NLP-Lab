@@ -158,6 +158,45 @@ def test_forward_exact_values_with_manual_parameters() -> None:
     assert np.allclose(probabilities, expected_probabilities)
 
 
+def test_predict_proba_matches_forward_probabilities() -> None:
+    model = BinaryMLPScratch(n_features=2, hidden_dim=2, seed=42)
+    X = np.array([[1.0, 1.0], [-1.0, 1.0]])
+
+    forward_probabilities, _ = model.forward(X)
+    predicted_probabilities = model.predict_proba(X)
+
+    assert np.allclose(predicted_probabilities, forward_probabilities)
+
+
+def test_predict_returns_integer_binary_labels() -> None:
+    model = BinaryMLPScratch(n_features=2, hidden_dim=2, seed=42)
+    X = np.array([[1.0, 1.0], [-1.0, 1.0], [0.5, -0.25]])
+
+    predictions = model.predict(X, threshold=0.5)
+
+    assert predictions.dtype.kind in {"i", "u"}
+    assert predictions.shape == (3,)
+    assert set(np.unique(predictions)).issubset({0, 1})
+
+
+@pytest.mark.parametrize("threshold", [-0.1, 1.1])
+def test_predict_invalid_threshold_range(threshold) -> None:
+    model = BinaryMLPScratch(n_features=2, hidden_dim=2, seed=42)
+    X = np.ones((2, 2))
+
+    with pytest.raises(ValueError):
+        model.predict(X, threshold=threshold)
+
+
+@pytest.mark.parametrize("threshold", [True, "0.5"])
+def test_predict_invalid_threshold_type(threshold) -> None:
+    model = BinaryMLPScratch(n_features=2, hidden_dim=2, seed=42)
+    X = np.ones((2, 2))
+
+    with pytest.raises(TypeError):
+        model.predict(X, threshold=threshold)
+
+
 def test_compute_loss_exact_value_with_manual_parameters() -> None:
     model = BinaryMLPScratch(n_features=2, hidden_dim=2, seed=42)
     model.W1 = np.array([[1.0, -1.0], [0.5, 2.0]])

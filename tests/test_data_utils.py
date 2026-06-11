@@ -10,6 +10,7 @@ sys.path.insert(0, str(PROJECT_ROOT))
 from src.data.datasets import (
     make_binary_classification_data,
     make_linear_regression_data,
+    make_xor_classification_data,
 )
 from src.data.preprocessing import iterate_minibatches, standardize_features, train_val_split
 
@@ -57,6 +58,61 @@ def test_binary_classification_is_roughly_balanced():
 
     positive_rate = y.mean()
     assert 0.4 <= positive_rate <= 0.6
+
+
+def test_xor_classification_data_shapes_and_labels():
+    X, y = make_xor_classification_data(
+        n_samples=100,
+        noise=0.1,
+        seed=42,
+    )
+
+    assert X.shape == (100, 2)
+    assert y.shape == (100,)
+    assert set(np.unique(y)).issubset({0, 1})
+    assert set(np.unique(y)) == {0, 1}
+
+
+def test_xor_classification_data_reproducibility():
+    X_first, y_first = make_xor_classification_data(
+        n_samples=100,
+        noise=0.1,
+        seed=42,
+    )
+    X_second, y_second = make_xor_classification_data(
+        n_samples=100,
+        noise=0.1,
+        seed=42,
+    )
+
+    assert np.array_equal(X_first, X_second)
+    assert np.array_equal(y_first, y_second)
+
+
+def test_xor_classification_data_different_seeds():
+    X_first, _ = make_xor_classification_data(
+        n_samples=100,
+        noise=0.1,
+        seed=42,
+    )
+    X_second, _ = make_xor_classification_data(
+        n_samples=100,
+        noise=0.1,
+        seed=43,
+    )
+
+    assert not np.array_equal(X_first, X_second)
+
+
+def test_xor_classification_data_invalid_arguments():
+    with pytest.raises(ValueError):
+        make_xor_classification_data(n_samples=0)
+
+    with pytest.raises(ValueError):
+        make_xor_classification_data(noise=-0.1)
+
+    with pytest.raises(TypeError):
+        make_xor_classification_data(noise=True)
 
 
 def test_linear_regression_data_reproducibility():
