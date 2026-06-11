@@ -308,7 +308,12 @@ dZ_2
 ```
 
 The final parameter gradient then aggregates these residual contributions across samples.
-## 12. Output-layer gradients
+## 12. Information-theory bridge
+
+Cross entropy is not merely a convenient differentiable formula. It is the expected coding cost incurred when labels follow the data distribution but the model assigns probabilities according to its learned distribution. The detailed source-coding derivation, entropy lower bound, KL-divergence decomposition, and neural-network interpretation are recorded in:
+
+[Appendix: Information Theory and Cross Entropy](appendix_information_theory_and_cross_entropy.md)
+## 13. Output-layer gradients
 
 The output affine layer is:
 
@@ -340,7 +345,7 @@ dZ_{2,i}
 | `dZ2`    |  `(n_samples, 1)` |
 | `dW2`    | `(hidden_dim, 1)` |
 | `db2`    |            `(1,)` |
-## 13. Why `dW2 = A1.T @ dZ2`
+## 14. Why `dW2 = A1.T @ dZ2`
 
 The output affine layer is:
 
@@ -403,7 +408,7 @@ dW_2^{\mathsf{T}}
 ```
 
 That expression contains the same scalar products, but it produces `(1, hidden_dim)` rather than the `(hidden_dim, 1)` shape of `W2`.
-## 14. Backpropagating through ReLU
+## 15. Backpropagating through ReLU
 
 The output-layer affine operation also sends gradient back into the hidden activations:
 
@@ -426,7 +431,7 @@ dA_1
 ```
 
 Here, `\odot` means elementwise multiplication. ReLU blocks gradient flow where the forward pre-activation is non-positive. The cached `Z1` value from the forward pass is needed to construct this mask, because the mask depends on the hidden pre-activation values seen during that same forward pass.
-## 15. Why cache `Z1` for ReLU backward
+## 16. Why cache `Z1` for ReLU backward
 
 The hidden activation is:
 
@@ -451,7 +456,7 @@ dA_1
 There is an important nuance for basic ReLU. If the derivative at exactly `Z1 = 0` is defined as zero, then the masks `Z1 > 0` and `A1 > 0` are equivalent for this specific derivative calculation. In that narrow case, `A1` could technically be sufficient.
 
 Caching `Z1` is still preferable because it preserves more information than `A1`. It supports debugging, activation-distribution analysis, dead-neuron diagnosis, and future replacement with other activation functions whose backward pass may depend directly on pre-activation values. Caching pre-activations also mirrors the chain-rule structure directly: the backward pass through an activation uses the derivative of the activation with respect to its own input.
-## 16. Input-layer gradients
+## 17. Input-layer gradients
 
 The input affine layer is:
 
@@ -484,7 +489,7 @@ dZ_{1,i}
 | `dZ1`    |  `(n_samples, hidden_dim)` |
 | `dW1`    | `(n_features, hidden_dim)` |
 | `db1`    |            `(hidden_dim,)` |
-## 17. Why divide by batch size only once
+## 18. Why divide by batch size only once
 
 The training objective is batch-average binary cross-entropy, so the average over samples contributes one factor of `1 / n`. That factor enters through the output-logit gradient:
 
@@ -495,7 +500,7 @@ dZ_2
 ```
 
 All later gradients inherit this factor through the chain rule. For example, `dW2`, `db2`, `dA1`, `dZ1`, `dW1`, and `db1` are all computed from values that already include the batch-average scaling. Dividing again at each layer would incorrectly shrink the gradients multiple times and would no longer match the derivative of the stated batch-average objective.
-## 18. Cache-to-gradient mapping
+## 19. Cache-to-gradient mapping
 
 | Cached variable | Backward use                                  |
 | --------------- | --------------------------------------------- |
@@ -505,7 +510,7 @@ All later gradients inherit this factor through the chain rule. For example, `dW
 | `Z2`            | inspect logits or recompute sigmoid if needed |
 
 Caching reduces repeated computation at the cost of additional memory. The cached values preserve the exact forward-pass intermediates needed by the backward pass, avoiding redundant matrix multiplications and activation evaluations.
-## 19. Backpropagation shape invariants
+## 20. Backpropagation shape invariants
 
 | Parameter |            Parameter shape | Gradient |             Gradient shape |
 | --------- | -------------------------: | -------- | -------------------------: |
@@ -515,7 +520,7 @@ Caching reduces repeated computation at the cost of additional memory. The cache
 | `b2`      |                     `(1,)` | `db2`    |                     `(1,)` |
 
 Each parameter gradient must have exactly the same shape as its corresponding parameter. This invariant is what allows the optimizer to update parameters element by element without broadcasting mistakes or shape-dependent special cases.
-## 20. Open questions
+## 21. Open questions
 
 - How should the optimizer API be generalized from one weight vector and one scalar bias to multiple MLP parameter tensors?
 - How can numerical gradient checking validate an MLP backpropagation implementation?
