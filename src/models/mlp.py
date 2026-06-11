@@ -10,6 +10,8 @@ class BinaryMLPScratch:
     One-hidden-layer MLP for binary classification implemented with NumPy.
     """
 
+    PARAMETER_NAMES = ("W1", "b1", "W2", "b2")
+
     def __init__(
         self,
         n_features: int,
@@ -53,6 +55,45 @@ class BinaryMLPScratch:
         probabilities[~positive_mask] = exp_z / (1.0 + exp_z)
 
         return probabilities
+
+    def get_parameters(self) -> dict[str, np.ndarray]:
+        """
+        Return copies of all trainable parameters.
+        """
+        return {
+            name: getattr(self, name).copy()
+            for name in self.PARAMETER_NAMES
+        }
+
+    def set_parameters(
+        self,
+        parameters: dict[str, np.ndarray],
+    ) -> None:
+        """
+        Replace trainable parameters after validating keys and shapes.
+        """
+        if not isinstance(parameters, dict):
+            raise TypeError("parameters must be a dictionary.")
+        if set(parameters) != set(self.PARAMETER_NAMES):
+            raise ValueError("parameters must contain W1, b1, W2, and b2.")
+
+        for name in self.PARAMETER_NAMES:
+            replacement = parameters[name]
+            current_parameter = getattr(self, name)
+
+            if not isinstance(replacement, np.ndarray):
+                raise TypeError(f"parameters[{name!r}] must be a NumPy array.")
+            if replacement.shape != current_parameter.shape:
+                raise ValueError(
+                    f"parameters[{name!r}] must match the current parameter shape."
+                )
+            if not np.all(np.isfinite(replacement)):
+                raise ValueError(
+                    f"parameters[{name!r}] must contain only finite values."
+                )
+
+        for name in self.PARAMETER_NAMES:
+            setattr(self, name, parameters[name].copy())
 
     def forward(
         self,

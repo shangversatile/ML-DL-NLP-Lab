@@ -15,6 +15,77 @@ def test_initialization_shapes() -> None:
     assert model.b2.shape == (1,)
 
 
+def test_get_parameters_keys_and_shapes() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+
+    parameters = model.get_parameters()
+
+    assert set(parameters) == {"W1", "b1", "W2", "b2"}
+    for name in model.PARAMETER_NAMES:
+        assert parameters[name].shape == getattr(model, name).shape
+
+
+def test_get_parameters_returns_copies() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    original_value = model.W1[0, 0]
+
+    parameters = model.get_parameters()
+    parameters["W1"][0, 0] += 10.0
+
+    assert model.W1[0, 0] == original_value
+
+
+def test_set_parameters_updates_model() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    parameters = {
+        name: parameter + 0.25
+        for name, parameter in model.get_parameters().items()
+    }
+
+    model.set_parameters(parameters)
+
+    for name in model.PARAMETER_NAMES:
+        assert np.allclose(getattr(model, name), parameters[name])
+
+
+def test_set_parameters_copies_inputs() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    parameters = model.get_parameters()
+
+    model.set_parameters(parameters)
+    model_value = model.W1[0, 0]
+    parameters["W1"][0, 0] += 10.0
+
+    assert model.W1[0, 0] == model_value
+
+
+def test_set_parameters_invalid_keys() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    parameters = model.get_parameters()
+    parameters.pop("W2")
+
+    with pytest.raises(ValueError):
+        model.set_parameters(parameters)
+
+
+def test_set_parameters_invalid_shape() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    parameters = model.get_parameters()
+    parameters["W1"] = np.ones((2, 2))
+
+    with pytest.raises(ValueError):
+        model.set_parameters(parameters)
+
+
+def test_set_parameters_non_finite_values() -> None:
+    model = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=42)
+    parameters = model.get_parameters()
+    parameters["W1"][0, 0] = np.nan
+
+    with pytest.raises(ValueError):
+        model.set_parameters(parameters)
+
+
 def test_reproducible_initialization() -> None:
     model_a = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=7)
     model_b = BinaryMLPScratch(n_features=3, hidden_dim=4, seed=7)
