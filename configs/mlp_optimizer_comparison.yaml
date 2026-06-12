@@ -1,0 +1,37 @@
+seed: 42
+
+data:
+  n_samples: 400
+  noise: 0.15
+  val_ratio: 0.2
+
+model:
+  hidden_dim: 16
+
+training:
+  num_epochs: 300
+  batch_size: 32
+  log_every: 50
+  threshold: 0.5
+
+optimizers:
+  sgd:
+    learning_rate: 0.05
+
+  momentum:
+    learning_rate: 0.05
+    beta: 0.9
+
+  adam:
+    learning_rate: 0.01
+    beta1: 0.9
+    beta2: 0.999
+    epsilon: 1e-8
+
+output:
+  train_loss_curve_path: results/figures/mlp_optimizer_comparison_train_bce.png
+  val_loss_curve_path: results/figures/mlp_optimizer_comparison_val_bce.png
+  val_accuracy_curve_path: results/figures/mlp_optimizer_comparison_val_accuracy.png
+
+logging:
+  log_file: results/logs/mlp_optimizer_comparison.log
