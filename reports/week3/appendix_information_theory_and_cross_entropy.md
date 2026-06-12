@@ -722,7 +722,362 @@ P(A)P(B)
 
 The logarithm turns multiplication of probabilities into addition of information.
 
-## 7. Equality conditions and ideal code lengths
+## 7. Alternative derivation with Lagrange multipliers
+
+The previous section proves the entropy lower bound by constructing a normalized code-space distribution and decomposing expected code length into entropy, KL divergence, and unused-code-space penalties. The same optimal code-length rule can also be derived from constrained optimization. This alternative derivation explains how the coding-space budget should be allocated across symbols.
+
+### 7.1 Optimization problem
+
+The expected code length is:
+
+```math
+L
+=
+\sum_{i=1}^{m}
+p_i l_i
+```
+
+For any uniquely decodable $`D`$-ary code, McMillan inequality gives:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+\le
+1
+```
+
+The quantity $`D^{-l_i}`$ is the code-space share assigned to symbol $`x_i`$. Shorter codewords consume a larger share of the coding tree. The total available code space cannot exceed one.
+
+For the optimization derivation, code lengths are temporarily relaxed from integers to positive real numbers.
+
+### 7.2 Why the Kraft-McMillan constraint is active at the optimum
+
+Suppose an optimal solution satisfies:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+<
+1
+```
+
+Then some coding space remains unused. All code lengths can be shortened by a sufficiently small common positive amount while keeping the inequality valid. Shortening code lengths reduces:
+
+```math
+L
+=
+\sum_{i=1}^{m}
+p_i l_i
+```
+
+This contradicts optimality. Therefore, at the continuous optimum:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+=
+1
+```
+
+### 7.3 Construct the Lagrangian
+
+Write the constrained optimization problem:
+
+```math
+\min_{l_1,\dots,l_m}
+\sum_{i=1}^{m}
+p_i l_i
+```
+
+subject to:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+=
+1
+```
+
+Construct the Lagrangian:
+
+```math
+J
+=
+\sum_{i=1}^{m}
+p_i l_i
++
+\lambda
+\left(
+\sum_{i=1}^{m}
+D^{-l_i}
+-
+1
+\right)
+```
+
+The first term is expected code length. The second term enforces the code-space budget. The symbol $`\lambda`$ is the Lagrange multiplier.
+
+### 7.4 Differentiate with respect to each code length
+
+For each $`l_i`$:
+
+```math
+\frac{\partial J}
+{\partial l_i}
+=
+p_i
+-
+\lambda\ln(D)D^{-l_i}
+```
+
+Set the first-order condition to zero:
+
+```math
+p_i
+-
+\lambda\ln(D)D^{-l_i}
+=
+0
+```
+
+Therefore:
+
+```math
+p_i
+=
+\lambda\ln(D)D^{-l_i}
+```
+
+Rearrange:
+
+```math
+D^{-l_i}
+=
+\frac{p_i}
+{\lambda\ln(D)}
+```
+
+### 7.5 Solve for the multiplier
+
+Sum over all $`i`$:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+=
+\frac{1}
+{\lambda\ln(D)}
+\sum_{i=1}^{m}
+p_i
+```
+
+Using:
+
+```math
+\sum_{i=1}^{m}
+D^{-l_i}
+=
+1
+```
+
+and:
+
+```math
+\sum_{i=1}^{m}
+p_i
+=
+1
+```
+
+derive:
+
+```math
+\lambda\ln(D)
+=
+1
+```
+
+Substitute back:
+
+```math
+D^{-l_i}
+=
+p_i
+```
+
+Then:
+
+```math
+l_i^\star
+=
+-\log_D p_i
+```
+
+### 7.6 Minimum expected length equals Shannon entropy
+
+Substitute the optimal real-valued lengths into the expected code length:
+
+```math
+L^\star
+=
+\sum_{i=1}^{m}
+p_i l_i^\star
+```
+
+```math
+L^\star
+=
+-
+\sum_{i=1}^{m}
+p_i
+\log_D p_i
+```
+
+Define:
+
+```math
+H_D(P)
+=
+-
+\sum_{i=1}^{m}
+p_i
+\log_D p_i
+```
+
+Therefore:
+
+```math
+L^\star
+=
+H_D(P)
+```
+
+Under the continuous relaxation of code lengths, the minimum expected code length equals Shannon entropy. This connects back to the lower bound:
+
+```math
+L
+\ge
+H_D(P)
+```
+
+for every uniquely decodable code.
+
+### 7.7 Why this does not replace the McMillan proof
+
+The Lagrange-multiplier derivation does not prove that uniquely decodable codes satisfy the Kraft-McMillan constraint. That feasibility result comes from the McMillan algebraic counting proof. The Lagrange method begins only after the feasible region has been established.
+
+McMillan answers which code-length vectors are allowed. Lagrange multipliers answer which allowed code-length allocation is optimal.
+
+| Question | Mathematical tool |
+| --- | --- |
+| Why must uniquely decodable codes satisfy a code-space constraint? | McMillan inequality |
+| What code-length allocation minimizes expected length? | Lagrange multipliers |
+| Why is the minimum equal to entropy? | Substitute the optimal lengths |
+| Why can real codes approach the bound? | Shannon coding and block coding |
+
+### 7.8 Code-space allocation intuition
+
+The optimality condition:
+
+```math
+D^{-l_i}
+=
+p_i
+```
+
+does not mean:
+
+```math
+l_i
+=
+p_i
+```
+
+Instead, $`D^{-l_i}`$ is the fraction of representation space allocated to symbol $`x_i`$, while $`p_i`$ is the fraction of source occurrences requiring that representation. An optimal code matches allocated representation capacity to source frequency. Common symbols receive larger code-space shares and shorter codewords. Rare symbols receive smaller shares and longer codewords.
+
+For binary coding:
+
+```math
+D
+=
+2
+```
+
+so:
+
+```math
+l_i^\star
+=
+-\log_2 p_i
+```
+
+| Probability | Ideal binary code-space share | Ideal code length |
+| ----------: | ----------------------------: | ----------------: |
+|       `1/2` |                         `1/2` |           `1 bit` |
+|       `1/4` |                         `1/4` |          `2 bits` |
+|       `1/8` |                         `1/8` |          `3 bits` |
+|      `1/16` |                        `1/16` |          `4 bits` |
+
+### 7.9 Integer-length boundary
+
+Real codeword lengths are an idealization. Physical codeword lengths must be integers. If $`p_i`$ is not an exact power of $`D`$, then:
+
+```math
+-\log_D p_i
+```
+
+may not be an integer.
+
+Shannon coding chooses:
+
+```math
+l_i
+=
+\lceil
+-\log_D p_i
+\rceil
+```
+
+The next existing sections already explain why this gives:
+
+```math
+H_D(P)
+\le
+L
+<
+H_D(P)
++
+1
+```
+
+and why block coding makes the per-symbol gap vanish asymptotically.
+
+### 7.10 Relationship to the existing KL-divergence proof
+
+The existing entropy-lower-bound derivation and the Lagrange-multiplier derivation emphasize different aspects of the same geometry.
+
+| Perspective | Main insight |
+| --- | --- |
+| McMillan plus KL divergence | Any mismatch between source probabilities and code-space allocation creates an excess expected length |
+| Lagrange multipliers | The optimal allocation distributes code-space capacity in proportion to source probabilities |
+
+The KL proof is stronger for interpreting mismatch penalties and cross entropy. The Lagrange proof is stronger for understanding optimal resource allocation. Both lead to:
+
+```math
+D^{-l_i}
+=
+p_i
+```
+
+and:
+
+```math
+l_i^\star
+=
+-\log_D p_i
+```
+
+## 8. Equality conditions and ideal code lengths
 
 Starting from:
 
@@ -789,7 +1144,7 @@ Common symbols receive larger code-space shares. Larger code-space shares requir
 
 The ideal lengths may not be integers. Exact equality is not always achievable with single-symbol prefix codes. Shannon coding and block coding address this issue.
 
-## 8. Shannon coding achieves the entropy bound within one code symbol
+## 9. Shannon coding achieves the entropy bound within one code symbol
 
 Choose:
 
@@ -872,7 +1227,7 @@ H_D(P)
 
 McMillan provides the lower bound for every uniquely decodable code. Kraft's converse provides the existence of a prefix-free code with Shannon lengths. The gap is caused by integer codeword lengths. In binary coding, the gap is less than one bit per encoded source symbol.
 
-## 9. Shannon's noiseless source coding theorem
+## 10. Shannon's noiseless source coding theorem
 
 This is the noiseless source coding theorem, not the noisy-channel coding theorem.
 
@@ -944,7 +1299,7 @@ H_D(X)
 
 Entropy is a lower bound for any uniquely decodable lossless code. Block coding makes the upper bound approach the same value. Entropy is therefore the asymptotically optimal average number of $`D`$-ary code symbols per source symbol. For $`D=2`$, this is measured in bits.
 
-## 10. Typical-set intuition
+## 11. Typical-set intuition
 
 For a long independent identically distributed sequence, most probability mass concentrates on a typical set. A typical sequence has probability approximately:
 
@@ -970,7 +1325,7 @@ Compression is possible because almost all observed long sequences lie inside a 
 
 The expected-length proof above is already sufficient for the coding bound used in this appendix. The typical-set view adds intuition for asymptotic block coding.
 
-## 11. Practical coding methods
+## 12. Practical coding methods
 
 Huffman coding produces an optimal prefix code for known symbol probabilities under integer code lengths. Huffman lengths are typically close to:
 
@@ -982,7 +1337,7 @@ Arithmetic coding encodes entire sequences and can approach fractional average l
 
 The quality of compression depends on how accurately the probability model matches the source.
 
-## 12. Cross entropy
+## 13. Cross entropy
 
 Suppose data are generated by true distribution $`P`$, but a code is designed using assumed distribution $`Q`$. Assign ideal code length:
 
@@ -1019,7 +1374,7 @@ D_D(P || Q)
 
 Source coding uses a code-induced model $`Q`$. Neural-network classification uses a learned conditional model $`Q_\theta(Y \mid X)`$. In both cases, mismatch between the true distribution and the modeled distribution creates excess expected coding cost. Minimizing cross entropy reduces this mismatch penalty.
 
-## 13. Cross entropy decomposition and KL divergence
+## 14. Cross entropy decomposition and KL divergence
 
 Define:
 
@@ -1073,7 +1428,7 @@ D_2(P || Q)
 
 Entropy is the irreducible source uncertainty. KL divergence is the additional coding cost caused by using the wrong distribution. Cross entropy equals unavoidable uncertainty plus mismatch penalty.
 
-## 14. Why KL divergence is non-negative
+## 15. Why KL divergence is non-negative
 
 Use the inequality:
 
@@ -1148,7 +1503,7 @@ D_D(P || Q)
 
 The proof used natural logarithms, but changing the logarithm base only multiplies KL divergence by a positive constant. Equality holds when $`P = Q`$. Cross entropy is minimized when the modeled distribution matches the true distribution. This is why minimizing cross entropy trains the model to approximate the data-generating conditional distribution.
 
-## 15. Cross entropy in neural-network classification
+## 16. Cross entropy in neural-network classification
 
 For an input $`x`$, the model predicts a categorical distribution:
 
@@ -1205,7 +1560,7 @@ x_i
 
 Minimizing cross entropy is equivalent to minimizing average negative log-likelihood. Minimizing negative log-likelihood is equivalent to maximizing likelihood. The model learns probabilities that compress observed labels efficiently conditioned on inputs.
 
-## 16. Binary cross entropy
+## 17. Binary cross entropy
 
 For binary labels:
 
@@ -1270,7 +1625,7 @@ BCE is the negative log-likelihood of a Bernoulli model. BCE measures how many n
 
 Base-2 logarithms measure information in bits. Natural logarithms measure information in nats. Neural-network libraries usually use natural logarithms. Changing the logarithm base multiplies the loss by a positive constant, which changes scale but not the location of the optimum.
 
-## 17. Why cross entropy is more informative than accuracy
+## 18. Why cross entropy is more informative than accuracy
 
 For a positive label:
 
@@ -1283,7 +1638,7 @@ For a positive label:
 
 Accuracy only checks whether the probability crosses a threshold. Cross entropy also measures confidence quality. A differentiable loss is needed for gradient-based optimization. Accuracy is piecewise constant with respect to model parameters and provides almost no useful local gradient.
 
-## 18. Why sigmoid and BCE simplify to `p - y`
+## 19. Why sigmoid and BCE simplify to `p - y`
 
 Start with:
 
@@ -1336,13 +1691,13 @@ p-y
 
 Coding-theory interpretation: $`p - y`$ measures model-distribution mismatch for the observed binary label. Probabilistic interpretation: it is the predicted Bernoulli mean minus the observed target. Optimization interpretation: the residual directly drives the logit correction.
 
-## 19. Interpretation boundaries
+## 20. Interpretation boundaries
 
 Shannon coding theorems describe asymptotic lossless compression under stated probabilistic assumptions. Real datasets may not be independent and identically distributed. Practical models only approximate the unknown source distribution.
 
 Minimizing training cross entropy does not automatically guarantee generalization. Low cross entropy does not automatically guarantee perfect calibration. Cross entropy is a proper scoring rule, but finite data, optimization limits, distribution shift, and model misspecification still matter. Accuracy, calibration, robustness, and error analysis remain separate evaluation concerns.
 
-## 20. Conceptual summary
+## 21. Conceptual summary
 
 ```text
 uniquely decodable code
@@ -1369,7 +1724,7 @@ uniquely decodable code
 - BCE is the Bernoulli special case.
 - Sigmoid plus BCE produces the residual `p - y`.
 
-## 21. Further reading
+## 22. Further reading
 
 - A Mathematical Theory of Communication
 - Two Inequalities Implied by Unique Decipherability
