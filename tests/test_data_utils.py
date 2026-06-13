@@ -12,7 +12,12 @@ from src.data.datasets import (
     make_linear_regression_data,
     make_xor_classification_data,
 )
-from src.data.preprocessing import iterate_minibatches, standardize_features, train_val_split
+from src.data.preprocessing import (
+    flip_binary_labels,
+    iterate_minibatches,
+    standardize_features,
+    train_val_split,
+)
 
 
 def test_linear_regression_data_shapes():
@@ -237,3 +242,74 @@ def test_standardize_features():
     assert std.shape == (2,)
     assert np.allclose(X_train_scaled.mean(axis=0), 0.0)
     assert np.allclose(X_train_scaled.std(axis=0), 1.0)
+
+
+def test_flip_binary_labels_changes_exact_number_of_labels():
+    y = np.array([0, 1, 0, 1, 0, 1, 0, 1, 0, 1])
+
+    corrupted_y = flip_binary_labels(y, flip_rate=0.3, seed=42)
+
+    assert np.sum(y != corrupted_y) == 3
+
+
+def test_flip_binary_labels_is_reproducible():
+    y = np.array([0, 1] * 20)
+
+    first_corruption = flip_binary_labels(y, flip_rate=0.25, seed=42)
+    second_corruption = flip_binary_labels(y, flip_rate=0.25, seed=42)
+
+    assert np.array_equal(first_corruption, second_corruption)
+
+
+def test_flip_binary_labels_different_seeds_change_pattern():
+    y = np.array([0, 1] * 50)
+
+    first_corruption = flip_binary_labels(y, flip_rate=0.2, seed=42)
+    second_corruption = flip_binary_labels(y, flip_rate=0.2, seed=43)
+
+    assert not np.array_equal(first_corruption, second_corruption)
+
+
+def test_flip_binary_labels_does_not_mutate_original_labels():
+    y = np.array([0, 1, 0, 1, 0, 1])
+    original_y = y.copy()
+
+    flip_binary_labels(y, flip_rate=0.5, seed=42)
+
+    assert np.array_equal(y, original_y)
+
+
+def test_flip_binary_labels_zero_rate_returns_separate_copy():
+    y = np.array([0, 1, 0, 1])
+
+    corrupted_y = flip_binary_labels(y, flip_rate=0.0, seed=42)
+
+    assert np.array_equal(corrupted_y, y)
+    assert corrupted_y is not y
+
+
+def test_flip_binary_labels_rejects_invalid_labels():
+    with pytest.raises(ValueError):
+        flip_binary_labels(np.array([0, 1, 2]), flip_rate=0.5)
+
+    with pytest.raises(ValueError):
+        flip_binary_labels(np.array([[0, 1], [1, 0]]), flip_rate=0.5)
+
+    with pytest.raises(TypeError):
+        flip_binary_labels([0, 1, 0, 1], flip_rate=0.5)
+
+
+def test_flip_binary_labels_rejects_invalid_rates():
+    y = np.array([0, 1, 0, 1])
+
+    with pytest.raises(ValueError):
+        flip_binary_labels(y, flip_rate=-0.1)
+
+    with pytest.raises(ValueError):
+        flip_binary_labels(y, flip_rate=1.1)
+
+    with pytest.raises(TypeError):
+        flip_binary_labels(y, flip_rate=True)
+
+    with pytest.raises(TypeError):
+        flip_binary_labels(y, flip_rate="0.5")

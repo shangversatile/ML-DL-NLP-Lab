@@ -1,6 +1,7 @@
 """Data preprocessing utilities."""
 
 from collections.abc import Iterator
+from numbers import Real
 
 import numpy as np
 
@@ -63,6 +64,48 @@ def iterate_minibatches(
     for start in range(0, n_samples, batch_size):
         batch_indices = indices[start : start + batch_size]
         yield X[batch_indices], y[batch_indices]
+
+
+def flip_binary_labels(
+    y: np.ndarray,
+    flip_rate: float,
+    seed: int | None = None,
+) -> np.ndarray:
+    """
+    Return a copy of binary labels with a deterministic subset flipped.
+
+    A flipped label changes:
+    0 -> 1
+    1 -> 0
+    """
+    if not isinstance(y, np.ndarray):
+        raise TypeError("y must be a NumPy array")
+    if y.ndim != 1:
+        raise ValueError("y must be one-dimensional")
+    if not np.all((y == 0) | (y == 1)):
+        raise ValueError("y must contain only 0 and 1")
+    if isinstance(flip_rate, (bool, np.bool_)):
+        raise TypeError("flip_rate must be numeric and not boolean")
+    if not isinstance(flip_rate, Real):
+        raise TypeError("flip_rate must be numeric")
+    if flip_rate < 0.0 or flip_rate > 1.0:
+        raise ValueError("flip_rate must be between 0.0 and 1.0")
+
+    corrupted_y = y.copy()
+    n_flips = int(round(len(y) * flip_rate))
+
+    if n_flips == 0:
+        return corrupted_y
+
+    rng = np.random.default_rng(seed)
+    flip_indices = rng.choice(
+        len(y),
+        size=n_flips,
+        replace=False,
+    )
+    corrupted_y[flip_indices] = 1 - corrupted_y[flip_indices]
+
+    return corrupted_y
 
 
 def standardize_features(

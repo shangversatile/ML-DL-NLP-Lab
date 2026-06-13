@@ -1,0 +1,29 @@
+seed: 42
+
+data:
+  n_samples: 500
+  feature_noise: 0.10
+  val_ratio: 0.80
+  train_label_flip_rate: 0.30
+
+model:
+  hidden_dim: 128
+
+training:
+  num_epochs: 2000
+  batch_size: 16
+  log_every: 200
+  threshold: 0.5
+
+optimizer:
+  learning_rate: 0.01
+  beta1: 0.9
+  beta2: 0.999
+  epsilon: 1e-8
+
+output:
+  bce_curve_path: results/figures/mlp_controlled_overfitting_bce.png
+  accuracy_curve_path: results/figures/mlp_controlled_overfitting_accuracy.png
+
+logging:
+  log_file: results/logs/mlp_controlled_overfitting.log
