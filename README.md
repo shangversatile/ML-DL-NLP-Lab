@@ -8,31 +8,21 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1 and Week 2 foundations are complete.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. The current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md).
 
 ## Implemented Components
 
-- synthetic data generation
-- train/validation split
-- feature standardization
-- `set_seed`
-- `get_logger`
-- YAML config loading
-- `LinearRegressionScratch`
-- `LogisticRegressionScratch`
-- `BatchGradientDescent`
-- `mean_squared_error`
-- `binary_cross_entropy`
-- `accuracy_score`
-- `precision_score`
-- `recall_score`
-- `f1_score`
-- `confusion_matrix`
-- loss curve plotting
-- linear regression training experiment
-- logistic regression training experiment
-- unit tests and integration tests
-- Week 1 and Week 2 reports
+- reproducible experiment utilities
+- synthetic-data pipelines
+- linear regression from scratch
+- logistic regression from scratch
+- binary MLP forward and backpropagation
+- analytical and numerical gradient verification
+- SGD, Momentum, and Adam
+- generic parameter-dictionary optimizers
+- nonlinear XOR-style training
+- controlled optimizer comparison
+- controlled overfitting analysis
 
 ## Environment Setup
 
@@ -72,10 +62,11 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 - `reports/week1_setup_notes.md`
 - `reports/week2_linear_logistic_regression.md`
+- `reports/week3_optimization_and_mlp.md`
 
 ## Next Steps
 
-- implement SGD, Momentum, and Adam
-- implement MLP from scratch
-- compare optimizers
-- add calibration and confidence analysis later
+- multiclass softmax MLP from scratch
+- real handwritten-digit training
+- prediction application
+- trustworthy-ML evaluation extensions

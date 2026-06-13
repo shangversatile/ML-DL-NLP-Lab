@@ -342,7 +342,48 @@ The Week 3 experiment is intentionally a teaching-oriented same-epoch comparison
 - Empirical risk approximates expected risk.
 - Mini-batch gradients approximate empirical-risk gradients.
 - The repository uses reproducible random reshuffling without replacement.
-## 9. Open questions
+## 9. Empirical-risk minimization and overfitting
+
+Training minimizes empirical risk on the observed samples:
+
+```math
+R_{\mathrm{emp}}(\theta)
+=
+\frac{1}{N}
+\sum_{i=1}^{N}
+\ell(f_{\theta}(x_i), y_i)
+```
+
+The real objective is low expected risk on unseen samples:
+
+```math
+R_{\mathrm{exp}}(\theta)
+=
+\mathbb{E}_{(X,Y)}
+\left[
+\ell(f_{\theta}(X), Y)
+\right]
+```
+
+A model can continue reducing empirical risk while its expected-risk estimate worsens. This divergence is a core overfitting signal: optimization on the training objective is still succeeding, but generalization is degrading.
+
+Validation loss is an imperfect but useful estimate of unseen-data performance. Training loss and validation loss answer different questions: training loss measures fit to the optimization target, while validation loss estimates behavior on held-out examples.
+## 10. Why label corruption is a controlled probe
+
+Label corruption modifies the training objective without corrupting the validation target. Keeping validation labels clean preserves a stable evaluation reference while the training labels become deliberately less trustworthy.
+
+Task 5F-C isolates the label-condition difference by keeping the initial parameters, data split, preprocessing, optimizer settings, mini-batch order, and update budget shared across conditions. Label noise is a useful controlled probe because it creates a known gap between the training objective and the clean evaluation target, but it is not the only source of overfitting.
+## 11. Why clean labels can still overfit
+
+Clean labels do not guarantee perfect generalization. Finite datasets contain sampling variation, feature noise creates ambiguous examples, large models can fit local irregularities, and long training can increase confidence on unstable decision boundaries.
+
+The clean-label result in Task 5F-C is therefore meaningful rather than contradictory. A high-capacity MLP trained for many epochs on a small noisy training set can overfit even when no labels are intentionally corrupted.
+## 12. Validation-set reuse and meta-overfitting
+
+Repeated hyperparameter decisions based on the same validation set leak information from the validation set into model development. Over time, the validation set gradually becomes part of the optimization process, even if gradients are never computed from it directly.
+
+Final reporting should use an untouched test set. Complex tuning workflows may require nested validation or nested cross-validation so that model selection and final performance estimation remain separated.
+## 13. Open questions
 
 - How does batch size quantitatively affect gradient variance and optimization speed?
 - How should the repository compare optimizers under same-update, same-sample, and same-wall-clock budgets?

@@ -269,7 +269,70 @@ Generated tests verify:
 - final parameters change for each optimizer
 
 All targeted tests passed, and the full suite passed with 172 tests.
-## 25. Open questions
+## 25. Controlled overfitting experiment design
+
+Task 5F-C deliberately uses a small training set, a high-capacity model, and a long training schedule while keeping validation labels clean.
+
+| Setting | Value |
+| ------- | ----: |
+| Total samples | 500 |
+| Training samples | 100 |
+| Validation samples | 400 |
+| Feature noise | 0.10 |
+| Hidden dimension | 128 |
+| Epochs | 2000 |
+| Batch size | 16 |
+| Updates per condition | 14000 |
+| Corrupted training labels | 30 |
+| Training-label corruption rate | 0.30 |
+
+The training set is deliberately small, the model is deliberately high capacity, and the training schedule is deliberately long. Validation labels remain clean. The experiment is designed to expose overfitting rather than optimize benchmark performance.
+## 26. Controlled overfitting result
+
+| Condition | Best validation BCE | Best epoch | Final train BCE | Final validation BCE | Post-best validation BCE increase | Final validation accuracy |
+| --------- | ------------------: | ---------: | --------------: | -------------------: | --------------------------------: | ------------------------: |
+| Clean labels | 0.173422 | 13 | 0.001302 | 1.708606 | 1.535183 | 0.860000 |
+| Corrupted labels | 0.407127 | 251 | 0.217634 | 0.905777 | 0.498650 | 0.702500 |
+
+| Corrupted-label training metric | Value |
+| -------------------------------- | ----: |
+| Final train accuracy against corrupted objective | 0.940000 |
+| Final train accuracy against original clean labels | 0.720000 |
+
+Both conditions used 14000 updates. The clean-label condition also strongly overfits, while the corrupted-label condition increasingly fits corrupted supervision. Optimization success does not guarantee generalization success, and the experiment demonstrates why training metrics cannot be interpreted alone.
+## 27. Why BCE can expose degradation before accuracy
+
+Accuracy uses thresholded class decisions. BCE also evaluates confidence quality, so confidence can worsen while thresholded decisions remain unchanged.
+
+A small number of confidently incorrect examples can sharply increase BCE. Validation BCE is therefore a more sensitive diagnostic curve when monitoring whether a model is becoming overconfident on held-out data.
+## 28. Interpretation boundary
+
+The experiment demonstrates a controlled overfitting signal. It does not prove that label noise is the only mechanism, establish a universal early-stopping epoch, or guarantee the same dynamics on other datasets or architectures.
+
+Future work should add checkpointing, early stopping, confidence analysis, calibration, and error analysis.
+## 29. Task 5F-C test coverage
+
+Task 5F-C tests cover:
+
+- deterministic binary-label corruption
+- exact flip counts
+- reproducibility
+- different corruption seeds
+- preservation of original labels
+- zero-rate corruption
+- invalid labels
+- invalid flip rates
+- best-validation-epoch extraction
+- post-best validation-BCE increase calculation
+
+Verification results:
+
+| Test target | Result |
+| ----------- | -----: |
+| Targeted data utility tests | 25 passed |
+| Targeted experiment helper tests | 3 passed |
+| Full suite | 182 passed |
+## 30. Open questions
 
 - How can numerical gradient checking validate an MLP backpropagation implementation?
 - Which tolerances should be used for finite-difference checks in float64 experiments?
