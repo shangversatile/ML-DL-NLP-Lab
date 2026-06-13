@@ -255,7 +255,21 @@ The optimizer tests also verify that input parameter and gradient dictionaries r
 The MLP tests verify that `get_parameters()` returns exactly `W1`, `b1`, `W2`, and `b2` with matching shapes, that `get_parameters()` returns copies, that `set_parameters()` updates model arrays, and that `set_parameters()` stores copies. They also reject missing MLP parameter keys, wrong replacement shapes, and non-finite replacement values.
 
 Testing the second optimizer step is essential because a stateful optimizer may appear correct on its first update while resetting or corrupting history later.
-## 24. Open questions
+## 24. Fair-comparison invariants for optimizer experiments
+
+Controlled optimizer comparisons need explicit invariants so the result reflects optimizer dynamics rather than accidental experimental differences. Shared initial parameter copies prevent initialization confounding. Fresh optimizer objects prevent historical-state leakage. Identical shuffle seeds preserve mini-batch order. Equal batch size and training-set size preserve updates per epoch, and equal epoch counts produce equal update counts for the compared mini-batch optimizers.
+
+Generated tests verify:
+
+- optimizer factory behavior
+- shared initial parameters are not mutated
+- update budgets are equal
+- history lengths are equal
+- initial metrics are identical
+- final parameters change for each optimizer
+
+All targeted tests passed, and the full suite passed with 172 tests.
+## 25. Open questions
 
 - How can numerical gradient checking validate an MLP backpropagation implementation?
 - Which tolerances should be used for finite-difference checks in float64 experiments?

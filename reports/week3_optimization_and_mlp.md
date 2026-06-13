@@ -14,10 +14,12 @@ Complete Week 3 modules:
 - MLP analytical backpropagation implementation
 - MLP numerical gradient checking
 - generic parameter-dictionary optimizer API
+- reusable XOR MLP training loop
+- controlled MLP optimizer comparison
 
 Next modules:
 
-- MLP training loop
+- controlled overfitting analysis
 
 ## 2. Learning map
 
@@ -37,7 +39,7 @@ Engineering validation
 
 ## 3. Table of contents
 
-- [Optimization Algorithms](week3/01_optimization_algorithms.md): SGD, Momentum, Adam, the optimizer-comparison experiment, and the generic parameter-dictionary optimizer API.
+- [Optimization Algorithms](week3/01_optimization_algorithms.md): SGD, Momentum, Adam, optimizer-comparison experiments, and the generic parameter-dictionary optimizer API.
 - [Gradient, Risk, and Sampling](week3/02_gradient_risk_and_sampling.md): loss terminology, empirical risk, expected risk, stochastic gradients, and sampling assumptions.
 - [MLP Forward Pass and Backpropagation](week3/03_mlp_forward_and_backprop.md): one-hidden-layer MLP equations, shapes, caches, and backpropagation derivations.
 - [Activation, Initialization, and Normalization](week3/04_activation_initialization_normalization.md): nonlinear geometry, activation statistics, Xavier/He initialization, and a normalization preview.
@@ -59,14 +61,21 @@ Engineering validation
 
 ## 5. Next task
 
-`Task 5F-A: Implement the reusable MLP training loop and train the MLP on a nonlinear XOR-style dataset.`
+Completed:
+
+- `Task 5F-A: reusable XOR MLP training loop`
+- `Task 5F-B: controlled MLP optimizer comparison`
+
+Next:
+
+- `Task 5F-C: controlled overfitting analysis`
 
 ## 6. Open questions
 
 Detailed open questions are tracked in the modular notes:
 
-- [Optimization open questions](week3/01_optimization_algorithms.md#18-open-questions)
+- [Optimization open questions](week3/01_optimization_algorithms.md#23-open-questions)
 - [Gradient, risk, and sampling open questions](week3/02_gradient_risk_and_sampling.md#9-open-questions)
 - [MLP forward/backpropagation open questions](week3/03_mlp_forward_and_backprop.md#21-open-questions)
 - [Activation and initialization open questions](week3/04_activation_initialization_normalization.md#16-open-questions)
-- [Engineering validation open questions](week3/05_engineering_validation.md#24-open-questions)
+- [Engineering validation open questions](week3/05_engineering_validation.md#25-open-questions)

@@ -340,7 +340,55 @@ v_t
 The generic optimizer does not infer that `dW1` corresponds to `W1`, or that `db1` corresponds to `b1`. The training layer performs explicit gradient-key mapping before calling the optimizer.
 
 The optimizer receives matching parameter and gradient keys, validates that contract, and then applies the update tensor by tensor. This avoids hidden naming conventions and keeps the optimizer reusable for future models whose parameter names may not look like MLP layer names.
-## 18. Open questions
+## 18. Controlled MLP optimizer comparison
+
+Task 5F-B compares `ParameterSGD`, `ParameterMomentum`, and `ParameterAdam` on the reusable XOR-style MLP training loop.
+
+The comparison controls:
+
+- same XOR-style dataset
+- same train-validation split
+- same standardized features
+- same MLP architecture
+- same initial parameter values
+- same reproducible mini-batch order
+- same epoch count
+- same batch size
+- same parameter-update count
+
+The purpose is to observe optimizer dynamics under one controlled teaching configuration, not to establish a universal optimizer ranking.
+## 19. Why identical initialization matters
+
+Neural-network optimization is non-convex, so two training runs can follow different trajectories even when the optimizer and dataset are the same. Different initial parameters can activate different ReLU regions, which changes the local gradient geometry seen by the model.
+
+Equal seeds are helpful for reproducibility, but they can be fragile if random-number consumption differs across code paths. Task 5F-B therefore explicitly copies shared initial parameters into each fresh model before training. Explicit parameter equality is stronger than assuming equal initialization from equal seeds.
+## 20. Comparison result
+
+| Optimizer | Initial train BCE | Final train BCE | Final validation BCE | Final validation accuracy | Parameter updates |
+| --------- | ----------------: | --------------: | -------------------: | ------------------------: | ----------------: |
+| SGD | 0.774857 | 0.251781 | 0.236874 | 0.875000 | 3000 |
+| Momentum | 0.774857 | 0.251798 | 0.236635 | 0.875000 | 3000 |
+| Adam | 0.774857 | 0.247358 | 0.246317 | 0.875000 | 3000 |
+
+Adam reaches lower BCE earlier under the current configuration. SGD and Momentum converge to very similar final results, and Momentum does not show a large advantage on this simple task. Adam has the lowest final train BCE but not the lowest final validation BCE. The result is configuration-specific.
+## 21. Why accuracy alone hides important behavior
+
+| Epoch | Train BCE | Validation BCE | Validation accuracy |
+| ----: | --------: | -------------: | ------------------: |
+| 50 | 0.253450 | 0.233398 | 0.875000 |
+| 100 | 0.252165 | 0.228138 | 0.875000 |
+| 150 | 0.247860 | 0.243383 | 0.875000 |
+| 300 | 0.247358 | 0.246317 | 0.875000 |
+
+Adam validation accuracy stays unchanged across this trajectory. Validation BCE first improves and then worsens: it is lowest at epoch 100 even though accuracy is identical at every listed checkpoint.
+
+Accuracy only depends on thresholded class decisions. BCE also reflects probability confidence. A model can become more confidently wrong on a small subset of examples while accuracy remains unchanged. This motivates the controlled overfitting experiment.
+## 22. Interpretation boundaries
+
+These results do not imply that Adam is universally best, that Momentum is useless, or that SGD always generalizes better. Optimizer outcomes depend on architecture, task geometry, noise, tuning budget, and compute budget.
+
+XOR-style data are useful for teaching because the setup is small, nonlinear, and inspectable. They are insufficient for universal claims about optimizer behavior.
+## 23. Open questions
 
 - How should learning-rate schedules interact with SGD, Momentum, and Adam?
 - How do optimizer conclusions change when moving from convex logistic regression to a non-convex MLP objective?
