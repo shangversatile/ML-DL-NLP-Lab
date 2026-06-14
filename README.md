@@ -8,7 +8,9 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. The current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md).
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has started with multiclass softmax and cross entropy utilities for the handwritten-digit recognition capstone.
+
+Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md) and [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md).
 
 ## Implemented Components
 
@@ -23,6 +25,7 @@ Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP
 - nonlinear XOR-style training
 - controlled optimizer comparison
 - controlled overfitting analysis
+- multiclass one-hot, stable softmax, cross entropy, and output-gradient utilities
 
 ## Environment Setup
 
@@ -63,10 +66,12 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 - `reports/week1_setup_notes.md`
 - `reports/week2_linear_logistic_regression.md`
 - `reports/week3_optimization_and_mlp.md`
+- `reports/week4_multiclass_digits_capstone.md`
 
 ## Next Steps
 
-- multiclass softmax MLP from scratch
-- real handwritten-digit training
-- prediction application
+- Multiclass MLP from scratch
+- handwritten-digit training
+- error analysis
+- local prediction application
 - trustworthy-ML evaluation extensions
