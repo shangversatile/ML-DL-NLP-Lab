@@ -289,7 +289,29 @@ Although logistic regression already has `compute_loss()` inside the model, addi
 
 In the current logistic regression experiment, the final training loss and evaluation train BCE match because they use the same mathematical formula. However, keeping them in separate modules preserves clear responsibilities and prepares the project for future evaluation tools such as calibration error, threshold analysis, and confidence monitoring.
 
-## 23. Updated open questions
+## 23. Connection to later weeks
+
+Week 2 is the conceptual bridge from classical models to neural networks. Linear regression introduces prediction, loss, gradients, and optimization. Logistic regression introduces logits, sigmoid, binary cross entropy, probabilities, and classification metrics.
+
+Binary cross entropy in logistic regression prepares the transition to the binary MLP in Week 3. The `p - y` residual intuition prepares the transition to softmax cross entropy in Week 4. Separating training loss from evaluation metrics prepares the evaluation and calibration work in Week 5.
+
+| Concept in Week 2                  | Later extension                                  |
+| ---------------------------------- | ------------------------------------------------ |
+| Linear model                       | affine layer in MLP                              |
+| MSE gradient                       | backpropagation as repeated chain rule           |
+| Logistic logit                     | neural-network output logit                      |
+| Sigmoid                            | softmax as multiclass generalization             |
+| BCE                                | multiclass cross entropy                         |
+| Accuracy / precision / recall / F1 | confusion matrix, per-class metrics, calibration |
+| Training / validation split        | generalization and overfitting analysis          |
+
+Related notes:
+
+- [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)
+- [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
+- [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)
+
+## 24. Updated open questions
 
 - Should the model class eventually include a `fit()` method, or should training remain fully controlled by external experiment scripts?
 - Should we add numerical gradient checking to compare analytical gradients against finite-difference approximations?

@@ -20,7 +20,7 @@ Complete Week 3 modules:
 
 Next modules:
 
-- real handwritten-digit recognition capstone
+- [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
 
 ## 2. Learning map
 
@@ -61,7 +61,7 @@ Engineering validation
 - Controlled validation curves distinguish optimization progress from generalization behavior.
 - Correct shapes, numerical stability, and state-transition tests are part of the mathematical implementation.
 
-## 5. Next task
+## 5. Next stage
 
 Completed:
 
@@ -71,9 +71,11 @@ Completed:
 
 Next:
 
-- `Task 5G: Real handwritten-digit recognition capstone`
+- [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
 
-The capstone will extend the NumPy MLP from binary classification to multiclass softmax classification, train on a real handwritten-digit dataset, and connect the model to a lightweight local prediction application.
+Week 3 closes the binary MLP foundation; Week 4 generalizes the same probability-and-gradient logic from sigmoid/BCE to softmax/multiclass cross entropy on a real handwritten-digit task.
+
+The capstone extends the NumPy MLP from binary classification to multiclass softmax classification, trains on a real handwritten-digit dataset, and connects the model to a lightweight local prediction application.
 
 ## 6. Open questions
 

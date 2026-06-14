@@ -4,6 +4,8 @@
 
 Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, real handwritten-digit data, checkpointed inference, error analysis, and confidence and distribution-shift diagnostics.
 
+Week 4 is the active stage of the project.
+
 The initial implementation scope is the probability and loss foundation required by a future `MulticlassMLPScratch` model. Full multiclass MLP training, handwritten-digit training, checkpoint inference, and application work are intentionally deferred to later modules.
 
 ## Learning objectives
@@ -44,7 +46,9 @@ No handwritten-digit training, full multiclass MLP model, GUI code, or checkpoin
 - Add error analysis for common digit confusions.
 - Add checkpointed prediction and confidence diagnostics.
 - Add local inference interaction and distribution-shift analysis.
+- Continue to Week 5 evaluation and technical debt work after the digits capstone baseline exists.
 
-## Links to Week 3
+## Links
 
 - [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)
+- [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

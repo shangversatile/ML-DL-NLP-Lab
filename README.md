@@ -8,7 +8,15 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has started with multiclass softmax and cross entropy utilities for the handwritten-digit recognition capstone.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax and cross entropy utilities for the handwritten-digit recognition capstone.
+
+| Week   | Theme                                                      | Status                                  |
+| ------ | ---------------------------------------------------------- | --------------------------------------- |
+| Week 1 | Reproducible Research Engineering Setup                    | complete                                |
+| Week 2 | Linear / Logistic Regression and Probabilistic Foundations | complete                                |
+| Week 3 | Optimization and Binary MLP Foundations                    | complete, tagged `week3-optimization-mlp` |
+| Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | in progress                             |
+| Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | planned                                 |
 
 Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md) and [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md).
 
@@ -67,6 +75,7 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 - `reports/week2_linear_logistic_regression.md`
 - `reports/week3_optimization_and_mlp.md`
 - `reports/week4_multiclass_digits_capstone.md`
+- `reports/week5_evaluation_technical_debt.md`
 
 ## Next Steps
 

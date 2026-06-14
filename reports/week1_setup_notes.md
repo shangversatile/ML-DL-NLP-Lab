@@ -53,7 +53,25 @@ Technical debt can appear when data processing, model logic, metrics, and experi
 
 This project is still small, so the structure may feel heavier than a single notebook or script. However, the same design principles matter more as the system grows. Starting with clear boundaries should make it easier to add models, evaluation tools, calibration methods, and error analysis without turning the codebase into a collection of disconnected experiments.
 
-## 5. Open questions
+## 5. Connection to later weeks
+
+Week 1 is not merely repository setup. It establishes the experimental infrastructure required by later weeks: reproducible seeds, YAML configuration loading, logging, deterministic synthetic data, preprocessing utilities, unit testing, experiment scripts, results directories, and report writing discipline.
+
+| Later stage                         | Dependency on Week 1                                                      |
+| ----------------------------------- | ------------------------------------------------------------------------- |
+| Week 2 Linear / Logistic Regression | uses configs, reproducible data generation, preprocessing, logging, tests |
+| Week 3 MLP and Optimizers           | relies on the same experiment and testing structure                       |
+| Week 4 Digits Capstone              | extends the same reproducible pipeline to real data                       |
+| Week 5 Evaluation                   | depends on logs, saved results, figures, and structured diagnostics       |
+
+Related notes:
+
+- [Week 2 Linear / Logistic Regression](week2_linear_logistic_regression.md)
+- [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)
+- [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
+- [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)
+
+## 6. Open questions
 
 - How much structure is enough before it becomes over-engineering?
 - How should experiment logs evolve when there are many runs?
