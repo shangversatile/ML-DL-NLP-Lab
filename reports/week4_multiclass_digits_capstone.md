@@ -2,11 +2,11 @@
 
 ## Scope
 
-Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, real handwritten-digit data, checkpointed inference, error analysis, and confidence and distribution-shift diagnostics.
+Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, and confidence and distribution-shift diagnostics.
 
 Week 4 is the active stage of the project.
 
-The initial implementation scope is the probability and loss foundation required by a future `MulticlassMLPScratch` model. Full multiclass MLP training, handwritten-digit training, checkpoint inference, and application work are intentionally deferred to later modules.
+The current implementation scope covers the probability and loss foundation plus the scratch multiclass MLP forward and backpropagation path. Handwritten-digit training, checkpoint inference, and application work are intentionally deferred to later modules.
 
 ## Learning objectives
 
@@ -14,6 +14,8 @@ The initial implementation scope is the probability and loss foundation required
 - Implement stable row-wise softmax without exponentiating raw large logits.
 - Compute multiclass cross entropy from integer labels and predicted probabilities.
 - Derive the softmax-cross-entropy gradient used by the output layer.
+- Implement a single-hidden-layer `MulticlassMLPScratch` model with analytical backpropagation.
+- Verify model gradients with generic central finite-difference checks.
 - Connect binary sigmoid BCE intuition to multiclass softmax CE.
 - Prepare the mathematical interface needed for future handwritten-digit recognition.
 
@@ -36,12 +38,18 @@ Task 6A is complete:
 - `tests/test_multiclass_utils.py` covers valid behavior, numerical stability, input validation, clipping behavior, and gradient structure.
 - `week4/01_softmax_and_multiclass_cross_entropy.md` records the theory foundation.
 
-No handwritten-digit training, full multiclass MLP model, GUI code, or checkpoint pipeline is included in Task 6A.
+Task 6B is complete:
+
+- `src/models/multiclass_mlp.py` implements `MulticlassMLPScratch` forward prediction, multiclass CE loss, analytical gradients, and safe parameter access.
+- `src/utils/model_gradient_check.py` implements generic central finite-difference gradient checking for scratch models with `get_parameters()` and `set_parameters()`.
+- `tests/test_multiclass_mlp.py` and `tests/test_multiclass_mlp_gradient_check.py` cover validation, forward values, predictions, loss, backpropagation shapes, parameter safety, and numerical gradient agreement.
+- [Multiclass MLP Backpropagation](week4/02_multiclass_mlp_backprop.md) records the architecture and gradient derivation.
+
+No handwritten-digit training, data pipeline, GUI code, or checkpoint pipeline is included through Task 6B.
 
 ## Next steps
 
-- Design the future `MulticlassMLPScratch` output layer and backpropagation path.
-- Add a real handwritten-digit data pipeline.
+- Task 6C: add a real handwritten-digit data pipeline and baseline training.
 - Train and evaluate the multiclass MLP on digit data.
 - Add error analysis for common digit confusions.
 - Add checkpointed prediction and confidence diagnostics.
@@ -51,4 +59,6 @@ No handwritten-digit training, full multiclass MLP model, GUI code, or checkpoin
 ## Links
 
 - [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)
+- [Softmax and Multiclass Cross Entropy](week4/01_softmax_and_multiclass_cross_entropy.md)
+- [Multiclass MLP Backpropagation](week4/02_multiclass_mlp_backprop.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)
