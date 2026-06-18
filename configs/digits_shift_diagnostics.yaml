@@ -1,0 +1,65 @@
+seed: 42
+
+data:
+  scale_pixels: true
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  num_classes: 10
+
+checkpoint:
+  path: results/checkpoints/digits_mlp_baseline.npz
+
+analysis:
+  n_bins: 10
+  high_confidence_threshold: 0.90
+
+shift_conditions:
+  - name: clean
+    type: identity
+
+  - name: shift_down_1
+    type: shift
+    row_shift: 1
+    col_shift: 0
+    fill_value: 0.0
+
+  - name: shift_right_1
+    type: shift
+    row_shift: 0
+    col_shift: 1
+    fill_value: 0.0
+
+  - name: dim_0_5
+    type: intensity
+    factor: 0.5
+
+  - name: bright_1_5
+    type: intensity
+    factor: 1.5
+
+  - name: noise_0_15
+    type: noise
+    noise_std: 0.15
+
+  - name: threshold_0_5
+    type: threshold
+    threshold: 0.5
+
+  - name: thicken
+    type: thicken
+
+  - name: thin_0_5
+    type: thin
+    threshold: 0.5
+
+output:
+  accuracy_by_shift_path: results/figures/digits_shift_accuracy.png
+  cross_entropy_by_shift_path: results/figures/digits_shift_cross_entropy.png
+  mean_confidence_by_shift_path: results/figures/digits_shift_mean_confidence.png
+  clean_confidence_bins_path: results/figures/digits_clean_confidence_bins.png
+  worst_shift_confidence_bins_path: results/figures/digits_worst_shift_confidence_bins.png
+
+logging:
+  log_file: results/logs/digits_shift_diagnostics.log

@@ -4,10 +4,12 @@ import numpy as np
 import pytest
 
 from src.utils.plotting import (
+    plot_confidence_bin_summary,
     plot_confusion_matrix,
     plot_digit_examples,
     plot_loss_curve,
     plot_multiple_loss_curves,
+    plot_shift_metric_bars,
 )
 
 
@@ -160,3 +162,105 @@ def test_plot_digit_examples_invalid_image_shape_raises_value_error(tmp_path) ->
 
     with pytest.raises(ValueError):
         plot_digit_examples(np.zeros((8, 8)), ["a"], str(output_path))
+
+
+def test_plot_shift_metric_bars_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "shift_bars.png"
+
+    plot_shift_metric_bars(
+        ["clean", "shifted"],
+        [0.95, 0.80],
+        str(output_path),
+        ylabel="Accuracy",
+        title="Shift Accuracy",
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_shift_metric_bars_invalid_inputs(tmp_path) -> None:
+    output_path = tmp_path / "shift_bars.png"
+
+    with pytest.raises(ValueError):
+        plot_shift_metric_bars(
+            ["clean"],
+            [0.95, 0.80],
+            str(output_path),
+            ylabel="Accuracy",
+            title="Shift Accuracy",
+        )
+
+    with pytest.raises(ValueError):
+        plot_shift_metric_bars(
+            [],
+            [],
+            str(output_path),
+            ylabel="Accuracy",
+            title="Shift Accuracy",
+        )
+
+    with pytest.raises(ValueError):
+        plot_shift_metric_bars(
+            ["clean"],
+            [float("nan")],
+            str(output_path),
+            ylabel="Accuracy",
+            title="Shift Accuracy",
+        )
+
+
+def test_plot_confidence_bin_summary_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "confidence_bins.png"
+    bin_summary = [
+        {
+            "bin_index": 0,
+            "lower": 0.0,
+            "upper": 0.5,
+            "count": 0,
+            "accuracy": np.nan,
+            "mean_confidence": np.nan,
+            "confidence_gap": np.nan,
+        },
+        {
+            "bin_index": 1,
+            "lower": 0.5,
+            "upper": 1.0,
+            "count": 3,
+            "accuracy": 2 / 3,
+            "mean_confidence": 0.8,
+            "confidence_gap": 0.8 - 2 / 3,
+        },
+    ]
+
+    plot_confidence_bin_summary(bin_summary, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_confidence_bin_summary_handles_empty_bins(tmp_path) -> None:
+    output_path = tmp_path / "confidence_bins_empty.png"
+    bin_summary = [
+        {
+            "bin_index": 0,
+            "lower": 0.0,
+            "upper": 0.5,
+            "count": 0,
+            "accuracy": np.nan,
+            "mean_confidence": np.nan,
+            "confidence_gap": np.nan,
+        },
+    ]
+
+    plot_confidence_bin_summary(bin_summary, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_confidence_bin_summary_rejects_empty_summary(tmp_path) -> None:
+    output_path = tmp_path / "confidence_bins.png"
+
+    with pytest.raises(ValueError):
+        plot_confidence_bin_summary([], str(output_path))

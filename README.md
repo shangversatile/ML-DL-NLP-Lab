@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, structured digits error analysis, checkpointed inference, and a local handwritten-digit drawing app.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is complete through the handwritten-digit capstone baseline, including multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, real digits training, error analysis, checkpointed inference, a local drawing app, and shift/confidence diagnostics.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -43,6 +43,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - reusable handwritten-digit inference helpers with top-k outputs
 - local Tkinter handwritten-digit drawing app using the checkpoint-loaded scratch MLP
 - canvas preprocessing from local drawings to 64-feature digit inputs
+- synthetic local-input distribution-shift probes
+- confidence-bin and ECE-style diagnostics
 
 ## Environment Setup
 
@@ -69,6 +71,7 @@ python experiments/run_logistic_regression.py
 python experiments/run_digits_mlp.py
 python experiments/analyze_digits_errors.py
 python experiments/train_save_load_digits_mlp.py
+python experiments/analyze_digits_shift_diagnostics.py
 ```
 
 Run the local digit drawing app:
@@ -98,5 +101,5 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- distribution-shift and confidence diagnostics for local handwritten inputs
+- Week 5 evaluation, calibration, and technical debt cleanup
 - trustworthy-ML evaluation extensions

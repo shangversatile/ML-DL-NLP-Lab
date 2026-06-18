@@ -6,7 +6,7 @@ Week 4 extends the binary MLP foundation into multiclass probability modeling, s
 
 Week 4 is the active stage of the project.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, and a local handwritten-digit drawing app.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, and local-input shift/confidence diagnostics.
 
 ## Learning objectives
 
@@ -29,6 +29,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 4      | `week4/04_training_and_error_analysis.md`            | Confusion matrix, per-class metrics, and error analysis    |
 | 5      | `week4/05_checkpoint_and_inference.md`               | Checkpoint saving/loading and reusable inference pipeline  |
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Local drawing app and distribution-shift boundary          |
+| 7      | `week4/07_shift_and_confidence_diagnostics.md`       | Synthetic shift probes and confidence diagnostics          |
 
 ## Current status
 
@@ -78,12 +79,19 @@ Task 6F is complete:
 - `tests/test_digit_canvas_preprocessing.py` covers the preprocessing bridge without launching Tkinter.
 - [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md) records why local canvas inference changes the problem.
 
-No calibration or full distribution-shift analysis is included through Task 6F.
+Task 6G is complete:
+
+- `src/evaluation/shift_diagnostics.py` implements controlled `8 x 8` shift probes for translation, intensity, noise, thresholding, thickening, and thinning.
+- `src/evaluation/confidence_diagnostics.py` implements confidence-bin summaries and ECE-style diagnostics.
+- `experiments/analyze_digits_shift_diagnostics.py` loads the saved checkpoint without retraining and compares clean test performance to synthetic shift conditions.
+- `tests/test_shift_diagnostics.py`, `tests/test_confidence_diagnostics.py`, and `tests/test_plotting.py` cover the new diagnostics and figures.
+- [Shift and Confidence Diagnostics](week4/07_shift_and_confidence_diagnostics.md) records the diagnostic framing and calibration boundary.
+
+No calibration correction, temperature scaling, abstention, or full real-canvas distribution-shift analysis is included through Task 6G.
 
 ## Next steps
 
-- Task 6G: add local-input distribution-shift probes and confidence diagnostics.
-- Continue to Week 5 evaluation and technical debt work after the digits capstone baseline exists.
+- Week 5: Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
 
 ## Links
 
@@ -94,4 +102,5 @@ No calibration or full distribution-shift analysis is included through Task 6F.
 - [Training and Error Analysis](week4/04_training_and_error_analysis.md)
 - [Checkpoint and Inference](week4/05_checkpoint_and_inference.md)
 - [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md)
+- [Shift and Confidence Diagnostics](week4/07_shift_and_confidence_diagnostics.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

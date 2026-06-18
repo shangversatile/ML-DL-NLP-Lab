@@ -221,3 +221,95 @@ def plot_digit_examples(
     figure.tight_layout()
     figure.savefig(path)
     plt.close(figure)
+
+
+def plot_shift_metric_bars(
+    condition_names: list[str],
+    metric_values: list[float],
+    output_path: str,
+    ylabel: str,
+    title: str,
+) -> None:
+    if len(condition_names) == 0:
+        raise ValueError("condition_names must not be empty.")
+    if len(condition_names) != len(metric_values):
+        raise ValueError("condition_names and metric_values must have matching length.")
+
+    values = np.asarray(metric_values, dtype=float)
+    if not np.all(np.isfinite(values)):
+        raise ValueError("metric_values must contain only finite values.")
+
+    path = _create_parent_directory(output_path)
+    positions = np.arange(len(condition_names))
+
+    figure, axis = plt.subplots(figsize=(max(7, 0.8 * len(condition_names)), 4.5))
+    axis.bar(positions, values)
+    axis.set_xticks(positions)
+    axis.set_xticklabels(condition_names, rotation=35, ha="right")
+    axis.set_ylabel(ylabel)
+    axis.set_title(title)
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+
+
+def plot_confidence_bin_summary(
+    bin_summary: list[dict[str, float | int]],
+    output_path: str,
+    title: str = "Confidence Bin Diagnostics",
+) -> None:
+    if not isinstance(bin_summary, list) or len(bin_summary) == 0:
+        raise ValueError("bin_summary must be a non-empty list.")
+
+    bin_indices = []
+    accuracies = []
+    mean_confidences = []
+    for record in bin_summary:
+        count = int(record["count"])
+        if count == 0:
+            continue
+
+        accuracy = float(record["accuracy"])
+        mean_confidence = float(record["mean_confidence"])
+        if not np.isfinite(accuracy) or not np.isfinite(mean_confidence):
+            raise ValueError("non-empty confidence bins must have finite diagnostics.")
+
+        bin_indices.append(int(record["bin_index"]))
+        accuracies.append(accuracy)
+        mean_confidences.append(mean_confidence)
+
+    path = _create_parent_directory(output_path)
+    figure, axis = plt.subplots(figsize=(7, 4.5))
+
+    if bin_indices:
+        axis.plot(
+            bin_indices,
+            accuracies,
+            marker="o",
+            label="Accuracy",
+        )
+        axis.plot(
+            bin_indices,
+            mean_confidences,
+            marker="o",
+            label="Mean confidence",
+        )
+    else:
+        axis.text(
+            0.5,
+            0.5,
+            "No non-empty bins",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
+
+    axis.set_ylim(0.0, 1.05)
+    axis.set_xlabel("Confidence bin index")
+    axis.set_ylabel("Value")
+    axis.set_title(title)
+    if bin_indices:
+        axis.legend()
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
