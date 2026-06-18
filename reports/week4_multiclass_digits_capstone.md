@@ -2,11 +2,11 @@
 
 ## Scope
 
-Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, and confidence and distribution-shift diagnostics.
+Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, confidence and distribution-shift diagnostics, and augmentation-based robustness improvement.
 
-Week 4 remains in progress. Tasks 6A through 6G built the baseline, local app, and diagnostics, but the thick-stroke shift failure requires an augmentation-based robustness loop before Week 4 closure.
+Week 4 is ready for final review after Task 6I. Tasks 6A through 6H built the baseline, local app, diagnostics, and an augmented robustness-improvement loop. The augmented model strongly improves configured synthetic shift robustness, but the project does not claim real-world canvas robustness or production readiness.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, and local-input shift/confidence diagnostics.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, local-input shift/confidence diagnostics, fixed-update augmented training comparison, and research interpretation.
 
 ## Learning objectives
 
@@ -30,8 +30,9 @@ The current implementation scope covers the probability and loss foundation, the
 | 5      | `week4/05_checkpoint_and_inference.md`               | Checkpoint saving/loading and reusable inference pipeline  |
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Local drawing app and distribution-shift boundary          |
 | 7      | `week4/07_shift_and_confidence_diagnostics.md`       | Synthetic shift probes and confidence diagnostics          |
-| 8      | `week4/08_capstone_summary_and_mnist_extension.md`   | Baseline synthesis and MNIST extension roadmap             |
+| 8      | `week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md` | Baseline diagnosis, robustness loop, and MNIST roadmap |
 | 9      | `week4/09_augmented_training_and_robustness_improvement.md` | Augmented training and robustness comparison        |
+| 10     | `week4/10_research_interpretation_and_next_steps.md` | Research interpretation and next steps                      |
 
 ## Current status
 
@@ -99,15 +100,17 @@ Task 6H is complete:
 - `tests/test_digit_augmentation.py`, `tests/test_multiclass_fixed_update_training.py`, and `tests/test_plotting.py` cover the new augmentation, training, and plotting utilities.
 - [Augmented Training and Robustness Improvement](week4/09_augmented_training_and_robustness_improvement.md) records the improvement protocol and interpretation boundaries.
 
-Week 4 baseline synthesis and MNIST extension note is updated:
+Task 6I is complete:
 
-- [Week 4 Baseline Summary, Failure Diagnosis, and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md) summarizes the current baseline, records the thick-stroke failure mode, and defines a staged MNIST extension roadmap.
-- This note is pending revision after Task 6H results are incorporated into the final Week 4 synthesis.
+- [Baseline Diagnosis, Robustness Loop, and MNIST Extension Roadmap](week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md) incorporates the Task 6H results into the Week 4 synthesis without overclaiming real-world robustness.
+- [Research Interpretation and Next Steps After Augmented Robustness](week4/10_research_interpretation_and_next_steps.md) records the scientific interpretation, threats to validity, and next research questions.
+
+Week 4 can be considered ready for final review after Task 6I, not before.
 
 ## Next steps
 
-- Revise the final Week 4 synthesis with Task 6H results.
-- After revised synthesis: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
+- Final Week 4 review.
+- Then: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
 
 ## Links
 
@@ -119,6 +122,7 @@ Week 4 baseline synthesis and MNIST extension note is updated:
 - [Checkpoint and Inference](week4/05_checkpoint_and_inference.md)
 - [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md)
 - [Shift and Confidence Diagnostics](week4/07_shift_and_confidence_diagnostics.md)
-- [Week 4 Capstone Summary and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md)
+- [Baseline Diagnosis, Robustness Loop, and MNIST Extension Roadmap](week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md)
 - [Augmented Training and Robustness Improvement](week4/09_augmented_training_and_robustness_improvement.md)
+- [Research Interpretation and Next Steps After Augmented Robustness](week4/10_research_interpretation_and_next_steps.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

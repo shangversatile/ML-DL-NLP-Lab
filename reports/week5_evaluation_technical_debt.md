@@ -32,7 +32,15 @@ Week 5 should not replace Week 4; it depends on Week 4.
 
 Week 5 should begin after Week 4 has completed the augmentation-based robustness improvement loop. Calibration and reliability diagrams should not be used to hide a weak base model.
 
-If Task 6H shows that augmentation is insufficient, Week 5 should explicitly record that limitation and use it to motivate MNIST-scale and convolutional extensions.
+Task 6H showed strong improvement on the configured synthetic shift probes, especially the thick-stroke condition. Week 5 should treat that as useful evidence, not as a proof of real-world robustness.
+
+If later held-out transformations or real canvas samples show that augmentation is insufficient, Week 5 should explicitly record that limitation and use it to motivate MNIST-scale and convolutional extensions.
+
+## Input-robustness evidence inherited from Week 4
+
+Week 4 now includes both failure diagnosis and augmentation-based improvement. The original clean-data baseline failed badly under thickened inputs while remaining highly confident. The augmented model strongly improved configured shift robustness under the same scratch MLP architecture and a fixed update budget.
+
+Week 5 should not repeat the same shift probes blindly. It should harden the evaluation system through calibration, experiment registry design, multiple seeds, held-out transforms, real canvas validation where possible, and artifact management.
 
 ## Relationship to MNIST extension
 
