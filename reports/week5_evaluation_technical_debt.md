@@ -28,9 +28,15 @@ Week 4 builds the real-data multiclass training and inference system. Week 5 eva
 
 Week 5 should not replace Week 4; it depends on Week 4.
 
+## Dependency on Week 4 robustness loop
+
+Week 5 should begin after Week 4 has completed the augmentation-based robustness improvement loop. Calibration and reliability diagrams should not be used to hide a weak base model.
+
+If Task 6H shows that augmentation is insufficient, Week 5 should explicitly record that limitation and use it to motivate MNIST-scale and convolutional extensions.
+
 ## Relationship to MNIST extension
 
-Week 5 hardens the current digits capstone before scaling it. Calibration, experiment registry design, artifact management, and technical debt cleanup should happen before MNIST-scale expansion.
+Week 5 hardens the current digits baseline before scaling it. Calibration, experiment registry design, artifact management, and technical debt cleanup should happen before MNIST-scale expansion.
 
 MNIST should inherit the same discipline established in Week 4: explicit split design, checkpointing, error analysis, calibration diagnostics, and shift diagnostics. It should be a scale-up of the evaluation system, not only a larger training run.
 

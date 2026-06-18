@@ -8,14 +8,14 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is complete through the handwritten-digit capstone, including multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, real digits training, error analysis, checkpointed inference, a local drawing app, shift/confidence diagnostics, and an MNIST extension roadmap.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is still in progress. The current system is a working handwritten-digit baseline with local app inference, but shift diagnostics exposed a major robustness gap: thick-stroke inputs can collapse accuracy while confidence remains high.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
 | Week 1 | Reproducible Research Engineering Setup                    | complete                                |
 | Week 2 | Linear / Logistic Regression and Probabilistic Foundations | complete                                |
 | Week 3 | Optimization and Binary MLP Foundations                    | complete, tagged `week3-optimization-mlp` |
-| Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | complete                                |
+| Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | in progress                             |
 | Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | planned                                 |
 
 Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md) and [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md).
@@ -45,7 +45,7 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - canvas preprocessing from local drawings to 64-feature digit inputs
 - synthetic local-input distribution-shift probes
 - confidence-bin and ECE-style diagnostics
-- Week 4 capstone synthesis and MNIST extension roadmap
+- Week 4 baseline synthesis, failure diagnosis, and MNIST extension roadmap
 
 ## Environment Setup
 
@@ -102,5 +102,6 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- Week 5 evaluation, calibration, and technical debt cleanup
-- Later: MNIST-scale extension and convolutional reasoning
+- Task 6H: augmentation-based robustness improvement
+- Then: Week 5 evaluation, calibration, and technical debt cleanup
+- Later: MNIST-scale extension and convolutional reasoning after the robustness loop and Week 5 hardening
