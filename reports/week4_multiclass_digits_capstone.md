@@ -6,7 +6,7 @@ Week 4 extends the binary MLP foundation into multiclass probability modeling, s
 
 Week 4 is the active stage of the project.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, and checkpointed inference. Application work is intentionally deferred to later modules.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, and a local handwritten-digit drawing app.
 
 ## Learning objectives
 
@@ -28,7 +28,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 3      | `week4/03_digits_data_pipeline.md`                   | Real handwritten-digit data pipeline and baseline training |
 | 4      | `week4/04_training_and_error_analysis.md`            | Confusion matrix, per-class metrics, and error analysis    |
 | 5      | `week4/05_checkpoint_and_inference.md`               | Checkpoint saving/loading and reusable inference pipeline  |
-| 6      | `week4/06_interactive_app_and_distribution_shift.md` | Future local application and shift analysis                |
+| 6      | `week4/06_interactive_app_and_distribution_shift.md` | Local drawing app and distribution-shift boundary          |
 
 ## Current status
 
@@ -71,12 +71,18 @@ Task 6E is complete:
 - `tests/test_model_checkpoint.py` and `tests/test_digits_inference.py` cover checkpoint round trips, metadata validation, and reusable inference behavior.
 - [Checkpoint and Inference](week4/05_checkpoint_and_inference.md) records the checkpoint semantics and inference boundary.
 
-No GUI code is included through Task 6E.
+Task 6F is complete:
+
+- `src/inference/digit_canvas_preprocessing.py` converts canvas grayscale arrays into 64-feature digit vectors with normalization, polarity correction, cropping, and 8 x 8 resizing.
+- `apps/digit_draw_app.py` loads the saved scratch MLP checkpoint once at startup and predicts user-drawn digits with top-3 candidates.
+- `tests/test_digit_canvas_preprocessing.py` covers the preprocessing bridge without launching Tkinter.
+- [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md) records why local canvas inference changes the problem.
+
+No calibration or full distribution-shift analysis is included through Task 6F.
 
 ## Next steps
 
-- Task 6F: add a local handwritten-digit drawing application.
-- Add local inference interaction and distribution-shift analysis.
+- Task 6G: add local-input distribution-shift probes and confidence diagnostics.
 - Continue to Week 5 evaluation and technical debt work after the digits capstone baseline exists.
 
 ## Links
@@ -87,4 +93,5 @@ No GUI code is included through Task 6E.
 - [Digits Data Pipeline](week4/03_digits_data_pipeline.md)
 - [Training and Error Analysis](week4/04_training_and_error_analysis.md)
 - [Checkpoint and Inference](week4/05_checkpoint_and_inference.md)
+- [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

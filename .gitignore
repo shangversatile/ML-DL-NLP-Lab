@@ -4,5 +4,6 @@ __pycache__/
 .ipynb_checkpoints/
 results/logs/*.log
 results/figures/*.png
+results/checkpoints/*.npz
 .env
 .DS_Store

@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, structured digits error analysis, and checkpointed inference.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, structured digits error analysis, checkpointed inference, and a local handwritten-digit drawing app.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -41,6 +41,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - top-k accuracy, confidence summaries, high-confidence errors, and top-loss example inspection
 - checkpoint saving/loading for the scratch multiclass MLP
 - reusable handwritten-digit inference helpers with top-k outputs
+- local Tkinter handwritten-digit drawing app using the checkpoint-loaded scratch MLP
+- canvas preprocessing from local drawings to 64-feature digit inputs
 
 ## Environment Setup
 
@@ -69,6 +71,13 @@ python experiments/analyze_digits_errors.py
 python experiments/train_save_load_digits_mlp.py
 ```
 
+Run the local digit drawing app:
+
+```powershell
+python experiments/train_save_load_digits_mlp.py
+python apps/digit_draw_app.py
+```
+
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
 
 ## Design Principles
@@ -89,5 +98,5 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- local handwritten digit drawing app
+- distribution-shift and confidence diagnostics for local handwritten inputs
 - trustworthy-ML evaluation extensions
