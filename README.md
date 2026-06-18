@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, and baseline scratch multiclass MLP training.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, and structured digits error analysis.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -37,6 +37,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - multiclass MLP forward pass, prediction, loss, analytical backpropagation, and gradient checking
 - real handwritten-digit data pipeline with stratified train/validation/test split
 - scratch multiclass MLP baseline training on the digits dataset
+- confusion matrix and per-class diagnostics for multiclass predictions
+- top-k accuracy, confidence summaries, high-confidence errors, and top-loss example inspection
 
 ## Environment Setup
 
@@ -61,6 +63,7 @@ pytest
 python experiments/run_linear_regression.py
 python experiments/run_logistic_regression.py
 python experiments/run_digits_mlp.py
+python experiments/analyze_digits_errors.py
 ```
 
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
@@ -83,6 +86,6 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- confusion matrix and per-class error analysis
-- local prediction application
+- checkpoint and inference pipeline
+- local handwritten digit app
 - trustworthy-ML evaluation extensions

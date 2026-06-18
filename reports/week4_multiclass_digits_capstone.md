@@ -6,7 +6,7 @@ Week 4 extends the binary MLP foundation into multiclass probability modeling, s
 
 Week 4 is the active stage of the project.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, and a baseline real handwritten-digit training pipeline. Checkpoint inference, confusion matrix analysis, per-class error analysis, and application work are intentionally deferred to later modules.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, and structured error analysis. Checkpoint inference and application work are intentionally deferred to later modules.
 
 ## Learning objectives
 
@@ -26,7 +26,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 1      | `week4/01_softmax_and_multiclass_cross_entropy.md`   | Softmax, multiclass cross entropy, and gradient derivation |
 | 2      | `week4/02_multiclass_mlp_backprop.md`                | Future multiclass MLP architecture and backprop            |
 | 3      | `week4/03_digits_data_pipeline.md`                   | Real handwritten-digit data pipeline and baseline training |
-| 4      | `week4/04_training_and_error_analysis.md`            | Future training diagnostics and error analysis             |
+| 4      | `week4/04_training_and_error_analysis.md`            | Confusion matrix, per-class metrics, and error analysis    |
 | 5      | `week4/05_checkpoint_and_inference.md`               | Future checkpoint and prediction pipeline                  |
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Future local application and shift analysis                |
 
@@ -54,12 +54,20 @@ Task 6C is complete:
 - `tests/test_digits_data.py` and `tests/test_multiclass_training.py` cover the data pipeline and multiclass training loop.
 - [Digits Data Pipeline](week4/03_digits_data_pipeline.md) records the real-data baseline design and interpretation limits.
 
-No GUI code, checkpoint pipeline, confusion matrix, or per-class error analysis is included through Task 6C.
+Task 6D is complete:
+
+- `src/evaluation/multiclass_metrics.py` implements confusion matrices, confusion-derived accuracy, per-class recall and precision, macro averaging, top-k accuracy, prediction confidence, and per-sample negative log-likelihood.
+- `src/evaluation/error_analysis.py` summarizes error and confidence behavior, selects high-loss examples, and selects high-confidence errors.
+- `src/utils/plotting.py` can save confusion-matrix figures and digit-example grids.
+- `experiments/analyze_digits_errors.py` trains the baseline and produces structured test-set diagnostics and figures.
+- `tests/test_multiclass_metrics.py`, `tests/test_error_analysis.py`, and `tests/test_plotting.py` cover the new diagnostics.
+- [Training and Error Analysis](week4/04_training_and_error_analysis.md) records the evaluation concepts and interpretation limits.
+
+No GUI code or checkpoint pipeline is included through Task 6D.
 
 ## Next steps
 
-- Task 6D: add confusion matrix, per-class accuracy, and error analysis.
-- Add checkpointed prediction and confidence diagnostics.
+- Task 6E: add checkpoint saving/loading and a reusable inference pipeline.
 - Add local inference interaction and distribution-shift analysis.
 - Continue to Week 5 evaluation and technical debt work after the digits capstone baseline exists.
 
@@ -69,4 +77,5 @@ No GUI code, checkpoint pipeline, confusion matrix, or per-class error analysis 
 - [Softmax and Multiclass Cross Entropy](week4/01_softmax_and_multiclass_cross_entropy.md)
 - [Multiclass MLP Backpropagation](week4/02_multiclass_mlp_backprop.md)
 - [Digits Data Pipeline](week4/03_digits_data_pipeline.md)
+- [Training and Error Analysis](week4/04_training_and_error_analysis.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)
