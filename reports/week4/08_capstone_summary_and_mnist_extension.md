@@ -2,6 +2,8 @@
 
 [<- Back to Week 4 Index](../week4_multiclass_digits_capstone.md)
 
+This synthesis was revised after Task 6G exposed a severe robustness gap. [Task 6H: Augmented Training and Robustness Improvement](09_augmented_training_and_robustness_improvement.md) is required before Week 4 can be treated as complete.
+
 ```text
 Current status:
 The Week 4 system is a working baseline and diagnostic platform, not yet a robust handwritten-digit recognizer.

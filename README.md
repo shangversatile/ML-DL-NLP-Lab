@@ -45,6 +45,7 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - canvas preprocessing from local drawings to 64-feature digit inputs
 - synthetic local-input distribution-shift probes
 - confidence-bin and ECE-style diagnostics
+- augmented training robustness-comparison experiment
 - Week 4 baseline synthesis, failure diagnosis, and MNIST extension roadmap
 
 ## Environment Setup
@@ -73,6 +74,7 @@ python experiments/run_digits_mlp.py
 python experiments/analyze_digits_errors.py
 python experiments/train_save_load_digits_mlp.py
 python experiments/analyze_digits_shift_diagnostics.py
+python experiments/compare_digits_augmented_training.py
 ```
 
 Run the local digit drawing app:
@@ -102,6 +104,6 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- Task 6H: augmentation-based robustness improvement
+- Task 6H: run and interpret the augmentation-based robustness comparison
 - Then: Week 5 evaluation, calibration, and technical debt cleanup
 - Later: MNIST-scale extension and convolutional reasoning after the robustness loop and Week 5 hardening

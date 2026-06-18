@@ -313,3 +313,56 @@ def plot_confidence_bin_summary(
     figure.tight_layout()
     figure.savefig(path)
     plt.close(figure)
+
+
+def plot_grouped_metric_bars(
+    group_names: list[str],
+    series_values: dict[str, list[float]],
+    output_path: str,
+    ylabel: str,
+    title: str,
+) -> None:
+    """
+    Plot grouped bars comparing multiple series across conditions.
+    """
+    if not isinstance(group_names, list) or len(group_names) == 0:
+        raise ValueError("group_names must be a non-empty list.")
+    if not all(isinstance(group_name, str) for group_name in group_names):
+        raise TypeError("group_names must contain only strings.")
+    if not isinstance(series_values, dict) or len(series_values) == 0:
+        raise ValueError("series_values must be a non-empty dictionary.")
+
+    converted_series = {}
+    for series_name, values in series_values.items():
+        if not isinstance(series_name, str):
+            raise TypeError("series names must be strings.")
+        values_array = np.asarray(values, dtype=float)
+        if values_array.ndim != 1 or values_array.shape[0] != len(group_names):
+            raise ValueError("each metric series must match group_names length.")
+        if not np.all(np.isfinite(values_array)):
+            raise ValueError("metric values must contain only finite values.")
+        converted_series[series_name] = values_array
+
+    path = _create_parent_directory(output_path)
+    group_positions = np.arange(len(group_names))
+    n_series = len(converted_series)
+    bar_width = min(0.8 / n_series, 0.35)
+
+    figure, axis = plt.subplots(figsize=(max(8, 0.9 * len(group_names)), 4.8))
+    for series_index, (series_name, values) in enumerate(converted_series.items()):
+        offset = (series_index - (n_series - 1) / 2.0) * bar_width
+        axis.bar(
+            group_positions + offset,
+            values,
+            width=bar_width,
+            label=series_name,
+        )
+
+    axis.set_xticks(group_positions)
+    axis.set_xticklabels(group_names, rotation=35, ha="right")
+    axis.set_ylabel(ylabel)
+    axis.set_title(title)
+    axis.legend()
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)

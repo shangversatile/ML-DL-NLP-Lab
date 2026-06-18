@@ -7,6 +7,7 @@ from src.utils.plotting import (
     plot_confidence_bin_summary,
     plot_confusion_matrix,
     plot_digit_examples,
+    plot_grouped_metric_bars,
     plot_loss_curve,
     plot_multiple_loss_curves,
     plot_shift_metric_bars,
@@ -264,3 +265,61 @@ def test_plot_confidence_bin_summary_rejects_empty_summary(tmp_path) -> None:
 
     with pytest.raises(ValueError):
         plot_confidence_bin_summary([], str(output_path))
+
+
+def test_plot_grouped_metric_bars_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "grouped_bars.png"
+
+    plot_grouped_metric_bars(
+        ["clean", "thicken"],
+        {
+            "Baseline": [0.98, 0.18],
+            "Augmented": [0.96, 0.80],
+        },
+        str(output_path),
+        ylabel="Accuracy",
+        title="Baseline vs Augmented",
+    )
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_grouped_metric_bars_rejects_invalid_inputs(tmp_path) -> None:
+    output_path = tmp_path / "grouped_bars.png"
+
+    with pytest.raises(ValueError):
+        plot_grouped_metric_bars(
+            [],
+            {"Baseline": []},
+            str(output_path),
+            ylabel="Accuracy",
+            title="Invalid",
+        )
+
+    with pytest.raises(ValueError):
+        plot_grouped_metric_bars(
+            ["clean"],
+            {},
+            str(output_path),
+            ylabel="Accuracy",
+            title="Invalid",
+        )
+
+    with pytest.raises(ValueError):
+        plot_grouped_metric_bars(
+            ["clean", "thicken"],
+            {"Baseline": [0.98]},
+            str(output_path),
+            ylabel="Accuracy",
+            title="Invalid",
+        )
+
+    with pytest.raises(ValueError):
+        plot_grouped_metric_bars(
+            ["clean"],
+            {"Baseline": [float("nan")]},
+            str(output_path),
+            ylabel="Accuracy",
+            title="Invalid",
+        )

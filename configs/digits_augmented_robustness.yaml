@@ -1,0 +1,140 @@
+seed: 42
+
+data:
+  scale_pixels: true
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  hidden_dim: 64
+  num_classes: 10
+
+training:
+  max_updates: 6000
+  batch_size: 64
+  eval_every_updates: 300
+  log_every_updates: 1200
+
+optimizer:
+  name: adam
+  learning_rate: 0.01
+  beta1: 0.9
+  beta2: 0.999
+  epsilon: 1e-8
+
+augmentation_conditions:
+  - name: clean
+    type: identity
+
+  - name: shift_down_1
+    type: shift
+    row_shift: 1
+    col_shift: 0
+    fill_value: 0.0
+
+  - name: shift_up_1
+    type: shift
+    row_shift: -1
+    col_shift: 0
+    fill_value: 0.0
+
+  - name: shift_right_1
+    type: shift
+    row_shift: 0
+    col_shift: 1
+    fill_value: 0.0
+
+  - name: shift_left_1
+    type: shift
+    row_shift: 0
+    col_shift: -1
+    fill_value: 0.0
+
+  - name: noise_0_10
+    type: noise
+    noise_std: 0.10
+
+  - name: dim_0_7
+    type: intensity
+    factor: 0.7
+
+  - name: bright_1_3
+    type: intensity
+    factor: 1.3
+
+  - name: threshold_0_4
+    type: threshold
+    threshold: 0.4
+
+  - name: thicken
+    type: thicken
+
+  - name: thin_0_4
+    type: thin
+    threshold: 0.4
+
+evaluation_shift_conditions:
+  - name: clean
+    type: identity
+
+  - name: shift_down_1
+    type: shift
+    row_shift: 1
+    col_shift: 0
+    fill_value: 0.0
+
+  - name: shift_right_1
+    type: shift
+    row_shift: 0
+    col_shift: 1
+    fill_value: 0.0
+
+  - name: dim_0_5
+    type: intensity
+    factor: 0.5
+
+  - name: bright_1_5
+    type: intensity
+    factor: 1.5
+
+  - name: noise_0_15
+    type: noise
+    noise_std: 0.15
+
+  - name: threshold_0_5
+    type: threshold
+    threshold: 0.5
+
+  - name: thicken
+    type: thicken
+
+  - name: thin_0_5
+    type: thin
+    threshold: 0.5
+
+analysis:
+  n_bins: 10
+  top_k: 3
+
+checkpoint:
+  augmented_path: results/checkpoints/digits_mlp_augmented.npz
+  input_scaling: "load_digits pixels scaled from 0-16 to 0-1 with app-like training augmentations"
+  class_names:
+    - "0"
+    - "1"
+    - "2"
+    - "3"
+    - "4"
+    - "5"
+    - "6"
+    - "7"
+    - "8"
+    - "9"
+
+output:
+  accuracy_comparison_path: results/figures/digits_augmented_accuracy_comparison.png
+  cross_entropy_comparison_path: results/figures/digits_augmented_ce_comparison.png
+  ece_comparison_path: results/figures/digits_augmented_ece_comparison.png
+
+logging:
+  log_file: results/logs/digits_augmented_robustness.log

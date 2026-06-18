@@ -248,3 +248,112 @@ def train_multiclass_mlp(
         "val_accuracy": val_accuracy_history,
         "update_count": update_count,
     }
+
+
+def train_multiclass_mlp_fixed_updates(
+    model,
+    optimizer,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_val: np.ndarray,
+    y_val: np.ndarray,
+    max_updates: int,
+    batch_size: int,
+    seed: int,
+    eval_every_updates: int,
+    log_every_updates: int,
+    logger,
+) -> dict[str, list[float] | int]:
+    """
+    Train a multiclass MLP for an exact number of parameter updates.
+    """
+    _validate_positive_int("max_updates", max_updates)
+    _validate_positive_int("batch_size", batch_size)
+    _validate_int("seed", seed)
+    _validate_positive_int("eval_every_updates", eval_every_updates)
+    _validate_positive_int("log_every_updates", log_every_updates)
+
+    update_steps = []
+    train_ce_history = []
+    val_ce_history = []
+    train_accuracy_history = []
+    val_accuracy_history = []
+    update_count = 0
+    epoch = 0
+
+    def evaluate_current_state() -> tuple[dict[str, float], dict[str, float]]:
+        train_metrics = evaluate_multiclass_mlp(model, X_train, y_train)
+        val_metrics = evaluate_multiclass_mlp(model, X_val, y_val)
+        update_steps.append(update_count)
+        train_ce_history.append(train_metrics["cross_entropy"])
+        val_ce_history.append(val_metrics["cross_entropy"])
+        train_accuracy_history.append(train_metrics["accuracy"])
+        val_accuracy_history.append(val_metrics["accuracy"])
+        return train_metrics, val_metrics
+
+    evaluate_current_state()
+
+    while update_count < max_updates:
+        epoch += 1
+        for X_batch, y_batch in iterate_minibatches(
+            X_train,
+            y_train,
+            batch_size=batch_size,
+            shuffle=True,
+            seed=seed + epoch,
+        ):
+            raw_gradients = model.compute_gradients(X_batch, y_batch)
+            parameter_gradients = map_mlp_gradients_to_parameters(raw_gradients)
+            parameters = model.get_parameters()
+            updated_parameters = optimizer.step(
+                parameters,
+                parameter_gradients,
+            )
+            model.set_parameters(updated_parameters)
+            update_count += 1
+
+            train_metrics = None
+            val_metrics = None
+            if update_count % eval_every_updates == 0:
+                train_metrics, val_metrics = evaluate_current_state()
+
+            if update_count % log_every_updates == 0:
+                if train_metrics is None or val_metrics is None:
+                    train_metrics = evaluate_multiclass_mlp(
+                        model,
+                        X_train,
+                        y_train,
+                    )
+                    val_metrics = evaluate_multiclass_mlp(
+                        model,
+                        X_val,
+                        y_val,
+                    )
+                logger.info(
+                    (
+                        "Multiclass MLP update %s/%s - train_ce: %.6f - "
+                        "val_ce: %.6f - train_accuracy: %.6f - "
+                        "val_accuracy: %.6f"
+                    ),
+                    update_count,
+                    max_updates,
+                    train_metrics["cross_entropy"],
+                    val_metrics["cross_entropy"],
+                    train_metrics["accuracy"],
+                    val_metrics["accuracy"],
+                )
+
+            if update_count == max_updates:
+                break
+
+    if update_steps[-1] != update_count:
+        evaluate_current_state()
+
+    return {
+        "update_steps": update_steps,
+        "train_cross_entropy": train_ce_history,
+        "val_cross_entropy": val_ce_history,
+        "train_accuracy": train_accuracy_history,
+        "val_accuracy": val_accuracy_history,
+        "update_count": update_count,
+    }

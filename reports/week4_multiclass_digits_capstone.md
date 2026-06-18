@@ -31,6 +31,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Local drawing app and distribution-shift boundary          |
 | 7      | `week4/07_shift_and_confidence_diagnostics.md`       | Synthetic shift probes and confidence diagnostics          |
 | 8      | `week4/08_capstone_summary_and_mnist_extension.md`   | Baseline synthesis and MNIST extension roadmap             |
+| 9      | `week4/09_augmented_training_and_robustness_improvement.md` | Augmented training and robustness comparison        |
 
 ## Current status
 
@@ -90,15 +91,23 @@ Task 6G is complete:
 
 No calibration correction, temperature scaling, abstention, or full real-canvas distribution-shift analysis is included through Task 6G.
 
+Task 6H is complete:
+
+- `src/data/digit_augmentation.py` applies explicit app-like training augmentations to `8 x 8` digit batches.
+- `src/train.py` includes fixed-update multiclass training so clean-only and augmented models can be compared under the same optimizer-step budget.
+- `experiments/compare_digits_augmented_training.py` compares clean-only and augmented training under the same synthetic shift probes.
+- `tests/test_digit_augmentation.py`, `tests/test_multiclass_fixed_update_training.py`, and `tests/test_plotting.py` cover the new augmentation, training, and plotting utilities.
+- [Augmented Training and Robustness Improvement](week4/09_augmented_training_and_robustness_improvement.md) records the improvement protocol and interpretation boundaries.
+
 Week 4 baseline synthesis and MNIST extension note is updated:
 
 - [Week 4 Baseline Summary, Failure Diagnosis, and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md) summarizes the current baseline, records the thick-stroke failure mode, and defines a staged MNIST extension roadmap.
-- This note is pending revision after Task 6H.
+- This note is pending revision after Task 6H results are incorporated into the final Week 4 synthesis.
 
 ## Next steps
 
-- Task 6H: Augmented Training and Robustness Improvement.
-- After Task 6H and revised synthesis: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
+- Revise the final Week 4 synthesis with Task 6H results.
+- After revised synthesis: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
 
 ## Links
 
@@ -111,4 +120,5 @@ Week 4 baseline synthesis and MNIST extension note is updated:
 - [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md)
 - [Shift and Confidence Diagnostics](week4/07_shift_and_confidence_diagnostics.md)
 - [Week 4 Capstone Summary and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md)
+- [Augmented Training and Robustness Improvement](week4/09_augmented_training_and_robustness_improvement.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)
