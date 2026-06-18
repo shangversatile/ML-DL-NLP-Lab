@@ -89,6 +89,18 @@ def _validate_threshold(
         raise ValueError("threshold must be between 0.0 and 1.0.")
 
 
+def _validate_unit_real(
+    name: str,
+    value: float,
+) -> None:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+        raise TypeError(f"{name} must be numeric and not boolean.")
+    if not np.isfinite(value):
+        raise ValueError(f"{name} must be finite.")
+    if value < 0.0 or value > 1.0:
+        raise ValueError(f"{name} must be between 0.0 and 1.0.")
+
+
 def find_foreground_bounding_box(
     image: np.ndarray,
     threshold: float = 0.05,
@@ -185,8 +197,33 @@ def preprocess_canvas_image(
     """
     Convert a canvas grayscale image into a flattened 64-dimensional digit feature vector.
     """
+    stages = preprocess_canvas_image_with_stages(
+        image,
+        padding=padding,
+        threshold=threshold,
+    )
+    return np.asarray(stages["feature_vector"], dtype=float).copy()
+
+
+def preprocess_canvas_image_with_stages(
+    image: np.ndarray,
+    padding: int = 4,
+    threshold: float = 0.05,
+    blank_mass_threshold: float = 0.01,
+) -> dict[str, np.ndarray | tuple[int, int, int, int] | None | bool | float]:
+    """
+    Return all intermediate preprocessing stages for debugging real canvas inputs.
+    """
+    _validate_padding(padding)
+    _validate_threshold(threshold)
+    _validate_unit_real("blank_mass_threshold", blank_mass_threshold)
+
     normalized = normalize_to_unit_interval(image)
     bright_foreground = ensure_bright_foreground(normalized)
+    bounding_box = find_foreground_bounding_box(
+        bright_foreground,
+        threshold=threshold,
+    )
     cropped = crop_to_foreground(
         bright_foreground,
         padding=padding,
@@ -194,4 +231,17 @@ def preprocess_canvas_image(
     )
     resized = resize_to_8x8(cropped)
     clipped = np.clip(resized, 0.0, 1.0)
-    return clipped.reshape(64)
+    feature_vector = clipped.reshape(64)
+    foreground_mass = float(np.mean(bright_foreground))
+    is_blank = bool(foreground_mass < blank_mass_threshold)
+
+    return {
+        "normalized": normalized.copy(),
+        "bright_foreground": bright_foreground.copy(),
+        "bounding_box": bounding_box,
+        "cropped": cropped.copy(),
+        "resized_8x8": clipped.copy(),
+        "feature_vector": feature_vector.copy(),
+        "is_blank": is_blank,
+        "foreground_mass": foreground_mass,
+    }

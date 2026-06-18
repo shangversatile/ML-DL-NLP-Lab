@@ -2,11 +2,11 @@
 
 ## Scope
 
-Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, confidence and distribution-shift diagnostics, and augmentation-based robustness improvement.
+Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, confidence and distribution-shift diagnostics, augmentation-based robustness improvement, and real canvas debugging.
 
-Week 4 is ready for final review after Task 6I. Tasks 6A through 6H built the baseline, local app, diagnostics, and an augmented robustness-improvement loop. The augmented model strongly improves configured synthetic shift robustness, but the project does not claim real-world canvas robustness or production readiness.
+Week 4 includes a strong baseline-plus-improvement system, but it must not claim real-world canvas robustness. Tasks 6A through 6H built the baseline, local app, diagnostics, and an augmented robustness-improvement loop. Task 6J adds a toolchain to collect and evaluate real canvas samples because user-drawn inputs can still fail.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, local-input shift/confidence diagnostics, fixed-update augmented training comparison, and research interpretation.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, local-input shift/confidence diagnostics, fixed-update augmented training comparison, research interpretation, and real canvas sample evaluation.
 
 ## Learning objectives
 
@@ -33,6 +33,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 8      | `week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md` | Baseline diagnosis, robustness loop, and MNIST roadmap |
 | 9      | `week4/09_augmented_training_and_robustness_improvement.md` | Augmented training and robustness comparison        |
 | 10     | `week4/10_research_interpretation_and_next_steps.md` | Research interpretation and next steps                      |
+| 11     | `week4/11_real_canvas_debugging_and_user_sample_evaluation.md` | Real canvas debugging and user-sample evaluation       |
 
 ## Current status
 
@@ -105,11 +106,22 @@ Task 6I is complete:
 - [Baseline Diagnosis, Robustness Loop, and MNIST Extension Roadmap](week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md) incorporates the Task 6H results into the Week 4 synthesis without overclaiming real-world robustness.
 - [Research Interpretation and Next Steps After Augmented Robustness](week4/10_research_interpretation_and_next_steps.md) records the scientific interpretation, threats to validity, and next research questions.
 
-Week 4 can be considered ready for final review after Task 6I, not before.
+Task 6J is complete:
+
+- `src/inference/digit_canvas_preprocessing.py` exposes stage-aware preprocessing so the final `8 x 8` model input can be inspected.
+- `apps/digit_draw_app.py` prefers the augmented checkpoint, displays the preprocessed model input, and saves labeled or unlabeled canvas samples.
+- `src/inference/canvas_sample_store.py` saves and loads real user-drawn samples without pickle.
+- `experiments/evaluate_canvas_samples.py` evaluates saved labeled canvas samples without retraining.
+- `tests/test_digit_canvas_preprocessing.py` and `tests/test_canvas_sample_store.py` cover the non-GUI utilities.
+- [Real Canvas Debugging and User-Sample Evaluation](week4/11_real_canvas_debugging_and_user_sample_evaluation.md) records the debugging method and interpretation boundaries.
+
+Week 4 can be considered ready for final review after Task 6J. It should still not claim real-world canvas robustness; it now includes a toolchain to collect and evaluate real canvas evidence.
+
+Week 4 now distinguishes configured synthetic robustness, real canvas robustness, preprocessing failure, and model/data coverage failure.
 
 ## Next steps
 
-- Final Week 4 review.
+- Final Week 4 review with real canvas sample evidence clearly separated from synthetic shift evidence.
 - Then: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
 
 ## Links
@@ -125,4 +137,5 @@ Week 4 can be considered ready for final review after Task 6I, not before.
 - [Baseline Diagnosis, Robustness Loop, and MNIST Extension Roadmap](week4/08_baseline_diagnosis_robustness_loop_and_mnist_extension.md)
 - [Augmented Training and Robustness Improvement](week4/09_augmented_training_and_robustness_improvement.md)
 - [Research Interpretation and Next Steps After Augmented Robustness](week4/10_research_interpretation_and_next_steps.md)
+- [Real Canvas Debugging and User-Sample Evaluation](week4/11_real_canvas_debugging_and_user_sample_evaluation.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

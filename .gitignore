@@ -5,5 +5,7 @@ __pycache__/
 results/logs/*.log
 results/figures/*.png
 results/checkpoints/*.npz
+results/canvas_debug/
+data/user_digits/
 .env
 .DS_Store

@@ -3,6 +3,11 @@
 [← Back to Week 4 Index](../week4_multiclass_digits_capstone.md)
 
 ```text
+Update after real canvas testing:
+Although Task 6H substantially improved configured synthetic shift robustness, real hand-drawn canvas inputs can still fail. In many observed cases, the 8x8 model input appears recognizable but the model still predicts incorrectly. This suggests a model/data-coverage gap rather than only a preprocessing failure. Task 6J adds model-input visualization and user-sample evaluation to measure this gap.
+```
+
+```text
 Current status:
 The Week 4 system has progressed from a clean-data baseline to an augmented robustness-improved recognizer on configured synthetic probes.
 

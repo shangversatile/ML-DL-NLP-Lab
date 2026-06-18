@@ -7,6 +7,7 @@ from src.inference.digit_canvas_preprocessing import (
     find_foreground_bounding_box,
     normalize_to_unit_interval,
     preprocess_canvas_image,
+    preprocess_canvas_image_with_stages,
     resize_to_8x8,
     validate_grayscale_image,
 )
@@ -124,6 +125,77 @@ def test_full_preprocessing_returns_flat_vector_for_dark_foreground() -> None:
     assert np.min(features) >= 0.0
     assert np.max(features) <= 1.0
     assert np.max(features) > 0.0
+
+
+def test_preprocess_canvas_image_with_stages_returns_required_keys() -> None:
+    image = np.full((20, 20), 255.0)
+    image[7:13, 8:12] = 0.0
+
+    stages = preprocess_canvas_image_with_stages(image)
+
+    assert set(stages) == {
+        "normalized",
+        "bright_foreground",
+        "bounding_box",
+        "cropped",
+        "resized_8x8",
+        "feature_vector",
+        "is_blank",
+        "foreground_mass",
+    }
+    assert stages["resized_8x8"].shape == (8, 8)
+    assert stages["feature_vector"].shape == (64,)
+    assert np.isfinite(stages["foreground_mass"])
+    assert stages["foreground_mass"] >= 0.0
+
+
+def test_stage_aware_preprocessing_detects_blank_image() -> None:
+    image = np.full((20, 20), 255.0)
+
+    stages = preprocess_canvas_image_with_stages(image)
+
+    assert stages["is_blank"] is True
+    assert stages["bounding_box"] is None
+
+
+def test_stage_aware_preprocessing_detects_non_blank_image() -> None:
+    image = np.full((20, 20), 255.0)
+    image[7:13, 8:12] = 0.0
+
+    stages = preprocess_canvas_image_with_stages(image)
+
+    assert stages["is_blank"] is False
+    assert stages["bounding_box"] is not None
+
+
+def test_preprocess_canvas_image_matches_stage_feature_vector() -> None:
+    image = np.full((20, 20), 255.0)
+    image[7:13, 8:12] = 0.0
+
+    features = preprocess_canvas_image(image)
+    stages = preprocess_canvas_image_with_stages(image)
+
+    np.testing.assert_allclose(features, stages["feature_vector"])
+
+
+@pytest.mark.parametrize(
+    "blank_mass_threshold,expected_error",
+    [
+        (-0.1, ValueError),
+        (1.1, ValueError),
+        (True, TypeError),
+        ("0.01", TypeError),
+    ],
+)
+def test_stage_aware_preprocessing_rejects_invalid_blank_mass_threshold(
+    blank_mass_threshold: object,
+    expected_error: type[Exception],
+) -> None:
+    with pytest.raises(expected_error):
+        preprocess_canvas_image_with_stages(
+            np.zeros((4, 4)),
+            blank_mass_threshold=blank_mass_threshold,
+        )
 
 
 def test_validate_grayscale_image_rejects_invalid_inputs() -> None:

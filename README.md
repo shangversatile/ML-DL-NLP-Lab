@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has a baseline recognizer, local app, shift diagnostics, and an augmented robustness comparison. The augmented model strongly improves configured synthetic shift robustness, especially the thick-stroke probe, but the system is not production-ready and does not claim real-world canvas robustness.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has a baseline recognizer, local app, shift diagnostics, an augmented robustness comparison, and real canvas sample debugging. The augmented model strongly improves configured synthetic shift robustness, but real hand-drawn canvas inputs still require separate evidence. This remains an educational/research prototype, not a production recognizer.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -46,6 +46,7 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - synthetic local-input distribution-shift probes
 - confidence-bin and ECE-style diagnostics
 - augmented training robustness-comparison experiment
+- real canvas model-input debugging and user-sample evaluation
 - Week 4 baseline diagnosis, robustness-loop interpretation, and MNIST extension roadmap
 
 ## Environment Setup
@@ -75,14 +76,18 @@ python experiments/analyze_digits_errors.py
 python experiments/train_save_load_digits_mlp.py
 python experiments/analyze_digits_shift_diagnostics.py
 python experiments/compare_digits_augmented_training.py
+python experiments/evaluate_canvas_samples.py
 ```
 
 Run the local digit drawing app:
 
 ```powershell
-python experiments/train_save_load_digits_mlp.py
+python experiments/compare_digits_augmented_training.py
 python apps/digit_draw_app.py
+python experiments/evaluate_canvas_samples.py
 ```
+
+The app prefers `results/checkpoints/digits_mlp_augmented.npz`, displays the `8 x 8` model input after preprocessing, and can save labeled canvas samples under `data/user_digits/samples/`.
 
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
 

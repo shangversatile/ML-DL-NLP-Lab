@@ -37,6 +37,10 @@ The synthetic probes are limited. The augmentation and evaluation probes overlap
 
 No calibration correction has been applied. The ECE-style diagnostic improved, but it remains a measurement rather than a calibration solution. No MNIST-scale validation has been run. No convolutional comparison has tested whether structured image bias changes the robustness story.
 
+### Real canvas mismatch
+
+Actual user-drawn inputs may differ from synthetic shift probes. A model can improve on configured probe distributions while still failing on the true app-input distribution. In Condition-B failures, the 8x8 input can look recognizable while the model remains wrong, suggesting limitations in training coverage, representation, or confidence calibration. This motivates Task 6J.
+
 ## 6. What would count as stronger evidence
 
 Stronger evidence would include held-out transformation strengths, a real canvas validation set, multiple random seeds, augmentation ablation studies, validation-based calibration, MNIST comparison, and eventual CNN comparison.
