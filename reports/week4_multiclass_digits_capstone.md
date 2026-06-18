@@ -6,7 +6,7 @@ Week 4 extends the binary MLP foundation into multiclass probability modeling, s
 
 Week 4 is the active stage of the project.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, and structured error analysis. Checkpoint inference and application work are intentionally deferred to later modules.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, and checkpointed inference. Application work is intentionally deferred to later modules.
 
 ## Learning objectives
 
@@ -27,7 +27,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 2      | `week4/02_multiclass_mlp_backprop.md`                | Future multiclass MLP architecture and backprop            |
 | 3      | `week4/03_digits_data_pipeline.md`                   | Real handwritten-digit data pipeline and baseline training |
 | 4      | `week4/04_training_and_error_analysis.md`            | Confusion matrix, per-class metrics, and error analysis    |
-| 5      | `week4/05_checkpoint_and_inference.md`               | Future checkpoint and prediction pipeline                  |
+| 5      | `week4/05_checkpoint_and_inference.md`               | Checkpoint saving/loading and reusable inference pipeline  |
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Future local application and shift analysis                |
 
 ## Current status
@@ -63,11 +63,19 @@ Task 6D is complete:
 - `tests/test_multiclass_metrics.py`, `tests/test_error_analysis.py`, and `tests/test_plotting.py` cover the new diagnostics.
 - [Training and Error Analysis](week4/04_training_and_error_analysis.md) records the evaluation concepts and interpretation limits.
 
-No GUI code or checkpoint pipeline is included through Task 6D.
+Task 6E is complete:
+
+- `src/models/checkpoint.py` saves and loads scratch multiclass MLP checkpoints with JSON metadata and NumPy parameter arrays.
+- `src/inference/digits_inference.py` normalizes digit input shapes and returns probabilities, predictions, confidences, and top-k candidates.
+- `experiments/train_save_load_digits_mlp.py` trains the baseline, saves a checkpoint, loads it, and verifies probability and prediction equivalence.
+- `tests/test_model_checkpoint.py` and `tests/test_digits_inference.py` cover checkpoint round trips, metadata validation, and reusable inference behavior.
+- [Checkpoint and Inference](week4/05_checkpoint_and_inference.md) records the checkpoint semantics and inference boundary.
+
+No GUI code is included through Task 6E.
 
 ## Next steps
 
-- Task 6E: add checkpoint saving/loading and a reusable inference pipeline.
+- Task 6F: add a local handwritten-digit drawing application.
 - Add local inference interaction and distribution-shift analysis.
 - Continue to Week 5 evaluation and technical debt work after the digits capstone baseline exists.
 
@@ -78,4 +86,5 @@ No GUI code or checkpoint pipeline is included through Task 6D.
 - [Multiclass MLP Backpropagation](week4/02_multiclass_mlp_backprop.md)
 - [Digits Data Pipeline](week4/03_digits_data_pipeline.md)
 - [Training and Error Analysis](week4/04_training_and_error_analysis.md)
+- [Checkpoint and Inference](week4/05_checkpoint_and_inference.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

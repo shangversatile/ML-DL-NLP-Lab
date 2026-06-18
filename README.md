@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, and structured digits error analysis.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, baseline scratch multiclass MLP training, structured digits error analysis, and checkpointed inference.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -39,6 +39,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - scratch multiclass MLP baseline training on the digits dataset
 - confusion matrix and per-class diagnostics for multiclass predictions
 - top-k accuracy, confidence summaries, high-confidence errors, and top-loss example inspection
+- checkpoint saving/loading for the scratch multiclass MLP
+- reusable handwritten-digit inference helpers with top-k outputs
 
 ## Environment Setup
 
@@ -64,6 +66,7 @@ python experiments/run_linear_regression.py
 python experiments/run_logistic_regression.py
 python experiments/run_digits_mlp.py
 python experiments/analyze_digits_errors.py
+python experiments/train_save_load_digits_mlp.py
 ```
 
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
@@ -86,6 +89,5 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- checkpoint and inference pipeline
-- local handwritten digit app
+- local handwritten digit drawing app
 - trustworthy-ML evaluation extensions
