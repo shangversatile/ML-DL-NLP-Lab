@@ -31,6 +31,96 @@ def train_val_split(
     return X[train_indices], X[val_indices], y[train_indices], y[val_indices]
 
 
+def stratified_train_val_test_split(
+    X: np.ndarray,
+    y: np.ndarray,
+    val_ratio: float,
+    test_ratio: float,
+    seed: int | None = None,
+) -> tuple[
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+    np.ndarray,
+]:
+    """
+    Split arrays into stratified train, validation, and test sets.
+    """
+    if not isinstance(X, np.ndarray):
+        raise TypeError("X must be a NumPy array")
+    if not isinstance(y, np.ndarray):
+        raise TypeError("y must be a NumPy array")
+    if X.ndim != 2:
+        raise ValueError("X must be two-dimensional")
+    if y.ndim != 1:
+        raise ValueError("y must be one-dimensional")
+    if X.shape[0] != y.shape[0]:
+        raise ValueError("X and y must have the same number of samples")
+
+    for name, ratio in (
+        ("val_ratio", val_ratio),
+        ("test_ratio", test_ratio),
+    ):
+        if isinstance(ratio, (bool, np.bool_)):
+            raise TypeError(f"{name} must be numeric and not boolean")
+        if not isinstance(ratio, Real):
+            raise TypeError(f"{name} must be numeric")
+
+    if not 0.0 < val_ratio < 1.0:
+        raise ValueError("val_ratio must be between 0.0 and 1.0")
+    if not 0.0 < test_ratio < 1.0:
+        raise ValueError("test_ratio must be between 0.0 and 1.0")
+    if val_ratio + test_ratio >= 1.0:
+        raise ValueError("val_ratio + test_ratio must be less than 1.0")
+
+    classes = np.unique(y)
+    if len(classes) < 2:
+        raise ValueError("y must contain at least two classes")
+
+    rng = np.random.default_rng(seed)
+    train_indices_by_class = []
+    val_indices_by_class = []
+    test_indices_by_class = []
+
+    for class_label in classes:
+        class_indices = np.flatnonzero(y == class_label)
+        rng.shuffle(class_indices)
+
+        n_class = len(class_indices)
+        n_val = int(round(n_class * val_ratio))
+        n_test = int(round(n_class * test_ratio))
+        n_train = n_class - n_val - n_test
+
+        if n_val < 1 or n_test < 1 or n_train < 1:
+            raise ValueError(
+                "every class must have at least one train, validation, "
+                "and test sample"
+            )
+
+        val_indices_by_class.append(class_indices[:n_val])
+        test_indices_by_class.append(class_indices[n_val : n_val + n_test])
+        train_indices_by_class.append(class_indices[n_val + n_test :])
+
+    train_indices = np.concatenate(train_indices_by_class)
+    val_indices = np.concatenate(val_indices_by_class)
+    test_indices = np.concatenate(test_indices_by_class)
+
+    rng.shuffle(train_indices)
+    rng.shuffle(val_indices)
+    rng.shuffle(test_indices)
+
+    return (
+        X[train_indices].copy(),
+        X[val_indices].copy(),
+        X[test_indices].copy(),
+        y[train_indices].copy(),
+        y[val_indices].copy(),
+        y[test_indices].copy(),
+    )
+
+
 def iterate_minibatches(
     X: np.ndarray,
     y: np.ndarray,

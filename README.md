@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, and numerical gradient checking for the handwritten-digit recognition capstone.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is in progress with multiclass softmax utilities, `MulticlassMLPScratch`, numerical gradient checking, a real digits data pipeline, and baseline scratch multiclass MLP training.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -35,6 +35,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - controlled overfitting analysis
 - multiclass one-hot, stable softmax, cross entropy, and output-gradient utilities
 - multiclass MLP forward pass, prediction, loss, analytical backpropagation, and gradient checking
+- real handwritten-digit data pipeline with stratified train/validation/test split
+- scratch multiclass MLP baseline training on the digits dataset
 
 ## Environment Setup
 
@@ -58,6 +60,7 @@ pytest
 ```powershell
 python experiments/run_linear_regression.py
 python experiments/run_logistic_regression.py
+python experiments/run_digits_mlp.py
 ```
 
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
@@ -80,7 +83,6 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- real handwritten-digit data pipeline and baseline training
-- error analysis
+- confusion matrix and per-class error analysis
 - local prediction application
 - trustworthy-ML evaluation extensions

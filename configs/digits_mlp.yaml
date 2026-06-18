@@ -1,0 +1,29 @@
+seed: 42
+
+data:
+  scale_pixels: true
+  val_ratio: 0.15
+  test_ratio: 0.15
+
+model:
+  hidden_dim: 64
+  num_classes: 10
+
+training:
+  num_epochs: 300
+  batch_size: 64
+  log_every: 50
+
+optimizer:
+  name: adam
+  learning_rate: 0.01
+  beta1: 0.9
+  beta2: 0.999
+  epsilon: 1e-8
+
+output:
+  loss_curve_path: results/figures/digits_mlp_cross_entropy_curve.png
+  accuracy_curve_path: results/figures/digits_mlp_accuracy_curve.png
+
+logging:
+  log_file: results/logs/digits_mlp_training.log

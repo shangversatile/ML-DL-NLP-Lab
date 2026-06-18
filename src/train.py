@@ -5,6 +5,7 @@ import numpy as np
 from src.data.preprocessing import iterate_minibatches
 from src.evaluation.metrics import accuracy_score, binary_cross_entropy
 from src.models.mlp import BinaryMLPScratch
+from src.utils.multiclass import multiclass_cross_entropy
 
 
 def _validate_positive_int(name: str, value: int) -> None:
@@ -54,6 +55,25 @@ def evaluate_binary_mlp(
     return {
         "bce": binary_cross_entropy(y, probabilities),
         "accuracy": accuracy_score(y, predictions),
+    }
+
+
+def evaluate_multiclass_mlp(
+    model,
+    X: np.ndarray,
+    y: np.ndarray,
+) -> dict[str, float]:
+    """
+    Evaluate multiclass cross entropy and accuracy.
+    """
+    probabilities = model.predict_proba(X)
+    predictions = model.predict(X)
+    loss = multiclass_cross_entropy(y, probabilities)
+    accuracy = np.mean(predictions == y)
+
+    return {
+        "cross_entropy": float(loss),
+        "accuracy": float(accuracy),
     }
 
 
@@ -139,6 +159,91 @@ def train_binary_mlp(
     return {
         "train_bce": train_bce_history,
         "val_bce": val_bce_history,
+        "train_accuracy": train_accuracy_history,
+        "val_accuracy": val_accuracy_history,
+        "update_count": update_count,
+    }
+
+
+def train_multiclass_mlp(
+    model,
+    optimizer,
+    X_train: np.ndarray,
+    y_train: np.ndarray,
+    X_val: np.ndarray,
+    y_val: np.ndarray,
+    num_epochs: int,
+    batch_size: int,
+    seed: int,
+    log_every: int,
+    logger,
+) -> dict[str, list[float] | int]:
+    """
+    Train a multiclass MLP with reproducible shuffled mini-batches.
+    """
+    _validate_positive_int("num_epochs", num_epochs)
+    _validate_positive_int("batch_size", batch_size)
+    _validate_int("seed", seed)
+    _validate_positive_int("log_every", log_every)
+
+    train_ce_history = []
+    val_ce_history = []
+    train_accuracy_history = []
+    val_accuracy_history = []
+    update_count = 0
+
+    for epoch in range(1, num_epochs + 1):
+        for X_batch, y_batch in iterate_minibatches(
+            X_train,
+            y_train,
+            batch_size=batch_size,
+            shuffle=True,
+            seed=seed + epoch,
+        ):
+            raw_gradients = model.compute_gradients(X_batch, y_batch)
+            parameter_gradients = map_mlp_gradients_to_parameters(raw_gradients)
+            parameters = model.get_parameters()
+            updated_parameters = optimizer.step(
+                parameters,
+                parameter_gradients,
+            )
+            model.set_parameters(updated_parameters)
+            update_count += 1
+
+        train_metrics = evaluate_multiclass_mlp(
+            model,
+            X_train,
+            y_train,
+        )
+        val_metrics = evaluate_multiclass_mlp(
+            model,
+            X_val,
+            y_val,
+        )
+
+        train_ce_history.append(train_metrics["cross_entropy"])
+        val_ce_history.append(val_metrics["cross_entropy"])
+        train_accuracy_history.append(train_metrics["accuracy"])
+        val_accuracy_history.append(val_metrics["accuracy"])
+
+        if epoch % log_every == 0:
+            logger.info(
+                (
+                    "Multiclass MLP epoch %s/%s - train_ce: %.6f - "
+                    "val_ce: %.6f - train_accuracy: %.6f - "
+                    "val_accuracy: %.6f"
+                ),
+                epoch,
+                num_epochs,
+                train_metrics["cross_entropy"],
+                val_metrics["cross_entropy"],
+                train_metrics["accuracy"],
+                val_metrics["accuracy"],
+            )
+
+    return {
+        "train_cross_entropy": train_ce_history,
+        "val_cross_entropy": val_ce_history,
         "train_accuracy": train_accuracy_history,
         "val_accuracy": val_accuracy_history,
         "update_count": update_count,
