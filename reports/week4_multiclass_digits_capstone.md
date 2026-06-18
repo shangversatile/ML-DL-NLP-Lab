@@ -4,7 +4,7 @@
 
 Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, and confidence and distribution-shift diagnostics.
 
-Week 4 is the active stage of the project.
+Week 4 is functionally complete after the capstone synthesis and MNIST extension note.
 
 The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, and local-input shift/confidence diagnostics.
 
@@ -30,6 +30,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 5      | `week4/05_checkpoint_and_inference.md`               | Checkpoint saving/loading and reusable inference pipeline  |
 | 6      | `week4/06_interactive_app_and_distribution_shift.md` | Local drawing app and distribution-shift boundary          |
 | 7      | `week4/07_shift_and_confidence_diagnostics.md`       | Synthetic shift probes and confidence diagnostics          |
+| 8      | `week4/08_capstone_summary_and_mnist_extension.md`   | Capstone synthesis and MNIST extension roadmap             |
 
 ## Current status
 
@@ -89,6 +90,11 @@ Task 6G is complete:
 
 No calibration correction, temperature scaling, abstention, or full real-canvas distribution-shift analysis is included through Task 6G.
 
+Week 4 synthesis and MNIST extension note is complete:
+
+- [Week 4 Capstone Summary and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md) closes the capstone narrative, summarizes empirical findings, records current limitations, and defines a staged MNIST extension roadmap.
+- Week 4 is functionally complete after this synthesis note.
+
 ## Next steps
 
 - Week 5: Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
@@ -103,4 +109,5 @@ No calibration correction, temperature scaling, abstention, or full real-canvas 
 - [Checkpoint and Inference](week4/05_checkpoint_and_inference.md)
 - [Interactive App and Distribution Shift](week4/06_interactive_app_and_distribution_shift.md)
 - [Shift and Confidence Diagnostics](week4/07_shift_and_confidence_diagnostics.md)
+- [Week 4 Capstone Summary and MNIST Extension Roadmap](week4/08_capstone_summary_and_mnist_extension.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

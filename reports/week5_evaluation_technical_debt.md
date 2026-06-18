@@ -28,6 +28,12 @@ Week 4 builds the real-data multiclass training and inference system. Week 5 eva
 
 Week 5 should not replace Week 4; it depends on Week 4.
 
+## Relationship to MNIST extension
+
+Week 5 hardens the current digits capstone before scaling it. Calibration, experiment registry design, artifact management, and technical debt cleanup should happen before MNIST-scale expansion.
+
+MNIST should inherit the same discipline established in Week 4: explicit split design, checkpointing, error analysis, calibration diagnostics, and shift diagnostics. It should be a scale-up of the evaluation system, not only a larger training run.
+
 ## Current status
 
 Planned
