@@ -33,6 +33,8 @@ A proper research protocol must separate diagnosis, training, validation, and fi
 
 The `top_k_miss_error_rate = 0.391304` is computed among errors, not among all samples. It means 9 of the 23 wrong Top-1 predictions also missed the true label in Top-3.
 
+See [Canvas-Diagnostic-v1 Inventory and Failure Taxonomy](15_canvas_diagnostic_v1_inventory_and_failure_taxonomy.md) for the diagnostic inventory, per-class taxonomy, and training policy.
+
 ## 3. Dataset split policy
 
 Future real canvas work should use explicit dataset roles.
@@ -137,5 +139,7 @@ Real input validation is necessary. Synthetic probes are useful but incomplete. 
 The current 56 samples are diagnostic evidence. Future training requires separate data. Evaluation must distinguish train, validation, and test roles.
 
 MNIST and CNNs are natural next steps, but they must not replace real canvas validation.
+
+Task 6M selects MNIST Option A for Week 4 closure. Week 4 will not implement MNIST. MNIST and CNN work is deferred to the later deep-learning stage, and `Canvas-Diagnostic-v1` remains diagnostic only.
 
 [← Back to Week 4 Index](../week4_multiclass_digits_capstone.md)

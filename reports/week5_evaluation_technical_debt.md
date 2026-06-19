@@ -37,8 +37,11 @@ Week 5 starts from a system with:
 - weak real canvas Top-1 performance
 - high-confidence real canvas errors
 - a dataset protocol preventing leakage
+- MNIST Option A selected, meaning no MNIST implementation in Week 4
 
 Therefore Week 5 should focus on calibration, reliability, evaluation discipline, artifact cleanup, experiment registry design, and final tag readiness.
+
+Week 5 starts after MNIST Option A. It should not add MNIST or CNN work. It should focus on calibration, evaluation reliability, technical debt, experiment registry design, artifact management, and tag readiness.
 
 ## Dependency on Week 4 robustness loop
 
@@ -66,7 +69,7 @@ Calibration and abstention should be evaluated on validation and test splits, no
 
 Week 5 hardens the current digits baseline before scaling it. Calibration, experiment registry design, artifact management, and technical debt cleanup should happen before MNIST-scale expansion.
 
-MNIST should inherit the same discipline established in Week 4: explicit split design, checkpointing, error analysis, calibration diagnostics, and shift diagnostics. It should be a scale-up of the evaluation system, not only a larger training run.
+MNIST and CNN work are deferred to the later deep-learning stage. When that work starts, it should inherit the same discipline established in Week 4: explicit split design, checkpointing, error analysis, calibration diagnostics, and shift diagnostics. It should be a scale-up of the evaluation system, not only a larger training run.
 
 ## Current status
 

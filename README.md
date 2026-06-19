@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 is now an MLP handwritten-digit application and failure-analysis capstone with final synthesis, real canvas diagnostics, and a canvas dataset protocol. The augmented model strongly improves configured synthetic shift robustness, but the first 56 real canvas samples show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a production recognizer.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 closes as an MLP handwritten-digit application and failure-analysis capstone with final synthesis, real canvas diagnostics, and a canvas dataset protocol. MNIST Option A is selected: no MNIST implementation in Week 4. The first 56 real canvas samples are `Canvas-Diagnostic-v1` only, and they show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a robust or production recognizer.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -49,6 +49,8 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - real canvas model-input debugging and user-sample evaluation
 - real canvas validation diagnostics with per-class summaries, confusion counts, high-confidence errors, and Top-k miss analysis
 - canvas dataset protocol for separating diagnostic, train, validation, and test roles
+- Canvas-Diagnostic-v1 inventory and failure taxonomy
+- MNIST Option A decision: defer MNIST/CNN work to the later deep-learning stage
 - Week 4 final synthesis and transition plan to Week 5
 - Week 4 baseline diagnosis, robustness-loop interpretation, and MNIST extension roadmap
 
@@ -114,6 +116,6 @@ Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are
 
 ## Next Steps
 
-- Final Week 4 review with real canvas diagnostics, dataset protocol, and final synthesis included
-- Then: Week 5 calibration, evaluation discipline, reliability analysis, experiment registry, and technical debt cleanup
-- Next research steps: collect separate Canvas-Train/Val/Test splits or proceed to MNIST/CNN work while retaining real canvas validation
+- Final Week 4 review with real canvas diagnostics, dataset protocol, inventory, and final synthesis included
+- Then: Week 5 calibration, evaluation discipline, reliability analysis, experiment registry, artifact management, and technical debt cleanup
+- Later: collect separate Canvas-Train/Val/Test splits or proceed to MNIST/CNN work while retaining real canvas validation
