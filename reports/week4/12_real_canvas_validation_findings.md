@@ -17,6 +17,14 @@ This is a small user-specific validation set, not a full benchmark.
 | Cross entropy     | 3.766522 |
 | Mean confidence   | 0.886175 |
 
+## Dataset role
+
+The 56 samples are now designated `Canvas-Diagnostic-v1`. They should not be used for training or model selection. Future real-canvas training, validation, and final testing require separate splits.
+
+The Task 6K `top_k_miss_error_rate = 0.391304` is computed among errors: 9 Top-3 misses out of 23 total errors.
+
+See [Canvas Dataset Protocol and Next-Stage Experiment Design](13_canvas_dataset_protocol_and_next_stage_experiment_design.md) for the split policy before any further model optimization.
+
 ## 2. Why this changes the interpretation
 
 Task 6H improved configured synthetic shifts, especially the thick-stroke probe. Real canvas accuracy is still low. Therefore, configured synthetic robustness does not imply real canvas robustness.

@@ -42,6 +42,14 @@ Week 4 now includes both failure diagnosis and augmentation-based improvement. T
 
 Week 5 should not repeat the same shift probes blindly. It should harden the evaluation system through calibration, experiment registry design, multiple seeds, held-out transforms, real canvas validation where possible, and artifact management.
 
+## Real canvas dataset protocol inherited from Week 4
+
+Week 5 should preserve `Canvas-Diagnostic-v1` as diagnostic-only. The first 56 labeled real canvas samples exposed failure modes, but they should not be used for training, model selection, calibration threshold selection, or final reported real-canvas performance.
+
+Future `Canvas-Train-v1`, `Canvas-Val-v1`, and `Canvas-Test-v1` splits should be explicit. Training or augmentation may use only the train split. Preprocessing sweeps, calibration, abstention, and top-k decision policies should be selected on validation data. Final claims should use a held-out canvas test split.
+
+Calibration and abstention should be evaluated on validation and test splits, not on training data. Otherwise, reliability improvements can become another form of leakage.
+
 ## Relationship to MNIST extension
 
 Week 5 hardens the current digits baseline before scaling it. Calibration, experiment registry design, artifact management, and technical debt cleanup should happen before MNIST-scale expansion.

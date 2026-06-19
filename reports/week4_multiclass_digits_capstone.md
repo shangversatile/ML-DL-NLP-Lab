@@ -2,11 +2,11 @@
 
 ## Scope
 
-Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, confidence and distribution-shift diagnostics, augmentation-based robustness improvement, real canvas debugging, and real canvas validation diagnostics.
+Week 4 extends the binary MLP foundation into multiclass probability modeling, stable softmax, multiclass cross entropy, explicit multiclass MLP backpropagation, real handwritten-digit data, checkpointed inference, error analysis, confidence and distribution-shift diagnostics, augmentation-based robustness improvement, real canvas debugging, real canvas validation diagnostics, and a protocol for future real-input experiments.
 
-Week 4 includes a strong baseline-plus-improvement system, but it must not claim real-world canvas robustness. Tasks 6A through 6H built the baseline, local app, diagnostics, and an augmented robustness-improvement loop. Task 6J adds a toolchain to collect and evaluate real canvas samples because user-drawn inputs can still fail. Task 6K turns the first 56 labeled canvas samples into a diagnostic validation report.
+Week 4 includes a strong baseline-plus-improvement system, but it must not claim real-world canvas robustness. Tasks 6A through 6H built the baseline, local app, diagnostics, and an augmented robustness-improvement loop. Task 6J adds a toolchain to collect and evaluate real canvas samples because user-drawn inputs can still fail. Task 6K turns the first 56 labeled canvas samples into a diagnostic validation report. Task 6L defines the dataset protocol needed before further real-canvas optimization.
 
-The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, local-input shift/confidence diagnostics, fixed-update augmented training comparison, research interpretation, real canvas sample evaluation, and real canvas validation diagnostics.
+The current implementation scope covers the probability and loss foundation, the scratch multiclass MLP forward and backpropagation path, a baseline real handwritten-digit training pipeline, structured error analysis, checkpointed inference, a local handwritten-digit drawing app, local-input shift/confidence diagnostics, fixed-update augmented training comparison, research interpretation, real canvas sample evaluation, real canvas validation diagnostics, and a dataset protocol for the next stage.
 
 ## Learning objectives
 
@@ -35,6 +35,7 @@ The current implementation scope covers the probability and loss foundation, the
 | 10     | `week4/10_research_interpretation_and_next_steps.md` | Research interpretation and next steps                      |
 | 11     | `week4/11_real_canvas_debugging_and_user_sample_evaluation.md` | Real canvas debugging and user-sample evaluation       |
 | 12     | `week4/12_real_canvas_validation_findings.md`        | Real canvas validation findings                             |
+| 13     | `week4/13_canvas_dataset_protocol_and_next_stage_experiment_design.md` | Canvas dataset protocol and next-stage experiment design |
 
 ## Current status
 
@@ -123,13 +124,18 @@ Task 6K is complete:
 - `tests/test_canvas_diagnostics.py` and `tests/test_plotting.py` cover the non-GUI diagnostics and plotting helpers.
 - [Real Canvas Validation Findings](week4/12_real_canvas_validation_findings.md) records the first 56-sample validation result and interpretation boundaries.
 
-Week 4 can be considered ready for final review after Task 6K. It should still not claim real-world canvas robustness; it now includes a toolchain to collect, evaluate, and diagnose real canvas evidence.
+Task 6L is complete:
 
-Week 4 now distinguishes configured synthetic robustness, real canvas robustness, preprocessing failure, and model/data coverage failure.
+- [Canvas Dataset Protocol and Next-Stage Experiment Design](week4/13_canvas_dataset_protocol_and_next_stage_experiment_design.md) defines `Canvas-Diagnostic-v1`, `Canvas-Train-v1`, `Canvas-Val-v1`, and `Canvas-Test-v1`.
+- The protocol keeps the first 56 real canvas samples diagnostic-only and prevents leakage before future preprocessing, augmentation, calibration, MNIST, or CNN work.
+
+Week 4 can be considered ready for final review after Task 6L. It should still not claim real-world canvas robustness; it now includes a toolchain to collect, evaluate, diagnose, and responsibly split real canvas evidence.
+
+Week 4 now includes baseline modeling, synthetic-shift diagnosis, augmentation improvement, real canvas validation, and a protocol for future real-input experiments. It distinguishes configured synthetic robustness, real canvas robustness, preprocessing failure, and model/data coverage failure.
 
 ## Next steps
 
-- Final Week 4 review with real canvas sample evidence clearly separated from synthetic shift evidence.
+- Final Week 4 review with real canvas sample evidence and dataset protocol clearly separated from synthetic shift evidence.
 - Then: Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics.
 
 ## Links
@@ -147,4 +153,5 @@ Week 4 now distinguishes configured synthetic robustness, real canvas robustness
 - [Research Interpretation and Next Steps After Augmented Robustness](week4/10_research_interpretation_and_next_steps.md)
 - [Real Canvas Debugging and User-Sample Evaluation](week4/11_real_canvas_debugging_and_user_sample_evaluation.md)
 - [Real Canvas Validation Findings](week4/12_real_canvas_validation_findings.md)
+- [Canvas Dataset Protocol and Next-Stage Experiment Design](week4/13_canvas_dataset_protocol_and_next_stage_experiment_design.md)
 - [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](week5_evaluation_technical_debt.md)

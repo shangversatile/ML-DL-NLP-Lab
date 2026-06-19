@@ -49,9 +49,11 @@ The observed failures are not just preprocessing failures. Digit 6 is often pred
 
 This is the clearest warning so far that configured synthetic robustness does not transfer automatically to real canvas robustness. The result should guide diagnostics and future validation design, not immediate retraining on the same 56 samples.
 
+Task 6L defines the dataset protocol before further optimization. The 56 real canvas samples are `Canvas-Diagnostic-v1`: useful for failure discovery, but not valid for training, model selection, calibration thresholds, or final claims. Training on these samples and evaluating on them again would invalidate the evaluation.
+
 ## 6. What would count as stronger evidence
 
-Stronger evidence would include held-out transformation strengths, a real canvas validation set, multiple random seeds, augmentation ablation studies, validation-based calibration, MNIST comparison, and eventual CNN comparison.
+Stronger evidence would include held-out transformation strengths, explicit Canvas-Train/Val/Test splits, multiple random seeds, augmentation ablation studies, validation-based calibration, MNIST comparison, and eventual CNN comparison.
 
 These studies would separate configured-probe improvement from broader invariance. They would also clarify whether the observed gains come from thickening alone, from combined transformations, or from a more general regularizing effect.
 
