@@ -28,6 +28,18 @@ Week 4 builds the real-data multiclass training and inference system. Week 5 eva
 
 Week 5 should not replace Week 4; it depends on Week 4.
 
+## Starting point inherited from Week 4
+
+Week 5 starts from a system with:
+
+- strong clean benchmark performance
+- improved configured synthetic robustness
+- weak real canvas Top-1 performance
+- high-confidence real canvas errors
+- a dataset protocol preventing leakage
+
+Therefore Week 5 should focus on calibration, reliability, evaluation discipline, artifact cleanup, experiment registry design, and final tag readiness.
+
 ## Dependency on Week 4 robustness loop
 
 Week 5 should begin after Week 4 has completed the augmentation-based robustness improvement loop. Calibration and reliability diagrams should not be used to hide a weak base model.
