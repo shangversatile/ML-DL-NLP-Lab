@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has a baseline recognizer, local app, shift diagnostics, an augmented robustness comparison, and real canvas sample debugging. The augmented model strongly improves configured synthetic shift robustness, but real hand-drawn canvas inputs still require separate evidence. This remains an educational/research prototype, not a production recognizer.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 has a baseline recognizer, local app, shift diagnostics, an augmented robustness comparison, real canvas sample debugging, and real canvas validation diagnostics. The augmented model strongly improves configured synthetic shift robustness, but the first real canvas validation set shows weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a production recognizer.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -47,6 +47,7 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - confidence-bin and ECE-style diagnostics
 - augmented training robustness-comparison experiment
 - real canvas model-input debugging and user-sample evaluation
+- real canvas validation diagnostics with per-class summaries, confusion counts, high-confidence errors, and Top-k miss analysis
 - Week 4 baseline diagnosis, robustness-loop interpretation, and MNIST extension roadmap
 
 ## Environment Setup
@@ -91,6 +92,8 @@ The app prefers `results/checkpoints/digits_mlp_augmented.npz`, displays the `8 
 
 Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
 
+Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are saved under `results/canvas_debug/`, which is also ignored by Git.
+
 ## Design Principles
 
 - separate model, optimizer, evaluation, data, and experiment responsibilities
@@ -109,6 +112,6 @@ Experiment logs are saved under `results/logs/`, and loss curves are saved under
 
 ## Next Steps
 
-- Final Week 4 review
+- Final Week 4 review with real canvas diagnostics included
 - Then: Week 5 evaluation, calibration, and technical debt cleanup
-- Later: MNIST-scale extension and convolutional reasoning after Week 5 hardening
+- Next research steps: per-class failure analysis, more real canvas samples, a held-out canvas split after enough data exists, and MNIST/CNN reasoning after Week 5 hardening

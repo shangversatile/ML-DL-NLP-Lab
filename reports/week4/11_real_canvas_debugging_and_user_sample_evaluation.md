@@ -1,5 +1,9 @@
 # Real Canvas Debugging and User-Sample Evaluation
 
+Related: [Real Canvas Validation Findings](12_real_canvas_validation_findings.md)
+
+Task 6K analyzes the first 56 labeled real canvas samples and shows that real canvas robustness remains weak despite synthetic-shift improvement.
+
 [← Back to Week 4 Index](../week4_multiclass_digits_capstone.md)
 
 ## 1. Why synthetic robustness was not enough

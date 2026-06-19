@@ -162,6 +162,71 @@ def plot_confusion_matrix(
     plt.close(figure)
 
 
+def plot_canvas_confusion_matrix(
+    confusion_matrix: np.ndarray,
+    output_path: str,
+    class_names: list[str] | None = None,
+    title: str = "Real Canvas Confusion Matrix",
+) -> None:
+    """
+    Plot and save a real-canvas confusion matrix with count annotations.
+    """
+    if not isinstance(confusion_matrix, np.ndarray):
+        raise TypeError("confusion_matrix must be a NumPy array.")
+    if confusion_matrix.ndim != 2 or confusion_matrix.shape[0] != confusion_matrix.shape[1]:
+        raise ValueError("confusion_matrix must be a square two-dimensional array.")
+    if confusion_matrix.shape[0] == 0:
+        raise ValueError("confusion_matrix must not be empty.")
+    if np.issubdtype(confusion_matrix.dtype, np.bool_) or not np.issubdtype(
+        confusion_matrix.dtype,
+        np.number,
+    ):
+        raise ValueError("confusion_matrix must contain numeric values.")
+    if not np.all(np.isfinite(confusion_matrix)):
+        raise ValueError("confusion_matrix must contain only finite values.")
+    if np.any(confusion_matrix < 0):
+        raise ValueError("confusion_matrix values must be non-negative.")
+
+    if class_names is None:
+        class_names = [str(index) for index in range(confusion_matrix.shape[0])]
+    if len(class_names) != confusion_matrix.shape[0]:
+        raise ValueError("class_names length must match confusion matrix size.")
+
+    path = _create_parent_directory(output_path)
+    figure, axis = plt.subplots(figsize=(7, 6))
+    image = axis.imshow(confusion_matrix, interpolation="nearest", cmap="Blues")
+    figure.colorbar(image, ax=axis)
+
+    axis.set_title(title)
+    axis.set_xlabel("Predicted label")
+    axis.set_ylabel("True label")
+    tick_positions = np.arange(confusion_matrix.shape[0])
+    axis.set_xticks(tick_positions)
+    axis.set_yticks(tick_positions)
+    axis.set_xticklabels(class_names)
+    axis.set_yticklabels(class_names)
+
+    max_value = float(np.max(confusion_matrix)) if confusion_matrix.size > 0 else 0.0
+    threshold = max_value / 2.0
+    for row in range(confusion_matrix.shape[0]):
+        for column in range(confusion_matrix.shape[1]):
+            value = confusion_matrix[row, column]
+            text_color = "white" if float(value) > threshold else "black"
+            axis.text(
+                column,
+                row,
+                f"{int(value)}",
+                ha="center",
+                va="center",
+                color=text_color,
+                fontsize=8,
+            )
+
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+
+
 def plot_digit_examples(
     images: np.ndarray,
     titles: list[str],
@@ -218,6 +283,95 @@ def plot_digit_examples(
         axis.set_title(titles[index], fontsize=8)
 
     figure.suptitle(figure_title)
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+
+
+def plot_canvas_error_grid(
+    error_records: list[dict],
+    output_path: str,
+    max_examples: int = 16,
+    title: str = "Real Canvas Error Examples",
+) -> None:
+    """
+    Plot saved 8x8 model inputs for real-canvas error records.
+    """
+    if not isinstance(error_records, list):
+        raise TypeError("error_records must be a list.")
+    if type(max_examples) is not int:
+        raise TypeError("max_examples must be an integer.")
+    if max_examples <= 0:
+        raise ValueError("max_examples must be positive.")
+
+    path = _create_parent_directory(output_path)
+    selected_records = error_records[:max_examples]
+
+    if len(selected_records) == 0:
+        figure, axis = plt.subplots(figsize=(5, 2.5))
+        axis.axis("off")
+        axis.text(
+            0.5,
+            0.5,
+            "No canvas errors",
+            ha="center",
+            va="center",
+            fontsize=12,
+        )
+        figure.suptitle(title)
+        figure.tight_layout()
+        figure.savefig(path)
+        plt.close(figure)
+        return
+
+    n_examples = len(selected_records)
+    n_cols = min(4, n_examples)
+    n_rows = int(np.ceil(n_examples / n_cols))
+    figure, axes = plt.subplots(
+        n_rows,
+        n_cols,
+        figsize=(2.8 * n_cols, 3.0 * n_rows),
+    )
+    axes_array = np.asarray(axes).reshape(-1)
+
+    for index, axis in enumerate(axes_array):
+        axis.axis("off")
+        if index >= n_examples:
+            continue
+
+        record = selected_records[index]
+        required_keys = {
+            "resized_8x8",
+            "true_label",
+            "prediction",
+            "confidence",
+            "path",
+        }
+        missing_keys = required_keys - set(record)
+        if missing_keys:
+            missing_text = ", ".join(sorted(missing_keys))
+            raise ValueError(f"error record missing required keys: {missing_text}.")
+
+        image = np.asarray(record["resized_8x8"], dtype=float)
+        if image.shape != (8, 8):
+            raise ValueError("resized_8x8 must have shape (8, 8).")
+        if not np.all(np.isfinite(image)):
+            raise ValueError("resized_8x8 must contain only finite values.")
+
+        true_label = int(record["true_label"])
+        prediction = int(record["prediction"])
+        confidence = float(record["confidence"])
+        if not np.isfinite(confidence):
+            raise ValueError("confidence must be finite.")
+
+        axis.imshow(image, cmap="gray", vmin=0.0, vmax=1.0)
+        axis.set_title(
+            f"true={true_label}, pred={prediction}, conf={confidence:.3f}",
+            fontsize=8,
+        )
+        axis.set_xlabel(Path(record["path"]).name, fontsize=7)
+
+    figure.suptitle(title)
     figure.tight_layout()
     figure.savefig(path)
     plt.close(figure)

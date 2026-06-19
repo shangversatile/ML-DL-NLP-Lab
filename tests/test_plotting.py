@@ -4,6 +4,8 @@ import numpy as np
 import pytest
 
 from src.utils.plotting import (
+    plot_canvas_confusion_matrix,
+    plot_canvas_error_grid,
     plot_confidence_bin_summary,
     plot_confusion_matrix,
     plot_digit_examples,
@@ -126,6 +128,29 @@ def test_plot_confusion_matrix_invalid_matrix_raises_errors(tmp_path) -> None:
         )
 
 
+def test_plot_canvas_confusion_matrix_creates_file(tmp_path) -> None:
+    matrix = np.array([[3, 1], [2, 4]])
+    output_path = tmp_path / "canvas_confusion.png"
+
+    plot_canvas_confusion_matrix(matrix, str(output_path), class_names=["0", "1"])
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_canvas_confusion_matrix_invalid_matrix_raises(tmp_path) -> None:
+    output_path = tmp_path / "canvas_confusion.png"
+
+    with pytest.raises(TypeError):
+        plot_canvas_confusion_matrix([[1, 0], [0, 1]], str(output_path))
+
+    with pytest.raises(ValueError):
+        plot_canvas_confusion_matrix(
+            np.array([[1, 0, 0], [0, 1, 0]]),
+            str(output_path),
+        )
+
+
 def test_plot_digit_examples_creates_file_for_non_empty_examples(tmp_path) -> None:
     images = np.zeros((3, 8, 8))
     titles = ["first", "second", "third"]
@@ -163,6 +188,40 @@ def test_plot_digit_examples_invalid_image_shape_raises_value_error(tmp_path) ->
 
     with pytest.raises(ValueError):
         plot_digit_examples(np.zeros((8, 8)), ["a"], str(output_path))
+
+
+def test_plot_canvas_error_grid_creates_file_with_errors(tmp_path) -> None:
+    output_path = tmp_path / "canvas_errors.png"
+    error_records = [
+        {
+            "path": tmp_path / "sample_1.npz",
+            "resized_8x8": np.eye(8),
+            "true_label": 8,
+            "prediction": 0,
+            "confidence": 0.95,
+        },
+        {
+            "path": tmp_path / "sample_2.npz",
+            "resized_8x8": np.flipud(np.eye(8)),
+            "true_label": 6,
+            "prediction": 5,
+            "confidence": 0.91,
+        },
+    ]
+
+    plot_canvas_error_grid(error_records, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_canvas_error_grid_creates_placeholder_for_no_errors(tmp_path) -> None:
+    output_path = tmp_path / "no_canvas_errors.png"
+
+    plot_canvas_error_grid([], str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
 
 
 def test_plot_shift_metric_bars_creates_file(tmp_path) -> None:

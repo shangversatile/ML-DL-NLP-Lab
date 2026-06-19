@@ -41,6 +41,14 @@ No calibration correction has been applied. The ECE-style diagnostic improved, b
 
 Actual user-drawn inputs may differ from synthetic shift probes. A model can improve on configured probe distributions while still failing on the true app-input distribution. In Condition-B failures, the 8x8 input can look recognizable while the model remains wrong, suggesting limitations in training coverage, representation, or confidence calibration. This motivates Task 6J.
 
+### First real canvas validation result
+
+Task 6K evaluates the augmented checkpoint on the first 56 labeled real canvas samples. The result is accuracy `0.589286`, Top-3 accuracy `0.839286`, cross entropy `3.766522`, and mean confidence `0.886175`.
+
+The observed failures are not just preprocessing failures. Digit 6 is often predicted as 5 or 4. Digit 8 is a severe failure mode, often predicted as 0, 3, or 9 and sometimes missing from Top-3. Digit 9 is often predicted as 4, but the true label often remains in Top-3.
+
+This is the clearest warning so far that configured synthetic robustness does not transfer automatically to real canvas robustness. The result should guide diagnostics and future validation design, not immediate retraining on the same 56 samples.
+
 ## 6. What would count as stronger evidence
 
 Stronger evidence would include held-out transformation strengths, a real canvas validation set, multiple random seeds, augmentation ablation studies, validation-based calibration, MNIST comparison, and eventual CNN comparison.
