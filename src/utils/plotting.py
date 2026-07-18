@@ -468,6 +468,79 @@ def plot_confidence_bin_summary(
     figure.savefig(path)
     plt.close(figure)
 
+def plot_reliability_diagram(
+    bin_summary: list[dict[str, float | int]],
+    output_path: str,
+    title: str = "Reliability Diagram",
+) -> None:
+    """
+    Plot confidence-bin accuracy versus confidence for calibration diagnostics.
+    """
+    if not isinstance(bin_summary, list) or len(bin_summary) == 0:
+        raise ValueError("bin_summary must be a non-empty list.")
+
+    confidences = []
+    accuracies = []
+    counts = []
+    for record in bin_summary:
+        required_keys = {"count", "accuracy", "confidence"}
+        missing_keys = required_keys - set(record)
+        if missing_keys:
+            missing_text = ", ".join(sorted(missing_keys))
+            raise ValueError(f"bin record missing required keys: {missing_text}.")
+
+        count = int(record["count"])
+        if count < 0:
+            raise ValueError("bin counts must be non-negative.")
+        if count == 0:
+            continue
+
+        accuracy = float(record["accuracy"])
+        confidence = float(record["confidence"])
+        if not np.isfinite(accuracy) or not np.isfinite(confidence):
+            raise ValueError("non-empty calibration bins must be finite.")
+        if accuracy < 0.0 or accuracy > 1.0:
+            raise ValueError("bin accuracy must be in [0, 1].")
+        if confidence < 0.0 or confidence > 1.0:
+            raise ValueError("bin confidence must be in [0, 1].")
+
+        accuracies.append(accuracy)
+        confidences.append(confidence)
+        counts.append(count)
+
+    path = _create_parent_directory(output_path)
+    figure, axis = plt.subplots(figsize=(6.5, 5.5))
+    axis.plot([0.0, 1.0], [0.0, 1.0], linestyle="--", label="Ideal")
+
+    if confidences:
+        marker_sizes = 30 + 12 * np.asarray(counts, dtype=float)
+        axis.scatter(
+            confidences,
+            accuracies,
+            s=marker_sizes,
+            alpha=0.7,
+            label="Bins sized by count",
+        )
+        axis.plot(confidences, accuracies, marker="o", label="Observed")
+    else:
+        axis.text(
+            0.5,
+            0.5,
+            "No non-empty bins",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
+
+    axis.set_xlim(0.0, 1.0)
+    axis.set_ylim(0.0, 1.0)
+    axis.set_xlabel("Average confidence")
+    axis.set_ylabel("Empirical accuracy")
+    axis.set_title(title)
+    axis.legend()
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
 
 def plot_grouped_metric_bars(
     group_names: list[str],

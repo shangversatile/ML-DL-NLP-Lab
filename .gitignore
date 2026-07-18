@@ -4,6 +4,7 @@ __pycache__/
 .ipynb_checkpoints/
 results/logs/*.log
 results/figures/*.png
+results/registry/
 results/checkpoints/*.npz
 results/canvas_debug/
 data/user_digits/

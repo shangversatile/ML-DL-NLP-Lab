@@ -12,6 +12,7 @@ from src.utils.plotting import (
     plot_grouped_metric_bars,
     plot_loss_curve,
     plot_multiple_loss_curves,
+    plot_reliability_diagram,
     plot_shift_metric_bars,
 )
 
@@ -325,6 +326,69 @@ def test_plot_confidence_bin_summary_rejects_empty_summary(tmp_path) -> None:
     with pytest.raises(ValueError):
         plot_confidence_bin_summary([], str(output_path))
 
+def test_plot_reliability_diagram_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "reliability.png"
+    bin_summary = [
+        {
+            "bin_index": 0,
+            "lower": 0.0,
+            "upper": 0.5,
+            "count": 0,
+            "accuracy": np.nan,
+            "confidence": np.nan,
+            "gap": np.nan,
+        },
+        {
+            "bin_index": 1,
+            "lower": 0.5,
+            "upper": 1.0,
+            "count": 4,
+            "accuracy": 0.75,
+            "confidence": 0.80,
+            "gap": 0.05,
+        },
+    ]
+
+    plot_reliability_diagram(bin_summary, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_reliability_diagram_handles_all_empty_bins(tmp_path) -> None:
+    output_path = tmp_path / "reliability_empty.png"
+    bin_summary = [
+        {
+            "bin_index": 0,
+            "lower": 0.0,
+            "upper": 1.0,
+            "count": 0,
+            "accuracy": np.nan,
+            "confidence": np.nan,
+            "gap": np.nan,
+        },
+    ]
+
+    plot_reliability_diagram(bin_summary, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_reliability_diagram_rejects_invalid_inputs(tmp_path) -> None:
+    output_path = tmp_path / "reliability.png"
+
+    with pytest.raises(ValueError):
+        plot_reliability_diagram([], str(output_path))
+
+    with pytest.raises(ValueError, match="required keys"):
+        plot_reliability_diagram([{"count": 1}], str(output_path))
+
+    with pytest.raises(ValueError, match="finite"):
+        plot_reliability_diagram(
+            [{"count": 1, "accuracy": np.nan, "confidence": 0.8}],
+            str(output_path),
+        )
 
 def test_plot_grouped_metric_bars_creates_file(tmp_path) -> None:
     output_path = tmp_path / "grouped_bars.png"

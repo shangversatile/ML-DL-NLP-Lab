@@ -4,7 +4,7 @@
 
 Week 5 comes after the Week 4 handwritten-digit recognition capstone, tagged as `week4-mlp-digits-diagnostic-capstone`. It focuses on evaluating trained models beyond aggregate accuracy, diagnosing errors and confidence failures, analyzing calibration, identifying distribution shift between training data and application inputs, cleaning technical debt accumulated during scratch implementation, and improving experiment reliability and reproducibility.
 
-Week 5 starts with Task 7A: Evaluation Registry and Technical Debt Baseline. The current focus is calibration, reliability, experiment discipline, artifact management, and technical debt. Week 5 should not add MNIST or CNN work; those belong to the later deep-learning stage.
+Week 5 starts with Task 7A: Evaluation Registry and Technical Debt Baseline. Task 7B adds calibration metrics and reliability diagrams. The current focus is calibration, reliability, experiment discipline, artifact management, and technical debt. In Task 7B, calibration is measured, not corrected; the next likely task is confidence thresholding and abstention. Week 5 should not add MNIST or CNN work; those belong to the later deep-learning stage.
 
 ## Why this comes after Week 4
 
@@ -75,10 +75,11 @@ MNIST and CNN work are deferred to the later deep-learning stage. When that work
 
 ## Current status
 
-In progress: Task 7A establishes the evaluation registry foundation and technical debt baseline before calibration correction or abstention experiments.
+In progress: Task 7B measures calibration with reliability diagrams and registry-backed evaluation records. Calibration correction is not applied yet; confidence thresholding and abstention are the next likely direction.
 
 ## Links
 
 - [Task 7A: Evaluation Registry and Technical Debt Baseline](week5/01_evaluation_registry_and_technical_debt_baseline.md)
+- [Task 7B: Calibration Metrics and Reliability Diagrams](week5/02_calibration_metrics_and_reliability_diagrams.md)
 - [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
 - [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)
