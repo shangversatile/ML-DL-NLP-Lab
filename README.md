@@ -8,17 +8,17 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 closes as an MLP handwritten-digit application and failure-analysis capstone with final synthesis, real canvas diagnostics, and a canvas dataset protocol. MNIST Option A is selected: no MNIST implementation in Week 4. The first 56 real canvas samples are `Canvas-Diagnostic-v1` only, and they show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a robust or production recognizer.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 closes as an MLP handwritten-digit application and failure-analysis capstone tagged `week4-mlp-digits-diagnostic-capstone`, with final synthesis, real canvas diagnostics, and a canvas dataset protocol. Week 5 begins with an evaluation registry and technical debt baseline. The current focus is calibration and evaluation reliability, not improving digit recognition accuracy. MNIST/CNN work is deferred to the later deep-learning stage. The first 56 real canvas samples are `Canvas-Diagnostic-v1` only, and they show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a robust or production recognizer.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
 | Week 1 | Reproducible Research Engineering Setup                    | complete                                |
 | Week 2 | Linear / Logistic Regression and Probabilistic Foundations | complete                                |
 | Week 3 | Optimization and Binary MLP Foundations                    | complete, tagged `week3-optimization-mlp` |
-| Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | ready for final review                  |
-| Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | planned                                 |
+| Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | complete, tagged `week4-mlp-digits-diagnostic-capstone` |
+| Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | in progress                             |
 
-Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md) and [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md).
+Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md), [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md), and [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](reports/week5_evaluation_technical_debt.md).
 
 ## Implemented Components
 
@@ -113,9 +113,9 @@ Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are
 - `reports/week3_optimization_and_mlp.md`
 - `reports/week4_multiclass_digits_capstone.md`
 - `reports/week5_evaluation_technical_debt.md`
+- `reports/week5/01_evaluation_registry_and_technical_debt_baseline.md`
 
 ## Next Steps
 
-- Final Week 4 review with real canvas diagnostics, dataset protocol, inventory, and final synthesis included
-- Then: Week 5 calibration, evaluation discipline, reliability analysis, experiment registry, artifact management, and technical debt cleanup
+- Week 5 calibration, evaluation discipline, reliability analysis, experiment registry, artifact management, and technical debt cleanup
 - Later: collect separate Canvas-Train/Val/Test splits or proceed to MNIST/CNN work while retaining real canvas validation
