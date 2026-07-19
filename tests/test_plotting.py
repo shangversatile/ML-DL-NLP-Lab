@@ -13,6 +13,8 @@ from src.utils.plotting import (
     plot_loss_curve,
     plot_multiple_loss_curves,
     plot_reliability_diagram,
+    plot_selective_accuracy_coverage_curve,
+    plot_abstention_error_tradeoff,
     plot_shift_metric_bars,
 )
 
@@ -389,6 +391,49 @@ def test_plot_reliability_diagram_rejects_invalid_inputs(tmp_path) -> None:
             [{"count": 1, "accuracy": np.nan, "confidence": 0.8}],
             str(output_path),
         )
+
+
+
+def test_plot_selective_accuracy_coverage_curve_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "selective_curve.png"
+    sweep_results = [
+        {"threshold": 0.0, "coverage": 1.0, "selective_accuracy": 0.75},
+        {"threshold": 0.5, "coverage": 0.75, "selective_accuracy": 0.90},
+        {"threshold": 1.0, "coverage": 0.0, "selective_accuracy": np.nan},
+    ]
+
+    plot_selective_accuracy_coverage_curve(sweep_results, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_selective_accuracy_coverage_curve_rejects_empty_sweep(tmp_path) -> None:
+    output_path = tmp_path / "selective_curve.png"
+
+    with pytest.raises(ValueError):
+        plot_selective_accuracy_coverage_curve([], str(output_path))
+
+
+def test_plot_abstention_error_tradeoff_creates_file(tmp_path) -> None:
+    output_path = tmp_path / "abstention_tradeoff.png"
+    sweep_results = [
+        {"threshold": 0.0, "coverage": 1.0, "error_abstention_rate": 0.0},
+        {"threshold": 0.5, "coverage": 0.75, "error_abstention_rate": 0.5},
+        {"threshold": 1.0, "coverage": 0.0, "error_abstention_rate": np.nan},
+    ]
+
+    plot_abstention_error_tradeoff(sweep_results, str(output_path))
+
+    assert output_path.exists()
+    assert output_path.stat().st_size > 0
+
+
+def test_plot_abstention_error_tradeoff_rejects_empty_sweep(tmp_path) -> None:
+    output_path = tmp_path / "abstention_tradeoff.png"
+
+    with pytest.raises(ValueError):
+        plot_abstention_error_tradeoff([], str(output_path))
 
 def test_plot_grouped_metric_bars_creates_file(tmp_path) -> None:
     output_path = tmp_path / "grouped_bars.png"

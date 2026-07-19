@@ -1,5 +1,6 @@
 """Plotting helpers."""
 
+from numbers import Real
 from pathlib import Path
 
 import matplotlib
@@ -536,6 +537,159 @@ def plot_reliability_diagram(
     axis.set_ylim(0.0, 1.0)
     axis.set_xlabel("Average confidence")
     axis.set_ylabel("Empirical accuracy")
+    axis.set_title(title)
+    axis.legend()
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+
+
+
+def _validate_unit_plot_value(
+    value: float | int,
+    field_name: str,
+    *,
+    allow_nan: bool = False,
+) -> float:
+    if isinstance(value, (bool, np.bool_)) or not isinstance(value, Real):
+        raise TypeError(f"{field_name} must be numeric and not boolean.")
+
+    value_float = float(value)
+    if allow_nan and np.isnan(value_float):
+        return value_float
+    if not np.isfinite(value_float):
+        raise ValueError(f"{field_name} must be finite.")
+    if value_float < 0.0 or value_float > 1.0:
+        raise ValueError(f"{field_name} must be in [0, 1].")
+
+    return value_float
+
+
+def _validate_sweep_results_for_plot(
+    sweep_results: list[dict[str, float | int]],
+    metric_key: str,
+) -> list[tuple[float, float, float]]:
+    if not isinstance(sweep_results, list) or len(sweep_results) == 0:
+        raise ValueError("sweep_results must be a non-empty list.")
+
+    validated_rows = []
+    required_keys = {"threshold", "coverage", metric_key}
+    for row in sweep_results:
+        if not isinstance(row, dict):
+            raise TypeError("each sweep row must be a dictionary.")
+        missing_keys = required_keys - set(row)
+        if missing_keys:
+            missing_text = ", ".join(sorted(missing_keys))
+            raise ValueError(f"sweep row missing required keys: {missing_text}.")
+
+        threshold = _validate_unit_plot_value(row["threshold"], "threshold")
+        coverage = _validate_unit_plot_value(row["coverage"], "coverage")
+        metric = _validate_unit_plot_value(
+            row[metric_key],
+            metric_key,
+            allow_nan=True,
+        )
+        validated_rows.append((threshold, coverage, metric))
+
+    return validated_rows
+
+
+def plot_selective_accuracy_coverage_curve(
+    sweep_results: list[dict[str, float | int]],
+    output_path: str,
+    title: str = "Selective Accuracy versus Coverage",
+) -> None:
+    """
+    Plot selective accuracy against coverage across confidence thresholds.
+    """
+    rows = _validate_sweep_results_for_plot(sweep_results, "selective_accuracy")
+    finite_rows = [
+        (threshold, coverage, selective_accuracy)
+        for threshold, coverage, selective_accuracy in rows
+        if np.isfinite(selective_accuracy)
+    ]
+
+    path = _create_parent_directory(output_path)
+    figure, axis = plt.subplots(figsize=(7, 4.8))
+
+    if finite_rows:
+        _, coverages, selective_accuracies = zip(*finite_rows)
+        axis.plot(
+            coverages,
+            selective_accuracies,
+            marker="o",
+            label="Threshold sweep",
+        )
+        if len(finite_rows) <= 10:
+            for threshold, coverage, selective_accuracy in finite_rows:
+                axis.annotate(
+                    f"{threshold:.2g}",
+                    (coverage, selective_accuracy),
+                    textcoords="offset points",
+                    xytext=(4, 4),
+                    fontsize=8,
+                )
+        axis.legend()
+    else:
+        axis.text(
+            0.5,
+            0.5,
+            "No answered samples",
+            ha="center",
+            va="center",
+            transform=axis.transAxes,
+        )
+
+    axis.set_xlim(0.0, 1.0)
+    axis.set_ylim(0.0, 1.05)
+    axis.set_xlabel("Coverage")
+    axis.set_ylabel("Selective accuracy")
+    axis.set_title(title)
+    figure.tight_layout()
+    figure.savefig(path)
+    plt.close(figure)
+
+
+def plot_abstention_error_tradeoff(
+    sweep_results: list[dict[str, float | int]],
+    output_path: str,
+    title: str = "Abstention and Error Tradeoff",
+) -> None:
+    """
+    Plot threshold versus coverage and error-abstention rate.
+    """
+    rows = _validate_sweep_results_for_plot(sweep_results, "error_abstention_rate")
+
+    threshold_values = [threshold for threshold, _, _ in rows]
+    coverage_values = [coverage for _, coverage, _ in rows]
+    error_rows = [
+        (threshold, error_abstention_rate)
+        for threshold, _, error_abstention_rate in rows
+        if np.isfinite(error_abstention_rate)
+    ]
+
+    path = _create_parent_directory(output_path)
+    figure, axis = plt.subplots(figsize=(7, 4.8))
+    axis.plot(
+        threshold_values,
+        coverage_values,
+        marker="o",
+        label="Coverage",
+    )
+
+    if error_rows:
+        error_thresholds, error_abstention_rates = zip(*error_rows)
+        axis.plot(
+            error_thresholds,
+            error_abstention_rates,
+            marker="o",
+            label="Error abstention rate",
+        )
+
+    axis.set_xlim(0.0, 1.0)
+    axis.set_ylim(0.0, 1.05)
+    axis.set_xlabel("Confidence threshold")
+    axis.set_ylabel("Rate")
     axis.set_title(title)
     axis.legend()
     figure.tight_layout()
