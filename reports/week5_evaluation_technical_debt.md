@@ -4,7 +4,7 @@
 
 Week 5 comes after the Week 4 handwritten-digit recognition capstone, tagged as `week4-mlp-digits-diagnostic-capstone`. It focuses on evaluating trained models beyond aggregate accuracy, diagnosing errors and confidence failures, analyzing calibration, identifying distribution shift between training data and application inputs, cleaning technical debt accumulated during scratch implementation, and improving experiment reliability and reproducibility.
 
-Week 5 starts with Task 7A: Evaluation Registry and Technical Debt Baseline. Task 7B adds calibration metrics and reliability diagrams. Task 7C adds selective prediction and abstention diagnostics. The current focus is calibration, reliability, abstention measurement, experiment discipline, artifact management, and technical debt. In Task 7C, confidence thresholding evaluates abstention behavior but does not fix the model. The next likely step is temperature scaling on a proper validation split or a technical-debt and artifact audit. Week 5 should not add MNIST or CNN work; those belong to the later deep-learning stage.
+Week 5 starts with Task 7A: Evaluation Registry and Technical Debt Baseline. Task 7B adds calibration metrics and reliability diagrams. Task 7C adds selective prediction and abstention diagnostics. Task 7D adds evaluation artifact and report-link auditing. The current focus is calibration, reliability, abstention measurement, experiment discipline, artifact management, and technical debt. In Task 7C, confidence thresholding evaluates abstention behavior but does not fix the model. In Task 7D, artifact and link auditing checks project state without changing model behavior. The next likely step is temperature scaling on a proper validation split or broader technical-debt cleanup after inspecting the audit output. Week 5 should not add MNIST or CNN work; those belong to the later deep-learning stage.
 
 ## Why this comes after Week 4
 
@@ -76,12 +76,13 @@ MNIST and CNN work are deferred to the later deep-learning stage. When that work
 
 ## Current status
 
-In progress: Task 7C measures confidence thresholding, selective prediction, abstention rates, and Top-k fallback diagnostics. Abstention is evaluated as a decision diagnostic; it does not fix the underlying model, calibration, or high-confidence real canvas errors. The next likely step is temperature scaling on a proper validation split or a technical-debt and artifact audit.
+In progress: Task 7D audits generated evaluation artifact locations, required local-artifact ignore patterns, and relative Markdown report links. This task improves project traceability and documentation consistency without changing model behavior, preprocessing, optimizer logic, or application behavior. The next likely step is temperature scaling on a proper validation split or broader technical-debt cleanup after the audit output is inspected.
 
 ## Links
 
 - [Task 7A: Evaluation Registry and Technical Debt Baseline](week5/01_evaluation_registry_and_technical_debt_baseline.md)
 - [Task 7B: Calibration Metrics and Reliability Diagrams](week5/02_calibration_metrics_and_reliability_diagrams.md)
 - [Task 7C: Confidence Thresholding and Abstention Policy](week5/03_confidence_thresholding_and_abstention_policy.md)
+- [Task 7D: Evaluation Artifact Audit and Link Consistency](week5/04_evaluation_artifact_audit_and_link_consistency.md)
 - [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](week4_multiclass_digits_capstone.md)
 - [Week 3 Optimization and MLP Notes](week3_optimization_and_mlp.md)

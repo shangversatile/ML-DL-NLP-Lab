@@ -8,7 +8,7 @@ The focus is implementing core machine learning components from scratch while ke
 
 ## Current Status
 
-Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 closes as an MLP handwritten-digit application and failure-analysis capstone tagged `week4-mlp-digits-diagnostic-capstone`, with final synthesis, real canvas diagnostics, and a canvas dataset protocol. Week 5 now includes an evaluation registry, calibration metrics, reliability diagrams, selective prediction, and abstention diagnostics. Confidence thresholding evaluates coverage versus selective accuracy, but high-confidence real canvas errors may remain unsolved. The current focus is evaluation reliability, not improving digit recognition accuracy. No MNIST or CNN work has been added; both are deferred to the later deep-learning stage. The first 56 real canvas samples are `Canvas-Diagnostic-v1` only, and they show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a robust or production recognizer.
+Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP. Week 4 closes as an MLP handwritten-digit application and failure-analysis capstone tagged `week4-mlp-digits-diagnostic-capstone`, with final synthesis, real canvas diagnostics, and a canvas dataset protocol. Week 5 now includes an evaluation registry, calibration metrics, reliability diagrams, selective prediction, abstention diagnostics, and artifact/report-link audit utilities. Confidence thresholding evaluates coverage versus selective accuracy, but high-confidence real canvas errors may remain unsolved. Generated figures, registries, checkpoints, canvas debug figures, and canvas samples remain local artifacts. The current focus is evaluation reliability and technical debt, not improving digit recognition accuracy. No MNIST or CNN work has been added; both are deferred to the later deep-learning stage. The first 56 real canvas samples are `Canvas-Diagnostic-v1` only, and they show weak Top-1 accuracy with stronger Top-3 accuracy. This remains an educational/research prototype, not a robust or production recognizer.
 
 | Week   | Theme                                                      | Status                                  |
 | ------ | ---------------------------------------------------------- | --------------------------------------- |
@@ -48,6 +48,7 @@ Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_o
 - calibration metrics, Brier score, NLL, and reliability diagrams
 - evaluation registry records for calibration runs
 - selective prediction, confidence-threshold sweeps, and abstention diagnostics
+- evaluation artifact inventory, required ignore-pattern audit, and Markdown report-link checks
 - coverage versus selective accuracy plots and Top-k fallback diagnostics
 - augmented training robustness-comparison experiment
 - real canvas model-input debugging and user-sample evaluation
@@ -86,6 +87,7 @@ python experiments/train_save_load_digits_mlp.py
 python experiments/analyze_digits_shift_diagnostics.py
 python experiments/analyze_digits_calibration.py
 python experiments/analyze_digits_abstention.py
+python experiments/audit_week5_evaluation_state.py
 python experiments/compare_digits_augmented_training.py
 python experiments/evaluate_canvas_samples.py
 ```
@@ -100,7 +102,7 @@ python experiments/evaluate_canvas_samples.py
 
 The app prefers `results/checkpoints/digits_mlp_augmented.npz`, displays the `8 x 8` model input after preprocessing, and can save labeled canvas samples under `data/user_digits/samples/`.
 
-Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs and figures are ignored by Git.
+Experiment logs are saved under `results/logs/`, and loss curves are saved under `results/figures/`. Generated logs, figures, registry JSONL files, checkpoints, canvas debug figures, and user canvas samples are ignored by Git and should remain local artifacts.
 
 Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are saved under `results/canvas_debug/`, which is also ignored by Git.
 
@@ -121,8 +123,10 @@ Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are
 - `reports/week5_evaluation_technical_debt.md`
 - `reports/week5/01_evaluation_registry_and_technical_debt_baseline.md`
 - `reports/week5/02_calibration_metrics_and_reliability_diagrams.md`
+- `reports/week5/03_confidence_thresholding_and_abstention_policy.md`
+- `reports/week5/04_evaluation_artifact_audit_and_link_consistency.md`
 
 ## Next Steps
 
-- Week 5 temperature scaling on a proper validation split or a technical-debt and artifact audit
+- Week 5 temperature scaling on a proper validation split or broader technical-debt cleanup after inspecting audit output
 - Later: collect separate Canvas-Train/Val/Test splits or proceed to MNIST/CNN work while retaining real canvas validation
