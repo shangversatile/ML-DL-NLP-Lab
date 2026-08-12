@@ -6,7 +6,7 @@
 
 ![Learning curves bias variance](../assets/learning_curves_bias_variance.png)
 
-图 2：learning curves 用 training error 与 out-of-sample/validation error 随 sample size 或 training progress 的变化来诊断 high-bias 与 high-variance regimes。但 curve 本身不能证明因果机制，也不能替代独立 evaluation。
+图 2：development-time learning curves 应优先使用 training error 与 validation/dev error 随 sample size 或 training progress 的变化来诊断 high-bias 与 high-variance regimes。final test set 应保持隔离，只用于 model-selection 结束后的最终 evidence。curve 本身不能证明因果机制，也不能替代独立 evaluation。
 
 ![Error source decomposition map](../assets/error_source_decomposition_map.png)
 
@@ -291,7 +291,7 @@ variance 是：
 - early stopping：可能降低对噪声细节的适配；
 - data geometry：稀疏或低密度 regions 中 predictions 更不稳定。
 
-high variance 的经验表现常是 train error 很低但 validation/test error 高，或 across seeds/splits 波动大。但同样，这只是 symptom，不是数学定义。
+high variance 的 development-time 经验表现常是 train error 很低但 validation/dev error 高，或 across seeds/splits 波动大。final test set 只有在 model selection 结束后才应用于最终报告，不应参与这种迭代诊断。但同样，这只是 symptom，不是数学定义。
 
 ## 6. Noise
 
@@ -306,13 +306,15 @@ irreducible noise 不应被 optimization effort 或 larger model 误解释为可
 
 ## 7. Learning Curves
 
-learning curves 通常比较：
+development-time learning curves 通常比较：
 
 - training error；
-- validation/test error；
+- validation/dev error；
 - sample size $N$；
 - training time/epochs；
 - model capacity or regularization strength。
+
+final test set 不应参与反复诊断、feature/architecture choice、regularization tuning 或 stopping-rule selection。否则 test set 会从 independent final evidence 变成 selection process 的一部分。
 
 典型 high-bias regime：
 
@@ -348,7 +350,7 @@ gap large
 - representation 是否保留了 causal mechanism；
 - probability outputs 是否 calibrated；
 - label noise 是否系统性偏置；
-- improvement 是否来自 test leakage；
+- improvement 是否来自 validation leakage 或 final-test contamination；
 - fairness、interpretability 或 safety。
 
 ### Cross-links to Existing Experiments
@@ -391,15 +393,119 @@ R(\hat h)-R(h^*_{\mathcal{H}})
 
 它衡量 finite sample selection 与 population-best-in-class 的差距。
 
-### Optimization Error
+### Optimization / Computation Error
 
-如果 algorithm output $\tilde h$ 没有达到 empirical objective 的理想解，可能需要比较：
+保留 T2 以后使用的 notation：
+
+- $h^*$：unrestricted/reference population optimum；
+- $h^*_{\mathcal{H}}$：population-best member of $\mathcal{H}$；
+- $\hat h$：exact empirical risk minimizer；
+- $\tilde h$：actual algorithm output。
+
+如果 algorithm output $\tilde h$ 没有达到 empirical objective 的理想解，optimization suboptimality 应先在 empirical objective 上定义：
 
 ```math
-R(\tilde h)-R(\hat h)
+\epsilon_{\mathrm{opt}}
+=
+\hat R_D(\tilde h)-\hat R_D(\hat h)
+\ge
+0
 ```
 
-但这不是唯一 canonical form，因为 optimization error 也可在 empirical objective 上定义。
+不要把 $R(\tilde h)-R(\hat h)$ 直接称为非负 optimization error。即使 $\hat h$ 是 empirical minimizer，它不一定在 population risk 上优于 actual output $\tilde h$；两者的 population ordering 受 sample randomness 与 generalization gap 影响。
+
+若定义：
+
+```math
+\epsilon_{\mathrm{gen}}
+=
+\sup_{h\in\mathcal{H}}
+\left|
+R(h)-\hat R_D(h)
+\right|
+```
+
+并且 $\tilde h,\hat h,h^*_{\mathcal{H}}\in\mathcal{H}$，则：
+
+```math
+R(\tilde h)-R(h^*_{\mathcal{H}})
+\le
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+推导是：
+
+```math
+R(\tilde h)
+\le
+\hat R_D(\tilde h)+\epsilon_{\mathrm{gen}}
+```
+
+由 empirical optimization suboptimality：
+
+```math
+\hat R_D(\tilde h)
+=
+\hat R_D(\hat h)+\epsilon_{\mathrm{opt}}
+```
+
+由 exact ERM：
+
+```math
+\hat R_D(\hat h)
+\le
+\hat R_D(h^*_{\mathcal{H}})
+```
+
+再由 uniform deviation：
+
+```math
+\hat R_D(h^*_{\mathcal{H}})
+\le
+R(h^*_{\mathcal{H}})+\epsilon_{\mathrm{gen}}
+```
+
+合并得到：
+
+```math
+R(\tilde h)
+\le
+R(h^*_{\mathcal{H}})
++
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+相对于 unrestricted/reference optimum $h^*$：
+
+```math
+R(\tilde h)-R(h^*)
+\le
+\left[
+R(h^*_{\mathcal{H}})-R(h^*)
+\right]
++
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+三项分别是：
+
+- **approximation/specification**：$R(h^*_{\mathcal{H}})-R(h^*)$；
+- **generalization/estimation control**：$2\epsilon_{\mathrm{gen}}$；
+- **empirical optimization suboptimality**：$\epsilon_{\mathrm{opt}}$。
+
+### Assumptions
+
+上述 inequality 需要 $\mathcal{H}$ 固定，$D$ 与目标 population risk $R$ 的 sampling assumptions 足以支持 uniform deviation bound，loss/objective 在 $\hat R_D$ 与 $R$ 中一致，$\hat h$ 是 exact ERM，$\tilde h$ 与 $h^*_{\mathcal{H}}$ 都属于被 uniform convergence 控制的同一个 $\mathcal{H}$。
+
+### What This Does NOT Imply
+
+该 inequality 不说明 $\epsilon_{\mathrm{gen}}$ 或 $\epsilon_{\mathrm{opt}}$ 数值小；不保证 arbitrary distribution shift；不保证 representation sufficient；不保证 $\epsilon_{\mathrm{opt}}$ 能由 training logs 精确估计；也不说明 population difference $R(\tilde h)-R(\hat h)$ 非负。
 
 ### Bias / Variance Decomposition
 

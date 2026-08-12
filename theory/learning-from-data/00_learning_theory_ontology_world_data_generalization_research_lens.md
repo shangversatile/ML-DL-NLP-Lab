@@ -240,10 +240,10 @@ f \notin \mathcal{H}
 则即使有无限数据、完美 optimization，也无法在 $\mathcal{H}$ 内恢复真实 target。此时最好的结果是 approximation：
 
 ```math
-h^* = \arg\min_{h\in\mathcal{H}} E_{\mathrm{out}}(h)
+h^*_{\mathcal{H}} = \arg\min_{h\in\mathcal{H}} E_{\mathrm{out}}(h)
 ```
 
-其中 $h^*$ 是在 allowed family 内最好的 hypothesis，不必等于 $f$。
+其中 $h^*_{\mathcal{H}}$ 是在 allowed family 内最好的 hypothesis，不必等于 unrestricted/reference optimum $h^*$ 或 deterministic target $f$。
 
 若使用 feature map $\Phi$，真正被检查的是 induced family：
 
@@ -367,7 +367,7 @@ fixed hypothesis 的 concentration 只能说明一个预先固定的 $h$ 在独�
 g = A(D)
 ```
 
-它依赖同一个 dataset $D$。因此 credible out-of-sample claim 需要说明 adaptive selection 被怎样控制：finite hypothesis set 的 union bound、growth function、VC dimension、regularization、stability、independent validation/test protocol，或其他明确的 capacity/control argument。没有这层论证，low training error 只是关于 observed sample 的事实，不是 generalization 的结论。
+它依赖同一个 dataset $D$。因此 credible out-of-sample claim 需要说明 adaptive selection 被怎样控制：finite hypothesis set 的 union bound、growth function、VC dimension、明确约束的 regularization、stability，或其他 formal capacity/algorithm-control argument；独立 validation/test protocol 则提供 evidence-control，而不是 capacity-control 本身。没有这些论证或证据，low training error 只是关于 observed sample 的事实，不是 generalization 的结论。
 
 ## 7. Research lens
 

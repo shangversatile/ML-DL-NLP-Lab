@@ -89,7 +89,14 @@ ERM formalism 不意味着实际 algorithm 一定精确求解 ERM；deep learnin
 
 ## 2. Excess-Risk Decomposition
 
-一种常用 decomposition 是：
+本 note 固定使用以下 notation：
+
+- $h^*$：unrestricted/reference population optimum；
+- $h^*_{\mathcal{H}}$：population-best member in $\mathcal{H}$；
+- $\hat h$：exact empirical risk minimizer；
+- $\tilde h$：actual algorithm output。
+
+一种 useful population-level reference decomposition 是：
 
 ```math
 R(\tilde h)-R(h^*)
@@ -99,44 +106,144 @@ R(h^*_{\mathcal{H}})-R(h^*)
 \right]
 +
 \left[
-R(\hat h)-R(h^*_{\mathcal{H}})
-\right]
-+
-\left[
-R(\tilde h)-R(\hat h)
+R(\tilde h)-R(h^*_{\mathcal{H}})
 \right]
 ```
 
 其中：
 
-- $h^*$：reference optimal predictor；
-- $h^*_{\mathcal{H}}$：population-best member in $\mathcal{H}$；
-- $\hat h$：exact ERM solution；
-- $\tilde h$：actual algorithm output。
+- 第一项是 **approximation/specification**：chosen class $\mathcal{H}$ 相对 unrestricted/reference optimum 的限制；
+- 第二项是 actual output $\tilde h$ 相对 population-best-in-class 的 excess risk，需要由 generalization/estimation control 与 optimization analysis 一起 upper bound。
 
-对应解释：
+不要把：
 
-```text
-approximation/specification error
-+
-estimation/generalization error
-+
-optimization/computation error
+```math
+R(\tilde h)-R(\hat h)
 ```
+
+直接称为非负 optimization error。$\hat h$ 是 empirical minimizer，不一定是 population minimizer；因此 $R(\tilde h)-R(\hat h)$ 可以为正、为负或无法由 optimization logs 直接解释。
+
+### Empirical Optimization Suboptimality
+
+actual algorithm output 的 empirical optimization suboptimality 定义为：
+
+```math
+\epsilon_{\mathrm{opt}}
+=
+\hat R_D(\tilde h)-\hat R_D(\hat h)
+\ge
+0
+```
+
+非负性来自 $\hat h$ 是 exact ERM：
+
+```math
+\hat R_D(\hat h)
+\le
+\hat R_D(h)
+\quad
+\text{for all }h\in\mathcal{H}
+```
+
+因此如果 $\tilde h\in\mathcal{H}$，就有 $\hat R_D(\tilde h)-\hat R_D(\hat h)\ge0$。
+
+### Bound with Generalization and Optimization
+
+#### Assumptions
+
+- $\mathcal{H}$ 固定，且 $\tilde h,\hat h,h^*_{\mathcal{H}}\in\mathcal{H}$；
+- $D$ 的 sampling assumptions 足以支持同一个 population risk $R$ 与 empirical risk $\hat R_D$ 之间的 uniform control；
+- $\hat h$ 是 exact empirical risk minimizer of $\hat R_D$ over $\mathcal{H}$；
+- $\tilde h$ 是 actual algorithm output；
+- empirical objective 与 population risk 使用一致的 loss，或已明确说明二者的关系；
+- $\epsilon_{\mathrm{opt}}$ 按 empirical objective 定义，而不是按 population-risk difference 定义。
+
+定义 uniform generalization control：
+
+```math
+\epsilon_{\mathrm{gen}}
+=
+\sup_{h\in\mathcal{H}}
+\left|
+R(h)-\hat R_D(h)
+\right|
+```
+
+若 $\tilde h,\hat h,h^*_{\mathcal{H}}\in\mathcal{H}$，则：
+
+```math
+R(\tilde h)-R(h^*_{\mathcal{H}})
+\le
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+推导：
+
+```math
+R(\tilde h)
+\le
+\hat R_D(\tilde h)+\epsilon_{\mathrm{gen}}
+```
+
+```math
+\hat R_D(\tilde h)
+=
+\hat R_D(\hat h)+\epsilon_{\mathrm{opt}}
+```
+
+```math
+\hat R_D(\hat h)
+\le
+\hat R_D(h^*_{\mathcal{H}})
+```
+
+```math
+\hat R_D(h^*_{\mathcal{H}})
+\le
+R(h^*_{\mathcal{H}})+\epsilon_{\mathrm{gen}}
+```
+
+合并得到：
+
+```math
+R(\tilde h)
+\le
+R(h^*_{\mathcal{H}})
++
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+相对于 unrestricted/reference optimum：
+
+```math
+R(\tilde h)-R(h^*)
+\le
+\left[
+R(h^*_{\mathcal{H}})-R(h^*)
+\right]
++
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+三项分别是：
+
+- **approximation/specification**：$R(h^*_{\mathcal{H}})-R(h^*)$；
+- **generalization/estimation control**：$2\epsilon_{\mathrm{gen}}$；
+- **empirical optimization suboptimality**：$\epsilon_{\mathrm{opt}}$。
 
 ### Important Caveat
 
-这不是唯一 canonical decomposition。optimization error 有时在 empirical risk 上定义：
-
-```math
-\hat R_D(\tilde h)-\hat R_D(\hat h)
-```
-
-而 population excess risk 的分解还可能加入 regularization bias、algorithmic stability terms、optimization noise 或 approximation to Bayes risk。研究笔记中必须先定义 reference predictors，再解释每一项。
+这不是唯一 analysis template。若使用 regularized ERM，$\hat h$ 可能应定义为 regularized empirical objective 的 minimizer；若 algorithm 输出不在同一个 $\mathcal{H}$，uniform control set 也要随之改变。population excess risk 的分解还可能加入 regularization bias、algorithmic stability terms、optimization noise 或 approximation to Bayes risk。研究笔记中必须先定义 reference predictors，再解释每一项。
 
 ### What This Does NOT Imply
 
-decomposition 不说明每一项都可观测。$R(h)$ 和 $h^*$ 通常不可直接访问；实际研究只能用 held-out evidence、bounds、simulation、ablations 或 controlled tasks 来间接诊断。
+decomposition 和 inequality 不说明每一项都可观测。$R(h)$、$h^*$、$h^*_{\mathcal{H}}$ 与 $\epsilon_{\mathrm{gen}}$ 通常不可直接访问；实际研究只能用 held-out evidence、bounds、simulation、ablations 或 controlled tasks 来间接诊断。它也不说明 $R(\tilde h)-R(\hat h)$ 是非负 optimization error。
 
 ## 3. Uniform Convergence
 

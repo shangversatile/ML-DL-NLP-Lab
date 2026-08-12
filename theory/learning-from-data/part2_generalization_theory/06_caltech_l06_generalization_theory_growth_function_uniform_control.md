@@ -371,10 +371,10 @@ E_{\mathrm{in}}(h)-E_{\mathrm{out}}(h)
 E_{\mathrm{in}}(h)
 ```
 
-- $h^*$ 是 population-best member of $\mathcal{H}$：
+- $h^*_{\mathcal{H}}$ 是 population-best member of $\mathcal{H}$：
 
 ```math
-h^*
+h^*_{\mathcal{H}}
 \in
 \arg\min_{h\in\mathcal{H}}
 E_{\mathrm{out}}(h)
@@ -387,7 +387,7 @@ E_{\mathrm{out}}(h)
 ```math
 E_{\mathrm{out}}(\hat{h})
 \le
-E_{\mathrm{out}}(h^*)+2\epsilon
+E_{\mathrm{out}}(h^*_{\mathcal{H}})+2\epsilon
 ```
 
 #### Derivation / Proof Idea
@@ -405,15 +405,15 @@ E_{\mathrm{in}}(\hat{h})+\epsilon
 ```math
 E_{\mathrm{in}}(\hat{h})
 \le
-E_{\mathrm{in}}(h^*)
+E_{\mathrm{in}}(h^*_{\mathcal{H}})
 ```
 
 再由 uniform convergence：
 
 ```math
-E_{\mathrm{in}}(h^*)
+E_{\mathrm{in}}(h^*_{\mathcal{H}})
 \le
-E_{\mathrm{out}}(h^*)+\epsilon
+E_{\mathrm{out}}(h^*_{\mathcal{H}})+\epsilon
 ```
 
 三行相加得到：
@@ -421,7 +421,7 @@ E_{\mathrm{out}}(h^*)+\epsilon
 ```math
 E_{\mathrm{out}}(\hat{h})
 \le
-E_{\mathrm{out}}(h^*)+2\epsilon
+E_{\mathrm{out}}(h^*_{\mathcal{H}})+2\epsilon
 ```
 
 #### Interpretation
@@ -430,7 +430,7 @@ $2\epsilon$ 结构说明：uniform convergence 不只是让 empirical risk 可�
 
 #### What This Does NOT Imply
 
-- $\hat h$ 不一定接近 true target $f$，只接近 $\mathcal{H}$ 内最好的 $h^*$；
+- $\hat h$ 不一定接近 true target $f$ 或 unrestricted/reference optimum $h^*$，只接近 $\mathcal{H}$ 内最好的 $h^*_{\mathcal{H}}$；
 - 若 ERM 没被优化到位，还要加 optimization error；
 - 若 $\mathcal{H}$ 太小，approximation error 可能主导；
 - 若 distribution 改变，$E_{\mathrm{out}}$ 的定义也改变；

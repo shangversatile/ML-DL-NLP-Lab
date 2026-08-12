@@ -170,7 +170,9 @@ out-of-sample 不等于 out-of-distribution。held-out i.i.d. test set 不能自
 
 ## 7. What Capacity-Control Argument Exists?
 
-可能的 control mechanisms：
+### A. Formal / Structural Generalization Controls
+
+formal 或 structural generalization controls 试图限制 selected hypothesis 或 algorithm path 的 effective complexity，使 empirical evidence 能支持 population-risk claim。常见形式包括：
 
 - finite hypothesis class；
 - VC dimension；
@@ -178,18 +180,31 @@ out-of-sample 不等于 out-of-distribution。held-out i.i.d. test set 不能自
 - Rademacher complexity；
 - norm bound；
 - margin；
-- explicit regularization；
+- explicit regularization, when its relationship to the effective hypothesis class or solution class is specified；
 - algorithmic stability；
-- compression；
+- compression。
+
+explicit regularization 只有在说明它怎样限制 effective hypothesis/solution class 时，才是 capacity 或 algorithm-control argument。例如 L2 penalty 可能对应 norm control，但必须说明 penalty、optimization path、chosen solution 与 reported hypothesis 之间的关系；单独写 “we used regularization” 不构成 generalization guarantee。
+
+### B. Empirical Evaluation / Evidence Controls
+
+empirical evaluation controls 不直接限制 $\mathcal{H}$ 的 capacity，但它们支持更可信的 evidence protocol：
+
 - validation protocol；
 - independent replication；
-- purely empirical evidence。
+- held-out final test set；
+- multiple seeds or splits；
+- confidence intervals；
+- pre-registered evaluation protocol；
+- external benchmark or deployment sample, if selection did not depend on it。
+
+这两类 controls 支持不同强度的 claims。formal/structural controls 可以支撑 high-probability 或 expected-risk 类型的理论 claim，前提是 assumptions 成立。empirical evaluation controls 更常支撑 observed performance、uncertainty estimate、replication evidence 或 benchmark-conditioned conclusion。二者都能提高 research credibility，但不能互相替代。
 
 如果论文没有 formal bound，也可以是有效 empirical research，但 claim strength 应相应降低。经验提升支持 observed benchmark improvement；它不自动支持 high-probability guarantee。
 
 ### What This Does NOT Imply
 
-capacity control 只处理 estimation/generalization 的一部分。它不保证 representation sufficient、loss aligned、optimization successful 或 deployment safe。
+capacity control 只处理 estimation/generalization 的一部分。evaluation discipline 只处理 evidence independence 与 measurement credibility 的一部分。它们都不保证 representation sufficient、loss aligned、optimization successful 或 deployment safe。
 
 ## 8. What Kind of Claim Is Supported?
 

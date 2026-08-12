@@ -42,11 +42,16 @@
 | $d_{\mathrm{VC}}$ | VC dimension | $\mathcal{H}$ 可 shatter 的最大 point-set size |
 | uniform convergence | simultaneous empirical-population control | 控制 $\sup_{h\in\mathcal{H}}|\hat R_D(h)-R(h)|$ |
 | ERM | empirical risk minimization | 选择 empirical risk 最小的 hypothesis |
-| excess risk | risk above a reference predictor | 通常为 $R(\hat h)-R(h^*)$ 或 $R(\hat h)-R(h^*_{\mathcal{H}})$，需定义 reference |
+| $h^*$ | unrestricted/reference population optimum | reference class 或 Bayes rule 下的 population optimum，必须按上下文定义 |
+| $h^*_{\mathcal{H}}$ | population-best member of $\mathcal{H}$ | $\mathcal{H}$ 内 population risk 最小的 hypothesis |
+| $\hat h$ | exact empirical risk minimizer | 精确最小化 $\hat R_D$ 的 idealized ERM solution |
+| $\tilde h$ | actual algorithm output | 实际 optimizer / training procedure 输出的 hypothesis |
+| excess risk | risk above a reference predictor | 通常为 $R(\tilde h)-R(h^*)$、$R(\hat h)-R(h^*)$ 或 $R(\hat h)-R(h^*_{\mathcal{H}})$，需定义 reference |
 | sample complexity | samples needed for target guarantee | 达到给定 $\epsilon,\delta$ 所需的 $N$ |
 | approximation error | best-in-class limitation | $\mathcal{H}$ 与 reference class/Bayes rule 的 population-risk 差距 |
 | estimation error | finite-sample selection error | selected empirical hypothesis 与 population-best-in-class 的差距 |
-| optimization error | algorithmic search error | actual algorithm output 与 intended optimum 的差距 |
+| $\epsilon_{\mathrm{opt}}$ | empirical optimization suboptimality | $\hat R_D(\tilde h)-\hat R_D(\hat h)\ge0$，不是 $R(\tilde h)-R(\hat h)$ |
+| optimization error | algorithmic search error | 应先在 empirical objective 或明确 optimization objective 上定义 |
 | bias | average predictor's systematic deviation | squared-loss bias-variance setup 中定义 |
 | variance | dataset-induced predictor variability | over possible training datasets 的 prediction fluctuation |
 | capacity | effective flexibility of a class/procedure | 可能由 VC dimension、growth function、norm、margin、stability 等衡量 |
@@ -305,7 +310,7 @@ capacity = parameter count
 
 ## 13. Approximation, estimation, optimization
 
-给定 reference predictor $h^*$、population-best-in-class $h^*_{\mathcal{H}}$、exact ERM $\hat h$ 与 actual output $\tilde h$，一种 useful decomposition 是：
+给定 unrestricted/reference optimum $h^*$、population-best-in-class $h^*_{\mathcal{H}}$、exact ERM $\hat h$ 与 actual output $\tilde h$，一种 useful reference decomposition 是：
 
 ```math
 R(\tilde h)-R(h^*)
@@ -315,15 +320,58 @@ R(h^*_{\mathcal{H}})-R(h^*)
 \right]
 +
 \left[
-R(\hat h)-R(h^*_{\mathcal{H}})
-\right]
-+
-\left[
-R(\tilde h)-R(\hat h)
+R(\tilde h)-R(h^*_{\mathcal{H}})
 \right]
 ```
 
-这里的三个 bracket 分别对应 approximation/specification、estimation/generalization、optimization/computation。但这不是唯一 decomposition；必须在每篇 note 或论文中说明 reference objects。
+第一项是 approximation/specification。第二项不是纯 optimization error；它需要用 generalization/estimation control 与 empirical optimization suboptimality 一起 upper bound。
+
+empirical optimization suboptimality 定义为：
+
+```math
+\epsilon_{\mathrm{opt}}
+=
+\hat R_D(\tilde h)-\hat R_D(\hat h)
+\ge
+0
+```
+
+若：
+
+```math
+\epsilon_{\mathrm{gen}}
+=
+\sup_{h\in\mathcal{H}}
+\left|
+R(h)-\hat R_D(h)
+\right|
+```
+
+且 $\tilde h,\hat h,h^*_{\mathcal{H}}\in\mathcal{H}$，则：
+
+```math
+R(\tilde h)-R(h^*_{\mathcal{H}})
+\le
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+因此：
+
+```math
+R(\tilde h)-R(h^*)
+\le
+\left[
+R(h^*_{\mathcal{H}})-R(h^*)
+\right]
++
+2\epsilon_{\mathrm{gen}}
++
+\epsilon_{\mathrm{opt}}
+```
+
+三项分别对应 approximation/specification、generalization/estimation control、empirical optimization suboptimality。不要把 $R(\tilde h)-R(\hat h)$ 称为非负 optimization error；它是 population-risk difference，不由 empirical minimization 保证非负。
 
 ## 14. Bias and variance
 
