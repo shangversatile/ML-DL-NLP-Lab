@@ -18,7 +18,7 @@ Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP
 | Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | complete, tagged `week4-mlp-digits-diagnostic-capstone` |
 | Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | in progress                             |
 
-Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md), [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md), and [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](reports/week5_evaluation_technical_debt.md).
+Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md), [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md), [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](reports/week5_evaluation_technical_debt.md), and the new [Learning From Data 理论笔记](theory/learning-from-data/README.md).
 
 ## Implemented Components
 
@@ -121,6 +121,7 @@ Real canvas diagnostic figures from `experiments/evaluate_canvas_samples.py` are
 - `reports/week3_optimization_and_mlp.md`
 - `reports/week4_multiclass_digits_capstone.md`
 - `reports/week5_evaluation_technical_debt.md`
+- `theory/learning-from-data/README.md`
 - `reports/week5/01_evaluation_registry_and_technical_debt_baseline.md`
 - `reports/week5/02_calibration_metrics_and_reliability_diagrams.md`
 - `reports/week5/03_confidence_thresholding_and_abstention_policy.md`

@@ -1,0 +1,360 @@
+# Machine Learning Theory Map: From World to Data to Generalization
+
+[← Back to Learning From Data Theory Notebook](README.md)
+
+本章是 T1 的 ontology map。它先不讨论某个具体算法是否强大，而是定义 machine learning 问题本身：世界中有某种未知结构，learner 只能看到有限、带 representation bias 的数据，并且必须在未见输入上做 prediction 或 decision。后续所有关于 VC dimension、regularization、validation、distribution shift、calibration、representation learning 的问题，都可以回到这张图。
+
+![Learning system from world to hypothesis](assets/learning_system_world_to_hypothesis.png)
+
+图 1：从 unknown world 到 selected hypothesis 的 learning system。读图时要注意，learner 并不直接接触世界本身；它接触的是 sampling、measurement、representation 与 hypothesis set 共同过滤后的 finite dataset。
+
+## 0. Source Separation
+
+- **Caltech Core**：learning diagram、target function、training examples、hypothesis set、learning algorithm、final hypothesis，以及 Lecture 2-4 中的 distribution、error measure、noisy target 与 nonlinear transformation。
+- **Stanford / Theory Extension**：把 learning problem 解释为 empirical evidence 与 population behavior 之间的 statistical-learning-theory question，尤其是后续 uniform convergence 的入口。
+- **Modern Perspective**：representation learning、world models、distribution shift、calibration 与 evaluation protocol 都回到同一 ontology。
+- **Research Reflection**：用本章 ontology 审计 ML paper 的 assumptions、evidence、objective、distribution 与 failure type。
+
+## 1. What problem is machine learning actually solving?
+
+### Caltech Core
+
+Caltech `Learning From Data` 的起点不是某个模型，而是一个问题：当我们无法直接写出 desired mapping 时，是否可以用 examples 让机器产生一个有用的 approximation？这个问题看似工程化，本质上是 finite information inference。
+
+我们需要区分几层对象：
+
+- **the world**：产生现象的真实环境、机制、population 或 task context；
+- **observations of the world**：通过 measurement 或 sampling 得到的有限记录；
+- **representation of observations**：被编码成向量、token、图像、表格字段、label 等机器可处理形式的数据；
+- **unknown target**：我们希望预测或决策时追踪的对象，可以是 deterministic function，也可以是 conditional distribution；
+- **hypothesis class**：learner 被允许选择的函数集合；
+- **learning algorithm**：从 dataset 中选择 hypothesis 的过程；
+- **learned hypothesis**：训练结束后实际得到的函数；
+- **prediction or decision**：部署时在新输入上的输出。
+
+这几层不能合并。把 model 写成一个函数 `g(x)` 并不意味着 `g` 就是世界，也不意味着 training dataset 完整代表世界。ML research 的困难在于：我们只能观察有限信息，却需要对未观察部分作出判断。
+
+### Intuition
+
+如果一个任务可以被完全写成规则，machine learning 不是必要条件。例如已知精确物理公式或确定性数据库查询时，程序员可以直接实现 mapping。machine learning 出现于另一些场景：人脸识别、手写数字、语音识别、医学风险、语言建模、用户行为预测。这些任务中，人类可以提供 examples 或 feedback，但很难给出完整规则。
+
+因此 learning 不是“让计算机自动发现真理”，而是在有限 evidence、representation、algorithmic search 与 inductive assumptions 下构造一个可评估的 approximation。
+
+### Modern Perspective
+
+现代 deep learning 常把大量 representation、optimization 与 data engineering 封装在一个端到端 pipeline 中。这会让基本 ontology 被遮蔽：输入图片、token 或 tabular row 已经是 representation；network architecture 已经限定 hypothesis family；loss 与 optimizer 已经定义 search behavior；train/validation/test split 已经定义 evidence policy。理论笔记的任务之一，就是把这些被工程框架隐藏的假设重新显式化。
+
+## 2. The canonical learning system
+
+### Formal Setup
+
+一个 supervised learning problem 常写作：
+
+```math
+\mathcal{X}: \text{input space}
+```
+
+```math
+\mathcal{Y}: \text{output space}
+```
+
+```math
+P: \text{unknown data-generating distribution over } \mathcal{X}\times\mathcal{Y}
+```
+
+```math
+D = \{(x_1,y_1),\ldots,(x_N,y_N)\}
+```
+
+其中 dataset $D$ 通常被建模为从 $P$ 独立同分布抽样得到的 realized sample：
+
+```math
+(x_i,y_i) \sim P,\quad i=1,\ldots,N
+```
+
+在 deterministic target 的理想化 setting 中，可以写：
+
+```math
+y_i = f(x_i)
+```
+
+其中 $f:\mathcal{X}\to\mathcal{Y}$ 是 unknown target function。在 noisy 或 probabilistic setting 中，更合适的是写：
+
+```math
+Y \mid X=x \sim P(\cdot \mid x)
+```
+
+此时 target 不再是单个 deterministic mapping，而是 conditional behavior，具体 prediction target 取决于 loss。例如 squared loss 下的 Bayes predictor 是 conditional mean，0/1 loss 下的 Bayes classifier 是 conditional mode。
+
+learner 还需要：
+
+```math
+\mathcal{H} = \{h: \mathcal{X}\to\mathcal{Y}\}
+```
+
+这是 hypothesis set。learning algorithm 是一个映射：
+
+```math
+A: D \mapsto g
+```
+
+其中：
+
+```math
+g \in \mathcal{H}
+```
+
+`g` 是 selected hypothesis，也就是训练完成后用于 prediction 的函数。
+
+### Conceptual Roles
+
+这些对象承担不同角色：
+
+| Object | Conceptual role | Common confusion |
+| ------ | --------------- | ---------------- |
+| `f` or `P(Y \mid X)` | target / data-generating structure | 被误当成 model |
+| `D` | finite observed evidence | 被误当成 population |
+| `H` | allowed functions | 被误当成 algorithm |
+| model parameters | 某个 parameterized family 内的坐标 | 被误当成 hypothesis set 本身 |
+| `A` | search/selection procedure | 被误当成 hypothesis |
+| `g` | final selected function | 被误当成 true target |
+
+### Assumption
+
+上述 canonical setup 常依赖一个强假设：training examples 与 deployment examples 来自同一个或可控相关的 distribution。如果 training distribution 与 deployment distribution 不同，则 `E_out` 的定义必须说明 out-of-sample 是在哪个 distribution 上计算。后续 Week 4 real canvas distribution shift 已经显示，benchmark `load_digits` 上表现良好的 scratch MLP 并不自动代表真实 canvas 输入上的表现。
+
+## 3. World, representation, and information loss
+
+### Caltech Core
+
+Caltech 前几讲把 learning problem 写成 examples、target function、hypothesis set、learning algorithm 与 final hypothesis。这已经暗含 representation：examples 必须以某种形式进入 learner。Lecture 3 的 linear model 与 nonlinear transform 更明确地说明，学习不是直接在“世界”上发生，而是在 feature representation 上发生。
+
+### Representation Chain
+
+更细的链条可以写成：
+
+```text
+world state
+→ measurement
+→ data representation
+→ model input
+```
+
+在手写数字任务中，这条链可以具体化为：
+
+```text
+person writes digit
+→ image captured on canvas
+→ preprocessing to grayscale 8 x 8 array
+→ 64-dimensional model input
+```
+
+每一步都可能丢失或扭曲信息：
+
+- measurement 可能受传感器、分辨率、采样频率、标注规范影响；
+- data representation 可能丢失时序、空间上下文、笔画顺序、背景条件；
+- preprocessing 可能改变尺度、中心、厚度、亮度分布；
+- model input 可能只保留任务相关结构的一部分。
+
+### Technical Consequence
+
+如果 relevant structure 在 representation 之前已经丢失，后面的 learner 无法靠更复杂的 optimization 恢复它。例如把动态书写轨迹压缩为低分辨率静态图像后，模型无法直接利用笔顺；把临床叙述强行压成几个二值字段后，语言中的不确定性和上下文被弱化；把图像裁剪到只剩局部纹理后，global shape 可能丢失。
+
+### Modern Perspective
+
+Representation learning 并不推翻这条链，而是在链条中增加可学习变换。classical feature engineering 手动指定 $\Phi(x)$；deep networks 学习一系列内部 representations：
+
+```math
+x \mapsto z_1 \mapsto z_2 \mapsto \cdots \mapsto z_L \mapsto \hat{y}
+```
+
+但 learned representation 仍受 data、architecture、loss、optimization 与 compute 约束。world models、mechanistic interpretability、distribution shift 研究都可以被看作对这条链的进一步追问：模型内部表示捕捉了哪些 world-relevant variables？哪些只是 training distribution 中的 shortcuts？
+
+## 4. What is the role of the computer?
+
+### Caltech Core
+
+在 `Learning From Data` 的 framing 中，computer 执行 learning algorithm：它接收 examples，在 hypothesis set 中搜索或计算，最终输出 hypothesis。computer 是执行 substrate，不是自动产生正确 inductive structure 的魔法实体。
+
+### Execution Substrate
+
+computer 主要提供：
+
+- representation storage：把 examples、features、labels、parameters 存储为可计算对象；
+- numerical calculation：执行 matrix multiplication、loss evaluation、gradient computation；
+- optimization：用 gradient descent、closed-form solvers、coordinate search 或其他方法寻找低 objective 的 parameters；
+- search：在 hypothesis set 中进行显式或隐式选择；
+- statistical estimation：用 finite sample 估计 population quantities；
+- simulation：构造 synthetic data、stress tests、ablation 和 Monte Carlo evidence。
+
+这些能力非常强，但它们不自动保证正确 generalization。一个计算机可以精确地最小化错误的 objective，可以高效地记住 training set，可以在 spurious feature 上获得低 training loss，也可以在 distribution shift 下非常自信地出错。
+
+### Constraint Statement
+
+机器能学到什么取决于：
+
+```math
+\text{observations}
++ \text{representation}
++ \mathcal{H}
++ \text{objective}
++ A
++ \text{compute}
++ \text{inductive assumptions}
+```
+
+任何一个环节错位，learning system 的失败都可能不是“模型不够大”造成的。
+
+## 5. The three gaps in learning
+
+![Three gaps in hypothesis selection](assets/hypothesis_space_and_selection.png)
+
+图 2：学习失败可以来自 representation gap、estimation/generalization gap 或 optimization/computation gap。图中的 target 不一定落在 hypothesis set 内；即使存在好 hypothesis，finite sample selection 和 optimization 也可能让 learner 得不到它。
+
+### Representation Gap
+
+问题：hypothesis class 能否表达 relevant target？
+
+如果：
+
+```math
+f \notin \mathcal{H}
+```
+
+则即使有无限数据、完美 optimization，也无法在 $\mathcal{H}$ 内恢复真实 target。此时最好的结果是 approximation：
+
+```math
+h^* = \arg\min_{h\in\mathcal{H}} E_{\mathrm{out}}(h)
+```
+
+其中 $h^*$ 是在 allowed family 内最好的 hypothesis，不必等于 $f$。
+
+### Estimation / Generalization Gap
+
+问题：finite samples 能否识别出 out-of-sample 表现好的 hypothesis？
+
+learner 只能看到 empirical evidence：
+
+```math
+E_{\mathrm{in}}(h)
+=
+\frac{1}{N}\sum_{i=1}^{N}\ell(h(x_i),y_i)
+```
+
+但真正关心的是：
+
+```math
+E_{\mathrm{out}}(h)
+=
+\mathbb{E}_{(X,Y)\sim P}
+\left[
+\ell(h(X),Y)
+\right]
+```
+
+generalization gap 是：
+
+```math
+E_{\mathrm{out}}(h)-E_{\mathrm{in}}(h)
+```
+
+更严格地，learning theory 常要求同时控制所有或许多 $h\in\mathcal{H}$ 的 gap，这就是 uniform convergence 的入口。
+
+### Optimization / Computation Gap
+
+问题：algorithm 能否实际找到 desired hypothesis？
+
+即使 $\mathcal{H}$ 中存在好 hypothesis，实际训练也可能失败，因为：
+
+- objective non-convex；
+- gradients noisy 或 ill-conditioned；
+- search space 太大；
+- compute budget 不足；
+- implementation 或 numerical stability 出问题；
+- optimizer 找到低 training objective 但不代表低 population risk。
+
+Week 3 optimization notes 已经展示了 gradient descent、SGD、Momentum、Adam 的不同 trajectory；这些差异属于 computation gap 的一部分，而不是 learning theory 的抽象 bounds 能完全覆盖的内容。
+
+## 6. Learning as constrained inference
+
+### Diagram
+
+```text
+Unknown world / target
+        ↓
+Sampling process
+        ↓
+Finite dataset
+        ↓
+Representation
+        ↓
+Hypothesis set
+        ↓
+Learning algorithm
+        ↓
+Selected hypothesis
+        ↓
+Out-of-sample evaluation
+```
+
+### Formal Reading
+
+这张图不是装饰性的流程图。它表达了一个 constrained inference problem：
+
+1. unknown target 或 population distribution 不可直接访问；
+2. sampling process 只给出 finite realized dataset；
+3. representation 决定 learner 能看见哪些 variables；
+4. hypothesis set 决定 learner 允许输出哪些 functions；
+5. learning algorithm 以某个 objective 或 selection rule 选择 $g$；
+6. out-of-sample evaluation 才检验 $g$ 是否能在未见样本上工作。
+
+### Failure Mode
+
+如果任何环节被误解，研究结论就会被过度解释：
+
+- 把 training loss 当成 population risk；
+- 把 validation reuse 当成 independent evidence；
+- 把 benchmark distribution 当成 deployment distribution；
+- 把 model confidence 当成 calibrated probability；
+- 把 architecture success 当成已理解 causal mechanism；
+- 把 representation 中的 shortcut 当成 task-relevant structure。
+
+## 7. Research lens
+
+这个 ontology 可以直接用于阅读 ML paper。对每篇论文，至少追问：
+
+- What is unknown?
+- What is observed?
+- What is assumed?
+- What is represented?
+- What hypothesis family is allowed?
+- What objective is optimized?
+- What evidence supports generalization?
+- Under which distribution?
+- What happens if the environment changes?
+- Which failure is representational, statistical, or computational?
+
+### Research Reflection
+
+这些问题能把“模型效果好不好”变成可审计的研究判断。例如在 digit canvas 项目中，`load_digits` test performance 回答的是 sklearn digits distribution 上的 out-of-sample behavior；real canvas diagnostics 回答的是另一个 observation mechanism 下的 behavior；calibration notes 回答的是 confidence 是否可解释为 probability-like evidence；abstention notes 回答的是在允许拒答时 selective risk 如何变化。它们不是同一个问题，因此不能用一个 scalar metric 混合解释。
+
+## 8. Conceptual conclusion
+
+T1 的核心地图可以压缩成一句话：
+
+```text
+Machine learning is constrained inference from finite represented observations
+to a selected hypothesis whose value is judged out of sample under an explicit
+distribution, loss, and evidence protocol.
+```
+
+后续章节会分别展开四个基础问题：
+
+- [Lecture 1 note](part1_learning_problem/01_caltech_l01_learning_problem_target_hypothesis_inductive_bias.md)：什么叫 learn；
+- [Lecture 2 note](part1_learning_problem/02_caltech_l02_finite_sample_generalization_hoeffding_uniform_convergence.md)：finite sample 如何支持 generalization；
+- [Lecture 3 note](part1_learning_problem/03_caltech_l03_hypothesis_spaces_linear_models_feature_transforms.md)：representation 与 linear models 如何定义 hypothesis geometry；
+- [Lecture 4 note](part1_learning_problem/04_caltech_l04_error_measures_noise_target_distribution.md)：loss、noise 与 target distribution 如何成为问题定义的一部分。
+
+Source traceability is recorded in [T1 Source Traceability](sources/t1_source_traceability_caltech_stanford_map.md), and symbols are standardized in [T1 Terminology and Notation](sources/t1_terminology_notation_learning_problem_generalization.md).
+
+[← Back to Learning From Data Theory Notebook](README.md)
