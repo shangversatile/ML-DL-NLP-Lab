@@ -55,7 +55,7 @@ linear classifier 的 inductive bias 是：类别差异可以由 input represent
 
 ### Failure Mode
 
-如果同一类别在 input space 中围成环形、异或结构或复杂 manifold，linear boundary 可能无法表达 correct classification。此时 failure 可能不是 optimization failure，而是 representation gap：$\mathcal{H}$ 中没有足够好的 classifier。
+如果同一类别在 input space 中围成环形、异或结构或复杂 manifold，linear boundary 可能无法表达 correct classification。此时 failure 可能不是 optimization failure，而是 approximation/specification error：在当前 representation 上，$\mathcal{H}$ 中没有足够好的 classifier。若 measurement 或 representation 本身已经丢掉 target-relevant information，则问题更早发生，属于 information/representation failure。
 
 ## 2. Linear regression
 
@@ -308,19 +308,19 @@ w^\top\Phi(x)+b=0
 
 ### Expressivity
 
-feature transform 增大了可表达函数集合：
+feature transform 不是自动“增大”可表达函数集合。更精确地说，representation 或 feature map 会改变原始 input domain 上的 effective hypothesis family。给定 base hypothesis family $\mathcal{H}$ 和 feature map $\Phi$，它诱导：
 
 ```math
 \mathcal{H}_{\Phi}
 =
-\{x\mapsto w^\top\Phi(x)+b\}
+\{x \mapsto h(\Phi(x)) : h\in\mathcal{H}\}
 ```
 
-即使 model 对 $\Phi(x)$ linear，$\mathcal{H}_{\Phi}$ 对 original $x$ 可能非常丰富。
+不同的 $\Phi$ 会在 original $x$ 上诱导不同的 function family。它可能扩大 effective expressivity，也可能限制它；可能重新组织 geometry，也可能把原本可区分的 inputs collapse 到同一个 representation；可能丢弃 irrelevant variation，也可能丢弃 target-relevant information。只有在证明了两个 family 之间存在 inclusion relation 时，才可以严格说一个 representation 的 hypothesis family 包含另一个。
 
 ### Dimensionality
 
-增加 features 通常提高 expressivity，但也改变 generalization behavior。若 feature dimension 很高，learner 更容易 fit finite sample 的偶然模式。Lecture 2 的 selected-hypothesis problem 在这里重新出现：larger transformed space 意味着 larger effective hypothesis set。
+增加 features 常常提高 expressivity，但这不是逻辑必然；它同时会改变 generalization behavior。若 transformed family 更灵活，learner 更容易 fit finite sample 的偶然模式。若 transform collapse 了重要 distinctions，则即使 feature dimension 更高也可能让 target 不可表达。Lecture 2 的 selected-hypothesis problem 在这里重新出现：representation 改变了 effective hypothesis set，也改变了需要被 generalization theory 控制的对象。
 
 ### Model Complexity
 

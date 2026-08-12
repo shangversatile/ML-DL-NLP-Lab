@@ -205,15 +205,31 @@ computer 主要提供：
 
 任何一个环节错位，learning system 的失败都可能不是“模型不够大”造成的。
 
-## 5. The three gaps in learning
+## 5. Four failure sources in learning
 
-![Three gaps in hypothesis selection](assets/hypothesis_space_and_selection.png)
+![Failure sources in hypothesis selection](assets/hypothesis_space_and_selection.png)
 
-图 2：学习失败可以来自 representation gap、estimation/generalization gap 或 optimization/computation gap。图中的 target 不一定落在 hypothesis set 内；即使存在好 hypothesis，finite sample selection 和 optimization 也可能让 learner 得不到它。
+图 2：T1 图中已经展示了 target、hypothesis set、finite sample selection 与 optimization 的关系。T2 以后需要更精确地区分四类 failure/error source：information/representation failure、approximation/specification error、estimation/generalization error、optimization/computational error。stochastic target 中的 irreducible uncertainty 还要另行处理，不能混入这些由 learner 选择造成的误差。
 
-### Representation Gap
+### Information / Representation Failure
 
-问题：hypothesis class 能否表达 relevant target？
+问题：observable representation 是否仍然包含 target-relevant information？
+
+机器学习系统不会直接观察 world state。它观察的是 measurement 和 representation：
+
+```text
+world
+→ measurement
+→ representation
+```
+
+如果在 measurement 或 representation 阶段，区分 target 所需的信息已经丢失，则再大的 model class 也不能从当前 input 恢复该信息。例如两个不同 world states 被映射成完全相同的 feature vector，但它们需要不同 decisions；此时问题不是 $\mathcal{H}$ 不够灵活，而是 representation 对任务来说不充分。
+
+### Approximation / Specification Error
+
+问题：relevant information 存在于 representation 中，但 chosen hypothesis family 是否能表达 desired mapping？
+
+给定 representation 后，若：
 
 如果：
 
@@ -228,6 +244,16 @@ h^* = \arg\min_{h\in\mathcal{H}} E_{\mathrm{out}}(h)
 ```
 
 其中 $h^*$ 是在 allowed family 内最好的 hypothesis，不必等于 $f$。
+
+若使用 feature map $\Phi$，真正被检查的是 induced family：
+
+```math
+\mathcal{H}_{\Phi}
+=
+\{x \mapsto h(\Phi(x)) : h\in\mathcal{H}\}
+```
+
+因此 representation 改变的是学习问题本身：它可能让 target 更容易表达，也可能让原本可表达的 distinction 消失。
 
 ### Estimation / Generalization Gap
 
@@ -275,6 +301,10 @@ E_{\mathrm{out}}(h)-E_{\mathrm{in}}(h)
 
 Week 3 optimization notes 已经展示了 gradient descent、SGD、Momentum、Adam 的不同 trajectory；这些差异属于 computation gap 的一部分，而不是 learning theory 的抽象 bounds 能完全覆盖的内容。
 
+### Irreducible Stochastic Uncertainty
+
+T1 Lecture 4 已经说明，target 也可能是 stochastic 的。即使 representation 充分、$\mathcal{H}$ 足够大、sample size 足够、optimization 完美，若 $Y|X=x$ 本身有随机性，prediction 仍然存在不可消除的不确定性。这个 quantity 通常来自 data-generating distribution，而不是 learner 的 representation、estimation 或 optimization 失败。
+
 ## 6. Learning as constrained inference
 
 ### Diagram
@@ -318,6 +348,26 @@ Out-of-sample evaluation
 - 把 model confidence 当成 calibrated probability；
 - 把 architecture success 当成已理解 causal mechanism；
 - 把 representation 中的 shortcut 当成 task-relevant structure。
+
+### Generalization credibility layer
+
+T2 在这张 map 上增加一层专门用于判断 research claim 是否可信的结构：
+
+```text
+sample
+→ adaptive selection
+→ capacity control
+→ uniform guarantee
+→ out-of-sample claim
+```
+
+fixed hypothesis 的 concentration 只能说明一个预先固定的 $h$ 在独立样本上的 empirical error 接近 population error。training 中真正出现的是 selected hypothesis：
+
+```math
+g = A(D)
+```
+
+它依赖同一个 dataset $D$。因此 credible out-of-sample claim 需要说明 adaptive selection 被怎样控制：finite hypothesis set 的 union bound、growth function、VC dimension、regularization、stability、independent validation/test protocol，或其他明确的 capacity/control argument。没有这层论证，low training error 只是关于 observed sample 的事实，不是 generalization 的结论。
 
 ## 7. Research lens
 

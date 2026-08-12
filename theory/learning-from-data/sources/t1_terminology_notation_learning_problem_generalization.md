@@ -26,11 +26,30 @@
 | $E_{\mathrm{out}}$ | out-of-sample error / population risk | distribution $P$ 上的 expected loss |
 | risk | expected loss | 有时指 population risk；需看上下文 |
 | empirical risk | finite-sample average loss | 与 $E_{\mathrm{in}}$ 基本同义 |
+| $\hat R_D(h)$ | empirical risk | T2 中常用 notation，等价于在 dataset $D$ 上的 $E_{\mathrm{in}}(h)$ |
+| $R(h)$ | population risk | T2 中常用 notation，等价于 $E_{\mathrm{out}}(h)$ |
 | target function | unknown ideal mapping | noisy setting 中可能要替换为 conditional distribution |
 | hypothesis | candidate predictor | 函数层对象，不等于参数向量 |
 | hypothesis set | allowed family of hypotheses | 表达 inductive bias |
 | learning algorithm | selection procedure | 可包含 optimization、regularization、early stopping、model selection |
 | generalization | out-of-sample performance | 不能只由 training error 判断 |
+| $\epsilon$ | tolerance / deviation parameter | generalization bound 中允许的误差或 excess-risk tolerance |
+| $\delta$ | confidence failure probability | theorem 不成立的概率上界，confidence 是 $1-\delta$ |
+| dichotomy | labeling pattern on finite points | $\mathcal{H}$ 在一组 points 上诱导的 binary labels |
+| $m_{\mathcal{H}}(N)$ | growth function | $\mathcal{H}$ 在任意 $N$ points 上最多能实现的 dichotomies 数量 |
+| shattering | realizing all labelings | 若 $\mathcal{H}$ 能实现 $N$ points 上所有 $2^N$ labelings，则 shatter 该点集 |
+| break point | first unshatterable size | 若 $m_{\mathcal{H}}(k)<2^k$，则 $k$ 是 break point |
+| $d_{\mathrm{VC}}$ | VC dimension | $\mathcal{H}$ 可 shatter 的最大 point-set size |
+| uniform convergence | simultaneous empirical-population control | 控制 $\sup_{h\in\mathcal{H}}|\hat R_D(h)-R(h)|$ |
+| ERM | empirical risk minimization | 选择 empirical risk 最小的 hypothesis |
+| excess risk | risk above a reference predictor | 通常为 $R(\hat h)-R(h^*)$ 或 $R(\hat h)-R(h^*_{\mathcal{H}})$，需定义 reference |
+| sample complexity | samples needed for target guarantee | 达到给定 $\epsilon,\delta$ 所需的 $N$ |
+| approximation error | best-in-class limitation | $\mathcal{H}$ 与 reference class/Bayes rule 的 population-risk 差距 |
+| estimation error | finite-sample selection error | selected empirical hypothesis 与 population-best-in-class 的差距 |
+| optimization error | algorithmic search error | actual algorithm output 与 intended optimum 的差距 |
+| bias | average predictor's systematic deviation | squared-loss bias-variance setup 中定义 |
+| variance | dataset-induced predictor variability | over possible training datasets 的 prediction fluctuation |
+| capacity | effective flexibility of a class/procedure | 可能由 VC dimension、growth function、norm、margin、stability 等衡量 |
 
 ## 2. Empirical error vs population risk
 
@@ -168,5 +187,175 @@ E_{\mathrm{out}}(g)-E_{\mathrm{in}}(g)
 - metric 是否匹配 problem definition；
 - subgroup、shift、calibration、abstention 等是否需要单独评估。
 
-[← Back to Learning From Data Theory Notebook](../README.md)
+## 9. Growth function, shattering, and VC dimension
 
+对于 binary classification，$\mathcal{H}$ 在 $N$ 个 points 上诱导的 dichotomy set 是：
+
+```math
+\Pi_{\mathcal{H}}(x_1,\ldots,x_N)
+=
+\left\{
+(h(x_1),\ldots,h(x_N)):h\in\mathcal{H}
+\right\}
+```
+
+growth function 是 worst-case dichotomy count：
+
+```math
+m_{\mathcal{H}}(N)
+=
+\max_{x_1,\ldots,x_N}
+\left|
+\Pi_{\mathcal{H}}(x_1,\ldots,x_N)
+\right|
+```
+
+若存在某组 $N$ points 被 $\mathcal{H}$ shatter，则：
+
+```math
+m_{\mathcal{H}}(N)=2^N
+```
+
+VC dimension 是最大可 shatter size：
+
+```math
+d_{\mathrm{VC}}
+=
+\max
+\{N:m_{\mathcal{H}}(N)=2^N\}
+```
+
+break point 是第一个无法达到 maximal dichotomy count 的 size：
+
+```math
+m_{\mathcal{H}}(k)<2^k
+```
+
+若 $d_{\mathrm{VC}}$ 有限，通常 $k=d_{\mathrm{VC}}+1$。
+
+## 10. Uniform convergence and ERM
+
+uniform convergence 控制的是：
+
+```math
+\sup_{h\in\mathcal{H}}
+\left|
+\hat R_D(h)-R(h)
+\right|
+```
+
+它与 fixed-h concentration 的区别在 quantifier：
+
+- fixed-h concentration：一个预先固定的 $h$；
+- finite-class bound：所有 $h\in\mathcal{H}$，但 $\mathcal{H}$ finite；
+- uniform convergence：一般 hypothesis class 中所有 $h$，在满足 capacity/control 条件时成立。
+
+ERM:
+
+```math
+\hat h
+\in
+\arg\min_{h\in\mathcal{H}}
+\hat R_D(h)
+```
+
+若 uniform deviation 不超过 $\epsilon$，则 exact ERM 满足：
+
+```math
+R(\hat h)
+\le
+\inf_{h\in\mathcal{H}}R(h)+2\epsilon
+```
+
+该结论只比较 $\mathcal{H}$ 内的 population-best member，不自动处理 $\mathcal{H}$ 外的 Bayes risk。
+
+## 11. Generalization gap vs excess risk
+
+generalization gap 比较同一个 hypothesis 的 empirical 与 population quantities：
+
+```math
+R(h)-\hat R_D(h)
+```
+
+excess risk 比较两个 hypotheses 或 policies 的 population risks：
+
+```math
+R(\hat h)-R(h^*)
+```
+
+二者不是同一个对象。small generalization gap 可能与 high excess risk 同时成立：例如一个很弱的 constant classifier 在 train 与 test 上表现都差，但 gap 很小。low empirical risk 也不等于 low excess risk，除非再加入 uniform convergence、approximation 与 optimization 条件。
+
+## 12. Capacity vs parameter count
+
+capacity 是 hypothesis class 或 algorithm-selected family 的 effective flexibility。parameter count 只是某种 parameterization 的维度。
+
+不能写成：
+
+```text
+capacity = parameter count
+```
+
+原因：
+
+- 多个 parameter vectors 可能表示同一个 function；
+- constraints、regularization、norm、margin 会改变 effective class；
+- feature map $\Phi$ 改变 original input domain 上的 induced family；
+- algorithmic stability 或 implicit bias 可能比 raw class size 更 relevant；
+- VC dimension 是 worst-case shattering capacity，不是 dataset-specific performance。
+
+## 13. Approximation, estimation, optimization
+
+给定 reference predictor $h^*$、population-best-in-class $h^*_{\mathcal{H}}$、exact ERM $\hat h$ 与 actual output $\tilde h$，一种 useful decomposition 是：
+
+```math
+R(\tilde h)-R(h^*)
+=
+\left[
+R(h^*_{\mathcal{H}})-R(h^*)
+\right]
++
+\left[
+R(\hat h)-R(h^*_{\mathcal{H}})
+\right]
++
+\left[
+R(\tilde h)-R(\hat h)
+\right]
+```
+
+这里的三个 bracket 分别对应 approximation/specification、estimation/generalization、optimization/computation。但这不是唯一 decomposition；必须在每篇 note 或论文中说明 reference objects。
+
+## 14. Bias and variance
+
+在 squared-loss deterministic-target setup 中，固定 $x$：
+
+```math
+\bar g(x)
+=
+\mathbb{E}_{D}[g_D(x)]
+```
+
+bias:
+
+```math
+\bar g(x)-f(x)
+```
+
+variance:
+
+```math
+\mathbb{E}_{D}
+\left[
+\left(g_D(x)-\bar g(x)\right)^2
+\right]
+```
+
+若 $Y=f(x)+\eta$ 且 $\mathbb{E}[\eta|x]=0$，则 squared loss 下还会出现 noise term：
+
+```math
+\mathbb{V}[\eta|X=x]
+```
+
+不要把 bias 简化成 underfitting，也不要把 variance 简化成 overfitting。那些是经验症状，不是定义。
+
+[← Back to Learning From Data Theory Notebook](../README.md)
