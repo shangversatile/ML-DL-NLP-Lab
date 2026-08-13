@@ -55,6 +55,37 @@
 | bias | average predictor's systematic deviation | squared-loss bias-variance setup 中定义 |
 | variance | dataset-induced predictor variability | over possible training datasets 的 prediction fluctuation |
 | capacity | effective flexibility of a class/procedure | 可能由 VC dimension、growth function、norm、margin、stability 等衡量 |
+| likelihood | probability of observed data under model | T3 logistic regression 中通常指 conditional likelihood $p(y\mid x;w)$ 的乘积 |
+| log likelihood | logarithm of likelihood | 把 product 转成 sum，便于 optimization |
+| negative log likelihood | loss from maximizing likelihood | 最小化 NLL 等价于最大化 likelihood |
+| cross entropy | common classification surrogate loss | binary case 下与 Bernoulli conditional NLL 对应 |
+| surrogate loss | optimizable proxy objective | 例如 cross entropy 代理 0/1 classification objective，但二者不是同一 metric |
+| parameterization | numerical coordinates for functions | 例如 $w$ 或 neural-network $\theta$；不等于 function space 本身 |
+| selected parameter vector | actual fitted parameters | 例如训练后得到的 $\tilde w$ 或 $\tilde\theta$ |
+| selected function | function represented by selected parameters | 例如 $g=h_{\tilde\theta}$；不等于 parameter vector 本身 |
+| optimizer | update/search procedure | 使用 gradients 或其他信号更新 parameters；不等于 objective |
+| optimization trajectory | sequence of iterates | 例如 $\theta_0,\theta_1,\ldots,\theta_T$，可影响 selected solution |
+| hidden representation | intermediate learned state | 例如 $z_\ell=\Phi_{\theta,\ell}(x)$ |
+| computational graph | dependency graph of operations | backpropagation 在图上复用 local derivatives |
+| backpropagation | gradient-computation algorithm | 计算 gradients；不等于 gradient descent |
+| overfitting | selected procedure exploits sample-specific structure | low training error alone is not the definition |
+| deterministic noise | residual target structure relative to chosen class | target deterministic 但 outside effective hypothesis family 时出现 |
+| stochastic noise | randomness in observations or labels | 来自 $Y\mid X$ 的随机性、measurement 或 label variation |
+| regularizer | explicit or implicit preference mechanism | 严格地说 explicit regularizer 需给出 $\Omega$ 或 constraint |
+| $\lambda$ | regularization coefficient | soft penalty 中控制 empirical fit 与 penalty tradeoff |
+| hard constraint | restricted feasible region | 例如 $\Omega(w)\le C$ |
+| soft constraint / penalty | augmented objective | 例如 $\hat R_D(w)+\lambda\Omega(w)$ |
+| validation set / dev set | data used for model selection | 可选择 hyperparameters/checkpoints，但被使用后不是 final independent test |
+| test set | data for final evaluation | 若要保持 final-test role，不应影响 development choices |
+| model selection | choosing among candidate procedures/models | selection layer 可依赖 validation data |
+| hyperparameter selection | choosing non-fitted controls | 如 $\lambda$、learning rate、architecture width、threshold |
+| data leakage | held-out information enters fitting pipeline | 包括 direct leakage 与 preprocessing leakage |
+| data contamination | evaluation data influences development | 包括 selection leakage 与 benchmark adaptation |
+| cross-validation | repeated train/validation resampling estimate | 用于 selection 后不自动提供独立 final test |
+| nested cross-validation | inner selection plus outer evaluation | outer loop 评估 selection procedure |
+| selection procedure | data-dependent rule selecting final candidate | 可包括 researcher iteration 与 automated search |
+| adaptive data reuse | repeated use of data to guide future choices | 会改变 evaluation estimate 的 interpretation |
+| selection / evaluation failure | research-process evidence failure | evaluation data 影响 final procedure 后仍被解释为 independent evidence |
 
 ## 2. Empirical error vs population risk
 
@@ -405,5 +436,103 @@ variance:
 ```
 
 不要把 bias 简化成 underfitting，也不要把 variance 简化成 overfitting。那些是经验症状，不是定义。
+
+## 15. Parameter vs hyperparameter
+
+parameter 是在 fitting objective 中由 training algorithm 直接更新或估计的 quantity：
+
+```math
+w,\theta
+```
+
+hyperparameter 控制 learning procedure，但通常不由同一个 empirical objective 直接拟合，例如：
+
+```math
+\lambda,\eta,\text{network width},\text{batch size},\text{threshold}
+```
+
+区别不是绝对的数学本体，而是 procedure role：
+
+- parameter 通常由 train set fitting；
+- hyperparameter 通常由 validation/dev selection；
+- 若 hyperparameter search 使用 validation feedback，则 final selected model 依赖 validation data；
+- reported final performance 必须说明 hyperparameter selection 是否已完成并冻结。
+
+## 16. Training objective vs evaluation metric
+
+training objective 是 optimizer 最小化或最大化的 quantity：
+
+```math
+\hat R_D(w)
+```
+
+evaluation metric 是报告或比较模型的 quantity，例如 accuracy、NLL、ECE、AUROC、selective risk 或 cost-sensitive utility。
+
+二者不必相同：
+
+```text
+cross entropy
+!=
+classification error
+!=
+calibration error
+!=
+deployment utility
+```
+
+surrogate loss 可使 optimization 更可行，但不能自动证明 reported metric 会改善，也不能自动证明 model calibrated 或 robust。
+
+## 17. Validation error vs final test error
+
+validation error 是 development signal：
+
+```math
+\hat R_{\mathrm{val}}(g_m)
+```
+
+它可用于选择 model、hyperparameters、thresholds 或 checkpoints。选择后：
+
+```math
+g_{\mathrm{selected}}
+=
+A(D_{\mathrm{train}},D_{\mathrm{val}})
+```
+
+因此 selected model 的 validation error 不再是 untouched final estimate。
+
+final test error 应在 procedure 冻结后计算：
+
+```math
+\hat R_{\mathrm{test}}(g_{\mathrm{frozen}})
+```
+
+如果 test result 反馈到 model/procedure design，它就失去原先 final-test role。
+
+## 18. Model fitting vs model selection
+
+model fitting 是在 fixed procedure 内估计 parameters：
+
+```math
+\tilde h
+=
+A_m(D_{\mathrm{train}})
+```
+
+model selection 是在多个 fitted candidates 或 procedures 中选择：
+
+```math
+\hat m
+=
+\arg\min_{m\in\mathcal{M}}
+\hat R_{\mathrm{val}}(g_m)
+```
+
+然后：
+
+```math
+g_{\hat m}
+```
+
+是 validation-dependent selected model。credible evaluation 必须同时审计 fitting layer 与 selection layer。
 
 [← Back to Learning From Data Theory Notebook](../README.md)

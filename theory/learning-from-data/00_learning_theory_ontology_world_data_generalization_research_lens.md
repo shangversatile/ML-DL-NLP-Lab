@@ -369,6 +369,66 @@ g = A(D)
 
 它依赖同一个 dataset $D$。因此 credible out-of-sample claim 需要说明 adaptive selection 被怎样控制：finite hypothesis set 的 union bound、growth function、VC dimension、明确约束的 regularization、stability，或其他 formal capacity/algorithm-control argument；独立 validation/test protocol 则提供 evidence-control，而不是 capacity-control 本身。没有这些论证或证据，low training error 只是关于 observed sample 的事实，不是 generalization 的结论。
 
+### Adaptive Selection Layer
+
+T3 在 selected-hypothesis 问题上再加一层：实际研究中的 learner 往往不是单次 optimizer call，而是完整的 adaptive procedure。
+
+最基本的信息流应写成：
+
+```text
+D_train
+→ parameter fitting
+
+D_val
+→ model / hyperparameter / checkpoint selection
+
+D_test
+→ final evaluation only
+```
+
+如果 validation/dev outcome 被反复用于改变后续候选集合，信息流会变成：
+
+```text
+validation feedback
+→ researcher / search procedure
+→ new preprocessing, architecture, hyperparameters, prompts, checkpoints
+→ new candidates
+```
+
+因此 generalization 相关的 algorithm 可能是：
+
+```text
+full adaptive selection procedure
+```
+
+而不是：
+
+```text
+one optimizer run on one fixed architecture
+```
+
+这不是说所有 adaptive development 都不可用，而是说每个 dataset role 必须按 information flow 解释。validation 可以服务 model selection；final test 若要估计 frozen procedure 的 performance，就必须留在 development loop 外。
+
+### Selection / Evaluation Failure
+
+T3 还引入一个 cross-cutting research-process failure mode：
+
+```text
+Selection / Evaluation Failure
+```
+
+它包括：
+
+- validation overuse；
+- test-set reuse；
+- benchmark adaptation；
+- checkpoint selection using test behavior；
+- excessive hyperparameter search without accounting for selection；
+- researcher feedback loops；
+- preprocessing selected after observing validation failures。
+
+这不是新的 population-risk decomposition term。它指 evaluation interpretation 的 assumptions 被破坏：某个数据集原本被当作 independent evidence，但实际已经影响了 final procedure。此时问题不一定在 representation、approximation、estimation 或 optimization 本身，而在 evidence role 被改变。
+
 ## 7. Research lens
 
 这个 ontology 可以直接用于阅读 ML paper。对每篇论文，至少追问：
@@ -383,6 +443,7 @@ g = A(D)
 - Under which distribution?
 - What happens if the environment changes?
 - Which failure is representational, statistical, or computational?
+- Which data influenced fitting, validation selection, hyperparameter search, checkpoint choice, and final reporting?
 
 ### Research Reflection
 
@@ -405,6 +466,6 @@ distribution, loss, and evidence protocol.
 - [Lecture 3 note](part1_learning_problem/03_caltech_l03_hypothesis_spaces_linear_models_feature_transforms.md)：representation 与 linear models 如何定义 hypothesis geometry；
 - [Lecture 4 note](part1_learning_problem/04_caltech_l04_error_measures_noise_target_distribution.md)：loss、noise 与 target distribution 如何成为问题定义的一部分。
 
-Source traceability is recorded in [T1 Source Traceability](sources/t1_source_traceability_caltech_stanford_map.md), and symbols are standardized in [T1 Terminology and Notation](sources/t1_terminology_notation_learning_problem_generalization.md).
+Source traceability is recorded in [Source Traceability](sources/source_traceability.md), and symbols are standardized in [Terminology and Notation](sources/t1_terminology_notation_learning_problem_generalization.md).
 
 [← Back to Learning From Data Theory Notebook](README.md)

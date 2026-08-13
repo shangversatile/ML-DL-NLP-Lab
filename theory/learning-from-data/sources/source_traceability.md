@@ -52,7 +52,46 @@ The Stanford material is used as an extension layer for ERM, uniform convergence
 
 These sources are used only for the labeled Modern Perspective sections on overparameterization, interpolation, double descent, and the limits of worst-case classical capacity bounds. They are not treated as Caltech Core.
 
-## 3. T1 note mapping
+## 3. Sources verified for T3
+
+### Caltech primary sources
+
+- Official Learning From Data lecture page: <https://home.work.caltech.edu/lectures.html>
+- Lecture 9 slides: <https://work.caltech.edu/slides/slides09.pdf>
+- Lecture 10 slides: <https://work.caltech.edu/slides/slides10.pdf>
+- Lecture 11 slides: <https://work.caltech.edu/slides/slides11.pdf>
+- Lecture 12 slides: <https://work.caltech.edu/slides/slides12.pdf>
+- Lecture 13 slides: <https://work.caltech.edu/slides/slides13.pdf>
+- Official AML slides page: <https://amlbook.com/slides.html>
+- Official supporting-material page: <https://amlbook.com/support.html>
+
+### Stanford CS229 derivational / methodological sources
+
+- Official Stanford CS229 course page and materials index: <https://cs229.stanford.edu/>
+- Official CS229 materials page: <https://cs229.stanford.edu/materials.html-withcomments>
+
+CS229 is used for derivational and methodological support: logistic-regression likelihood, cross entropy, gradients, Hessian/convexity, neural-network forward/backward propagation, regularization, train/dev/test methodology, model selection, and cross-validation. These are not labeled CS229M.
+
+### Stanford CS229M / theory extension sources
+
+- Official STATS214 / CS229M Machine Learning Theory page: <https://web.stanford.edu/class/stats214/>
+- Official page-linked public notes repository: <https://github.com/tengyuma/cs229m_notes/blob/main/master.pdf>
+
+CS229M is used as a theory extension for non-convex optimization, overparameterization, implicit / algorithmic regularization, algorithm-dependent generalization, NTK as a theory bridge, and limits of purely classical explicit-capacity explanations.
+
+### Modern-theory clarification sources
+
+- Soudry, Hoffer, Nacson, Gunasekar, and Srebro, `The Implicit Bias of Gradient Descent on Separable Data`: <https://arxiv.org/abs/1710.10345>
+- Jacot, Gabriel, and Hongler, `Neural Tangent Kernel: Convergence and Generalization in Neural Networks`: <https://arxiv.org/abs/1806.07572>
+- Dwork et al., `The Reusable Holdout: Preserving Validity in Adaptive Data Analysis`: <https://arxiv.org/abs/1507.02629>
+- Dwork et al., `Preserving Statistical Validity in Adaptive Data Analysis`: <https://arxiv.org/abs/1411.2664>
+- Zhang, Bengio, Hardt, Recht, and Vinyals, `Understanding deep learning requires rethinking generalization`: <https://arxiv.org/abs/1611.03530>
+- Belkin, Hsu, Ma, and Mandal, `Reconciling modern machine-learning practice and the classical bias-variance trade-off`: <https://arxiv.org/abs/1812.11118>
+- Nakkiran et al., `Deep Double Descent`: <https://arxiv.org/abs/1912.02292>
+
+These sources are used only for labeled Modern Perspective sections and conceptual caveats. T3 does not turn implicit bias, NTK, double descent, benign overfitting, or adaptive-data-analysis methods into fully derived chapters.
+
+## 4. T1 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -63,7 +102,7 @@ These sources are used only for the labeled Modern Perspective sections on overp
 | [04 Error, Noise, and Target Distribution](../part1_learning_problem/04_caltech_l04_error_measures_noise_target_distribution.md) | Lecture 4: Error and Noise; Lecture 4 slides; video-library Error Measures and Noisy Targets topics | STATS214 statistical-learning framing of population risk and loss | error measure as part of learning problem; noisy targets; target distribution | conditional distribution interpretation; Bayes classifier and conditional mean derivations; loss-likelihood connection; calibration/abstention/distribution-shift implications |
 | [Terminology and Notation](t1_terminology_notation_learning_problem_generalization.md) | Lecture 1-4 notation conventions | STATS214 population/empirical risk vocabulary | symbols for target, hypothesis, algorithm, dataset, in/out error | explicit distinctions among parameter/function, representation/hypothesis, empirical/population, random/realized |
 
-## 4. T2 note mapping
+## 5. T2 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -74,7 +113,19 @@ These sources are used only for the labeled Modern Perspective sections on overp
 | [09 Modern Uniform Convergence](../part2_generalization_theory/09_modern_uniform_convergence_and_capacity_control.md) | Lecture 5-7 concepts synthesized | STATS214 / CS229M official page and linked notes | fixed-to-uniform logic; ERM consequence | excess-risk decomposition variants; PAC vocabulary; beyond-VC capacity preview; limits of worst-case class control |
 | [10 Generalization Claim Audit](../part2_generalization_theory/10_generalization_claim_audit_for_ml_research.md) | Lecture 5-8 generalization chain | STATS214 research-level generalization vocabulary | training/testing distinction; capacity control; sample complexity; bias-variance caveats | original research audit framework for population, sampling, selection, evidence, assumptions, and non-implications |
 
-## 5. What is original in this repository
+## 6. T3 note mapping
+
+| Note | Primary Caltech source | Stanford / modern extension source | Caltech Core in note | Extension / modern / original reflection |
+| ---- | ---------------------- | ---------------------------------- | -------------------- | ---------------------------------------- |
+| [09 Logistic Regression](../part3_fitting_regularization_validation/09_caltech_l09_logistic_regression_likelihood_gradient_descent.md) | Lecture 9: The Linear Model II; Lecture 9 slides | Stanford CS229 logistic/GLM derivational material; Soudry et al. for separable-data implicit-bias caveat | logistic model; likelihood; cross entropy; gradient descent | Bernoulli conditional likelihood derivation; gradient/Hessian details; objective vs metric vs decision rule; perfect-separation caveat; Week 2/5 links |
+| [10 Neural Networks](../part3_fitting_regularization_validation/10_caltech_l10_neural_networks_backpropagation_representation.md) | Lecture 10: Neural Networks; Lecture 10 slides | Stanford CS229 neural-network/backprop material; CS229M deep-learning-theory topics | hidden layers; neural-network hypothesis; backpropagation | scalar-to-matrix backprop derivation; learned representation lens; function-space vs parameter-space distinction; non-convexity boundary; Week 3/4 links |
+| [11 Overfitting](../part3_fitting_regularization_validation/11_caltech_l11_overfitting_noise_and_effective_complexity.md) | Lecture 11: Overfitting; Lecture 11 slides | CS229M overparameterization perspective; Zhang et al., Belkin et al., Nakkiran et al. for modern caveats | fitting data too well; stochastic noise; deterministic noise | overfitting as selection phenomenon; effective complexity beyond parameter count; overfitting vs distribution shift distinction; Week 3/4 links |
+| [12 Regularization](../part3_fitting_regularization_validation/12_caltech_l12_regularization_constraints_inductive_bias.md) | Lecture 12: Regularization; Lecture 12 slides | Stanford CS229 regularization/MAP material; CS229M implicit-solution-selection lens | hard constraints; soft constraints; augmented error; weight decay | Lagrangian caveat; nominal H vs feasible family vs solution preference; L1 comparison; MAP boundary; Week 2/3/5 links |
+| [13 Validation](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md) | Lecture 13: Validation; Lecture 13 slides | Stanford CS229 model selection / cross-validation material; adaptive-data-analysis literature for caveats | validation; model selection; data contamination; cross-validation | validation-dependent selection formalization; effective hypothesis set of research process; nested CV; Canvas-Diagnostic-v1 role; final test isolation |
+| [14 Modern Explicit/Implicit Regularization](../part3_fitting_regularization_validation/14_modern_explicit_implicit_regularization_and_solution_selection.md) | Lecture 12 synthesized | CS229M official page/topics; Soudry et al.; Jacot et al.; Zhang/Belkin/Nakkiran caveats | explicit regularization picture | implicit / algorithmic bias boundary; separable logistic-regression example; NTK preview; architecture vs full learner distinction |
+| [15 Selection-Aware Research Protocol](../part3_fitting_regularization_validation/15_selection_aware_ml_research_protocol.md) | Lecture 13 synthesized | Stanford CS229 methodology; Dwork et al. adaptive data-analysis papers | validation and contamination principles | selection ledger; dataset-role ledger; researcher as adaptive loop; freeze point; credibility levels; Canvas protocol connection |
+
+## 7. What is original in this repository
 
 The following T1 content is original synthesis for this repository, not copied from course slides:
 
@@ -94,11 +145,22 @@ The following T2 content is original synthesis for this repository:
 - all T2 PNG figures under `theory/learning-from-data/assets/`;
 - the explicit separation between generalization gap, excess risk, bias-variance, and approximation-estimation-optimization decomposition.
 
-## 6. Source-use boundaries
+The following T3 content is original synthesis for this repository:
+
+- the T3 chain from objective, optimization, fitting, overfitting, regularization, validation, selection, to credible evaluation;
+- the explicit separation among hypothesis family, parameterization, empirical objective, optimizer, selected parameter vector, selected function, regularizer, validation procedure, model-selection procedure, and final evaluation procedure;
+- the Selection / Evaluation Failure category as a research-process failure mode distinct from the T2 risk decomposition terms;
+- the selection-aware research protocol, selection ledger, dataset-role ledger, and freeze-point framing;
+- cross-links to Week 2 logistic regression, Week 3 MLP/overfitting/optimization, Week 4 Canvas-Diagnostic-v1, and Week 5 calibration/abstention;
+- all T3 PNG figures and the reproducible T3 figure-generation script under `theory/learning-from-data/assets/`.
+
+## 8. Source-use boundaries
 
 No copyrighted slide screenshots were copied. Notes use original wording, diagrams, and derivations. Formulae such as Hoeffding inequality, least-squares normal equations, empirical/population risk, Bayes classifier under 0/1 loss, and likelihood-derived cross entropy are standard mathematical material and are written here in original explanatory context.
 
 Formulae such as finite-class union bounds, Sauer-type growth control, VC-style uniform bounds, ERM excess-risk consequences, and squared-loss bias-variance decompositions are standard mathematical material. T2 gives original explanatory derivations and proof skeletons rather than copying source notes.
+
+Formulae such as Bernoulli likelihood, logistic negative log likelihood, binary cross entropy, logistic gradient/Hessian, chain-rule backpropagation, constrained/penalized regularization, L2 gradient, MAP/L2 correspondence, and hold-out validation selection are standard mathematical material. T3 writes original derivations and distinguishes objective, optimizer, model selection, and evaluation roles.
 
 Unresolved source issue: direct video transcript-level attribution is not recorded section by section. The official lecture page, official slides, and official/linked theory notes were used for mapping, while the notes synthesize the concepts rather than quote lecture speech.
 
