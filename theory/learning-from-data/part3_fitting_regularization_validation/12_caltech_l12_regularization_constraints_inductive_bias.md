@@ -163,7 +163,7 @@ selected solution
 
 所以 hard/soft regularization 的关系应理解为重要的 optimization principle，而不是无条件同义替换。
 
-## 5. Weight Decay / L2 Regularization
+## 5. L2 Penalty and Weight Decay: Classical Equivalence and Modern Distinction
 
 L2-regularized empirical objective：
 
@@ -227,7 +227,15 @@ w_{t+1}
 \eta\nabla_w \hat R_D(w_t)
 ```
 
-这解释了 weight decay 名称：在每步 empirical gradient update 之外，参数被乘以一个小于 1 的 factor。
+这说明：在 objective 中加入 $\lambda\|w\|_2^2$ 会产生一个 proportional to $w$ 的 gradient term。对 ordinary gradient descent / SGD，上式可写成“先对参数做 multiplicative shrinkage，再按 empirical gradient 更新”的形式；具体系数取决于 penalty 前是否写 $1/2$、learning rate scaling 与实现约定。这就是 L2 penalty 与 classical weight decay 之间的联系。
+
+### Adam / AdamW Distinction
+
+这个等价关系不是 optimizer-independent 的。对 adaptive methods such as Adam，gradient 会被 first/second moment estimates 与 coordinate-wise scaling 改写；把 $2\lambda w$ 加进 gradient 后，它也会进入 Adam 的 adaptive scaling pipeline。因此 L2 penalty 和 literal weight decay 一般不再等价。
+
+decoupled weight decay 的思想是把 decay 从 adaptive gradient update 中分离出来。AdamW 正是这种做法：它对 loss gradient 使用 Adam-style adaptive update，同时把 weight decay 作为单独的 parameter shrinkage step 施加。这里不展开 AdamW 的完整算法；关键是不要把 “L2 penalty in Adam” 与 “decoupled weight decay” 当成同一件事。
+
+本仓库 Week 3 的 Adam 推导已经把 Adam 描述为 stateful optimizer with adaptive parameter-wise scaling；这个结构正是 L2 penalty 与 literal weight decay 在 Adam 中不再自动等价的原因之一。见 [Adam derivation appendix](../../../reports/week3/appendix_adam_derivation.md) 与 [optimizer comparison note](../../../reports/week3/01_optimization_algorithms.md)。
 
 ### Geometric Interpretation
 

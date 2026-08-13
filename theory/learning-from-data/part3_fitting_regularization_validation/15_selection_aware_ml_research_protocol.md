@@ -147,29 +147,20 @@ inspect validation errors
 
 ordinary classical bounds 不会自动量化 arbitrary researcher adaptivity。要严谨处理，需要额外假设、预注册 protocol、fresh holdout、nested evaluation、reusable holdout 方法或其他 adaptive-data-analysis 工具。
 
-## 6. Result Credibility Levels
+## 6. Evidence Dimensions / Claim Types
 
-下面不是绝对排序，而是不同 evidence types 的区分：
+下面这些不是一个 universal strength order。它们是不同 evidence dimensions，回答不同问题，依赖不同 assumptions，也留下不同 unsupported claims。一个 formal bound 可能很严谨但 assumption-limited 或 numerically vacuous；强 empirical evidence 不能替代理论定理；same-distribution theorem 不 imply shift robustness；shift-specific testing 也不 imply arbitrary-distribution robustness。
 
-```text
-Training fit
-< Development evidence
-< Held-out empirical evidence
-< Repeated independent evidence
-< Formal generalization guarantee
-< Shift-specific robustness evidence
-```
+| Evidence type | What question it answers | Assumptions it relies on | What it does NOT establish |
+| ------------- | ------------------------ | ------------------------ | -------------------------- |
+| Optimization / training evidence | optimizer 是否能降低 observed training objective | implementation 正确；training objective 定义清楚；training data/loop 如报告所述 | 不证明 generalization、calibration、robustness 或 mechanism |
+| Development evidence | 调参过程中哪些 choices 看起来有用 | validation/dev role 被承认；selection loop 被记录；metric 与 task 有关 | 不提供 untouched final-test estimate |
+| Untouched held-out empirical evidence | frozen procedure 在 held-out sample 上表现如何 | evaluation data 未影响 procedure；sampling distribution 明确；metric/loss 明确；样本量足够解释不确定性 | 不证明 causality、interpretability、calibration 或 arbitrary shift behavior |
+| Independent replication evidence | 结果是否能在独立数据、实现或实验中重复 | replication 的 population、protocol 与 metric 可比较；独立性真实存在 | 不自动给出 formal guarantee，也不覆盖未测试环境 |
+| Formal theoretical guarantee | 在明确 assumptions 下可推出什么 probability/expectation statement | assumptions 如 i.i.d.、bounded loss、capacity/stability/margin/control、distribution agreement 等成立 | 若假设不满足或 bound vacuous，不直接支持实际部署 claim |
+| Shift-specific robustness evidence | 在指定 shifted environment 中表现如何 | shift type 明确定义；测试数据代表该 shift；evaluation 未被用于 selection 或 role 被明确 | 不证明任意 distribution shift、OOD generality 或 causal mechanism |
 
-### Interpretation
-
-- **Training fit**：说明 optimizer 能降低 observed training objective。
-- **Development evidence**：说明 model 在调参过程中有用，但已经参与 selection。
-- **Held-out empirical evidence**：若独立且未参与 selection，可估计 frozen procedure 的 same-distribution performance。
-- **Repeated independent evidence**：多个独立 datasets/replications 支持更稳健 empirical claim。
-- **Formal guarantee**：在明确 assumptions 下给出 probability/expectation statement。
-- **Shift-specific robustness evidence**：针对明确定义的 shifted environments，而非 arbitrary distribution shift。
-
-不同证据回答不同问题，不能互相替代。
+这些 evidence types 可以互相补充，但不能互相替代。credible ML research 应说明自己支持的是哪一种 claim，而不是把所有 evidence 压成一个单一“强弱等级”。
 
 ## 7. Freeze Point
 
