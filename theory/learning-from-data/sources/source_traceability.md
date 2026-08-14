@@ -92,7 +92,47 @@ CS229M is used as a theory extension for non-convex optimization, overparameteri
 
 These sources are used only for labeled Modern Perspective sections and conceptual caveats. T3 does not turn implicit bias, NTK, double descent, benign overfitting, or adaptive-data-analysis methods into fully derived chapters.
 
-## 4. T1 note mapping
+## 4. Sources verified for T4
+
+### Caltech primary sources
+
+- Official Learning From Data lecture page: <https://home.work.caltech.edu/lectures.html>
+- Official AML slides page: <https://amlbook.com/slides.html>
+- Lecture 14 slides: <https://work.caltech.edu/slides/slides14.pdf>
+- Lecture 15 slides: <https://work.caltech.edu/slides/slides15.pdf>
+- Lecture 16 slides: <https://work.caltech.edu/slides/slides16.pdf>
+- Lecture 17 slides: <https://work.caltech.edu/slides/slides17.pdf>
+- Lecture 18 slides: <https://work.caltech.edu/slides/slides18.pdf>
+- Official Machine Learning Video Library: <https://home.work.caltech.edu/library/>
+- Official supporting-material page: <https://amlbook.com/support.html>
+
+### Stanford CS229 derivational sources
+
+- Official Stanford CS229 course page: <https://cs229.stanford.edu/>
+- Official Stanford SEE CS229 materials page: <https://see.stanford.edu/Course/CS229>
+- Stanford SEE CS229 SVM notes: <https://see.stanford.edu/materials/aimlcs229/cs229-notes3.pdf>
+- Official CS229 syllabus/materials index: <https://cs229.stanford.edu/syllabus-new.html>
+
+CS229 is used for functional margin, geometric margin, optimal-margin classifier, primal/dual SVM, Lagrange duality, KKT conditions, support vectors, kernels, and soft-margin SVM. It is not labeled as Caltech content.
+
+### Stanford CS229M / theory extension sources
+
+- Official STATS214 / CS229M Machine Learning Theory page: <https://web.stanford.edu/class/stats214/>
+- Official page-linked public notes repository: <https://github.com/tengyuma/cs229m_notes/blob/main/master.pdf>
+
+CS229M is used only as a light theory bridge for algorithm-dependent complexity, norm/margin control, and the distinction between ambient representation dimension and effective statistical complexity.
+
+### Modern primary / canonical sources used sparingly
+
+- Cortes and Vapnik, `Support-Vector Networks`: <https://doi.org/10.1007/BF00994018>
+- Breiman, `Bagging Predictors`: <https://doi.org/10.1007/BF00058655>
+- Freund and Schapire, `A Decision-Theoretic Generalization of On-Line Learning and an Application to Boosting`: <https://doi.org/10.1006/jcss.1997.1504>
+- Dwork et al., `The Reusable Holdout: Preserving Validity in Adaptive Data Analysis`: <https://arxiv.org/abs/1507.02629>
+- Dwork et al., `Preserving Statistical Validity in Adaptive Data Analysis`: <https://arxiv.org/abs/1411.2664>
+
+These sources support labeled modern or canonical clarification only. T4 does not become full RKHS theory, PAC-Bayes, Gaussian processes, boosting theory, NTK theory, or deep margin theory.
+
+## 5. T1 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -103,7 +143,7 @@ These sources are used only for labeled Modern Perspective sections and conceptu
 | [04 Error, Noise, and Target Distribution](../part1_learning_problem/04_caltech_l04_error_measures_noise_target_distribution.md) | Lecture 4: Error and Noise; Lecture 4 slides; video-library Error Measures and Noisy Targets topics | STATS214 statistical-learning framing of population risk and loss | error measure as part of learning problem; noisy targets; target distribution | conditional distribution interpretation; Bayes classifier and conditional mean derivations; loss-likelihood connection; calibration/abstention/distribution-shift implications |
 | [Terminology and Notation](t1_terminology_notation_learning_problem_generalization.md) | Lecture 1-4 notation conventions | STATS214 population/empirical risk vocabulary | symbols for target, hypothesis, algorithm, dataset, in/out error | explicit distinctions among parameter/function, representation/hypothesis, empirical/population, random/realized |
 
-## 5. T2 note mapping
+## 6. T2 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -114,7 +154,7 @@ These sources are used only for labeled Modern Perspective sections and conceptu
 | [09 Modern Uniform Convergence](../part2_generalization_theory/09_modern_uniform_convergence_and_capacity_control.md) | Lecture 5-7 concepts synthesized | STATS214 / CS229M official page and linked notes | fixed-to-uniform logic; ERM consequence | excess-risk decomposition variants; PAC vocabulary; beyond-VC capacity preview; limits of worst-case class control |
 | [10 Generalization Claim Audit](../part2_generalization_theory/10_generalization_claim_audit_for_ml_research.md) | Lecture 5-8 generalization chain | STATS214 research-level generalization vocabulary | training/testing distinction; capacity control; sample complexity; bias-variance caveats | original research audit framework for population, sampling, selection, evidence, assumptions, and non-implications |
 
-## 6. T3 note mapping
+## 7. T3 note mapping
 
 | Note | Primary Caltech source | Stanford / modern extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ---------------------------------- | -------------------- | ---------------------------------------- |
@@ -126,7 +166,19 @@ These sources are used only for labeled Modern Perspective sections and conceptu
 | [14 Modern Explicit/Implicit Regularization](../part3_fitting_regularization_validation/14_modern_explicit_implicit_regularization_and_solution_selection.md) | Lecture 12 synthesized | CS229M official page/topics; Soudry et al.; Jacot et al.; Zhang/Belkin/Nakkiran caveats | explicit regularization picture | implicit / algorithmic bias boundary; separable logistic-regression example; NTK preview; architecture vs full learner distinction |
 | [15 Selection-Aware Research Protocol](../part3_fitting_regularization_validation/15_selection_aware_ml_research_protocol.md) | Lecture 13 synthesized | Stanford CS229 methodology; Dwork et al. adaptive data-analysis papers | validation and contamination principles | selection ledger; dataset-role ledger; researcher as adaptive loop; freeze point; credibility levels; Canvas protocol connection |
 
-## 7. What is original in this repository
+## 8. T4 note mapping
+
+| Note | Primary Caltech source | Stanford / modern extension source | Caltech Core in note | Extension / modern / original reflection |
+| ---- | ---------------------- | ---------------------------------- | -------------------- | ---------------------------------------- |
+| [14 Support Vector Machines](../part4_margin_kernel_learning_principles/14_caltech_l14_support_vector_machines_margin_geometry_duality.md) | Lecture 14: Support Vector Machines; Lecture 14 slides | Stanford CS229 SVM notes; CS229M algorithm-dependent complexity framing | separating hyperplanes; maximum margin; support vectors | functional/geometric margin derivation; hard-margin primal/dual/KKT; margin as norm-controlled solution preference; margin/probability caveat |
+| [15 Kernel Methods](../part4_margin_kernel_learning_principles/15_caltech_l15_kernel_methods_feature_spaces_soft_margins.md) | Lecture 15: Kernel Methods; Lecture 15 slides | Stanford CS229 kernel/SVM notes; CS229M dimension-vs-effective-complexity framing; Cortes/Vapnik canonical SVM source | nonlinear feature spaces; kernel trick; soft margins | PSD Gram-matrix derivation; Mercer caveat; kernel validity; infinite-dimensional representation versus effective complexity |
+| [16 Radial Basis Functions](../part4_margin_kernel_learning_principles/16_caltech_l16_radial_basis_functions_local_representation.md) | Lecture 16: Radial Basis Functions; Lecture 16 slides | Stanford CS229 kernel comparison | RBF units; centers; widths; local representation | design-matrix derivation; RBF model versus Gaussian kernel versus kernel SVM; high-dimensional distance caveat |
+| [17 Three Learning Principles](../part4_margin_kernel_learning_principles/17_caltech_l17_three_learning_principles_occam_sampling_snooping.md) | Lecture 17: Three Learning Principles; Lecture 17 slides | CS229 methodology; CS229M capacity vocabulary; Dwork et al. adaptive data-analysis papers | Occam's razor; sampling bias; data snooping | Occam beyond parameter count; sampling bias as world-representation failure; data snooping as hidden selection; benchmark contamination distinctions |
+| [18 Epilogue](../part4_margin_kernel_learning_principles/18_caltech_l18_epilogue_bayesian_learning_aggregation_ml_map.md) | Lecture 18: Epilogue; Lecture 18 slides | CS229 probabilistic/MAP support; Breiman bagging; Freund/Schapire boosting | ML map; Bayesian learning; aggregation | Bayes-rule derivation; posterior predictive; aggregation variance derivation; ensemble versus joint representation learning |
+| [19 Unified Lens](../part4_margin_kernel_learning_principles/19_geometry_representation_capacity_unified_lens.md) | Lecture 14-18 synthesis | CS229/CS229M support across SVM, kernel, and capacity | representation, geometry, similarity, margin, locality, principles | original unified chain and paper-reading question: which arrow does a new ML paper modify |
+| [20 Learning Algorithm Anatomy](../part4_margin_kernel_learning_principles/20_learning_algorithm_anatomy_for_ml_research.md) | Full Learning From Data arc | CS229 and CS229M support for formal categories | map of model, representation, learning, and evidence | original analysis matrix comparing linear regression, logistic regression, MLP, SVM, kernel SVM, and RBF models |
+
+## 9. What is original in this repository
 
 The following T1 content is original synthesis for this repository, not copied from course slides:
 
@@ -155,13 +207,24 @@ The following T3 content is original synthesis for this repository:
 - cross-links to Week 2 logistic regression, Week 3 MLP/overfitting/optimization, Week 4 Canvas-Diagnostic-v1, and Week 5 calibration/abstention;
 - all T3 PNG figures and the reproducible T3 figure-generation script under `theory/learning-from-data/assets/`.
 
-## 8. Source-use boundaries
+The following T4 content is original synthesis for this repository:
+
+- the chain from input geometry through representation, similarity, margin/norm, effective complexity, sampling assumptions, selection discipline, and credible learning;
+- the unified representation-geometry-capacity lens and the question "which arrow does a new ML paper actually modify?";
+- the learning-algorithm anatomy matrix for research reading;
+- the explicit conceptual-trap audits around margin/probability, kernel/similarity, RBF model/kernel SVM, data snooping, sampling bias, Bayesian priors, and ensembles;
+- cross-links to T1-T3 and Week 2-5 reports;
+- all T4 PNG figures and the reproducible T4 figure-generation script under `theory/learning-from-data/assets/`.
+
+## 10. Source-use boundaries
 
 No copyrighted slide screenshots were copied. Notes use original wording, diagrams, and derivations. Formulae such as Hoeffding inequality, least-squares normal equations, empirical/population risk, Bayes classifier under 0/1 loss, and likelihood-derived cross entropy are standard mathematical material and are written here in original explanatory context.
 
 Formulae such as finite-class union bounds, Sauer-type growth control, VC-style uniform bounds, ERM excess-risk consequences, and squared-loss bias-variance decompositions are standard mathematical material. T2 gives original explanatory derivations and proof skeletons rather than copying source notes.
 
 Formulae such as Bernoulli likelihood, logistic negative log likelihood, binary cross entropy, logistic gradient/Hessian, chain-rule backpropagation, constrained/penalized regularization, L2 gradient, MAP/L2 correspondence, and hold-out validation selection are standard mathematical material. T3 writes original derivations and distinguishes objective, optimizer, model selection, and evaluation roles.
+
+Formulae such as hyperplane distance, functional margin, geometric margin, hard-margin SVM primal/dual, KKT complementary slackness, support-vector expansions, soft-margin slack variables, hinge loss, kernelized dual objectives, PSD Gram-matrix derivations, RBF design matrices, Bayes rule, posterior predictive distributions, and variance of an averaged ensemble are standard mathematical material. T4 writes original explanatory derivations and source-separated interpretation.
 
 Unresolved source issue: direct video transcript-level attribution is not recorded section by section. The official lecture page, official slides, and official/linked theory notes were used for mapping, while the notes synthesize the concepts rather than quote lecture speech.
 

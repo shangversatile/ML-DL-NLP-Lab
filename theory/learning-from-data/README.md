@@ -129,6 +129,44 @@ validation is part of the learning system
 - [Modern extension：explicit/implicit regularization 与 solution selection](part3_fitting_regularization_validation/14_modern_explicit_implicit_regularization_and_solution_selection.md)
 - [Research tool：selection-aware ML research protocol](part3_fitting_regularization_validation/15_selection_aware_ml_research_protocol.md)
 
+## T4 Notes
+
+T4 closes the main Caltech `Learning From Data` course arc. It does not mark the whole theory project complete; deeper modern-theory bridges remain future T5 work.
+
+T4's purpose is:
+
+```text
+Margin
+-> Kernel
+-> Local Representation
+-> Learning Principles
+-> Bayesian / Aggregation Epilogue
+-> Classical Theory Synthesis
+```
+
+The central chain is:
+
+```text
+Input Geometry
+-> Representation
+-> Similarity / Inner Product
+-> Decision Geometry
+-> Margin / Norm
+-> Effective Complexity
+-> Generalization
+-> Sampling Assumptions
+-> Selection Discipline
+-> Credible Learning
+```
+
+- [Lecture 14: support vector machines, margin geometry, and duality](part4_margin_kernel_learning_principles/14_caltech_l14_support_vector_machines_margin_geometry_duality.md)
+- [Lecture 15: kernel methods, feature spaces, and soft margins](part4_margin_kernel_learning_principles/15_caltech_l15_kernel_methods_feature_spaces_soft_margins.md)
+- [Lecture 16: radial basis functions and local representation](part4_margin_kernel_learning_principles/16_caltech_l16_radial_basis_functions_local_representation.md)
+- [Lecture 17: Occam, sampling bias, and data snooping](part4_margin_kernel_learning_principles/17_caltech_l17_three_learning_principles_occam_sampling_snooping.md)
+- [Lecture 18: Bayesian learning, aggregation, and the ML map](part4_margin_kernel_learning_principles/18_caltech_l18_epilogue_bayesian_learning_aggregation_ml_map.md)
+- [Unified lens: geometry, representation, capacity, and inductive bias](part4_margin_kernel_learning_principles/19_geometry_representation_capacity_unified_lens.md)
+- [Research tool: anatomy of a learning algorithm](part4_margin_kernel_learning_principles/20_learning_algorithm_anatomy_for_ml_research.md)
+
 ## Sources and notation
 
 - [Source traceability：Caltech、Stanford 与 modern theory map](sources/source_traceability.md)

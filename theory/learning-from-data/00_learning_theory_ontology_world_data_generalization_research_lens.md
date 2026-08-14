@@ -429,7 +429,56 @@ Selection / Evaluation Failure
 
 这不是新的 population-risk decomposition term。它指 evaluation interpretation 的 assumptions 被破坏：某个数据集原本被当作 independent evidence，但实际已经影响了 final procedure。此时问题不一定在 representation、approximation、estimation 或 optimization 本身，而在 evidence role 被改变。
 
-## 7. Research lens
+## 7. Geometry and Similarity Layer
+
+T4 adds a layer that was implicit in T1-T3:
+
+```text
+Representation Phi(x)
+down
+Geometry
+├── distance
+├── inner product
+├── angle
+├── margin
+└── locality
+down
+Learning algorithm
+```
+
+Geometry is not independent of representation. Once observations are mapped to
+
+```math
+z=\Phi(x),
+```
+
+distance, angle, inner product, margin, and local neighborhood are defined in the represented space, not directly in the raw world.
+
+This matters for SVMs, kernels, RBF models, and neural networks:
+
+- an SVM margin is measured using the norm in the feature representation;
+- a kernel declares an inner-product geometry through pairwise evaluations;
+- an RBF model declares locality around centers under a chosen metric;
+- a neural network learns a representation, so the geometry itself becomes data-dependent.
+
+The new failure mode is a refinement of representation failure:
+
+```text
+representation failure
+-> geometry / similarity failure
+```
+
+For example, a representation may preserve class labels on the training data but induce unstable similarity under environmental shift. Two images may be close in a learned feature space because of shared background, stroke artifact, or acquisition condition rather than the predictive mechanism. Under deployment shift, the same similarity relation can become wrong even if the nominal classifier, optimizer, and validation score looked acceptable on the development distribution.
+
+Technically, this means a learning claim should identify:
+
+- which representation induces the geometry;
+- which norm, kernel, metric, or neighborhood structure is used;
+- whether geometry-defining hyperparameters were selected adaptively;
+- whether the sampling process makes that geometry valid for the target population;
+- whether evaluation tests geometry/similarity failure, not only average accuracy.
+
+## 8. Research lens
 
 这个 ontology 可以直接用于阅读 ML paper。对每篇论文，至少追问：
 
@@ -449,7 +498,7 @@ Selection / Evaluation Failure
 
 这些问题能把“模型效果好不好”变成可审计的研究判断。例如在 digit canvas 项目中，`load_digits` test performance 回答的是 sklearn digits distribution 上的 out-of-sample behavior；real canvas diagnostics 回答的是另一个 observation mechanism 下的 behavior；calibration notes 回答的是 confidence 是否可解释为 probability-like evidence；abstention notes 回答的是在允许拒答时 selective risk 如何变化。它们不是同一个问题，因此不能用一个 scalar metric 混合解释。
 
-## 8. Conceptual conclusion
+## 9. Conceptual conclusion
 
 T1 的核心地图可以压缩成一句话：
 

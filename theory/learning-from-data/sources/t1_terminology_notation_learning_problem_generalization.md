@@ -535,4 +535,69 @@ g_{\hat m}
 
 是 validation-dependent selected model。credible evaluation 必须同时审计 fitting layer 与 selection layer。
 
+## 19. T4 margin, kernel, locality, and evidence terminology
+
+| Term | Meaning | Notes |
+| ---- | ------- | ----- |
+| separating hyperplane | affine decision boundary $w^\top x+b=0$ | $w$ is normal to the hyperplane |
+| functional margin | $y_i(w^\top x_i+b)$ | scale-dependent; changes under $(w,b)\mapsto(cw,cb)$ for $c>0$ |
+| geometric margin | $y_i(w^\top x_i+b)/\|w\|_2$ | scale-invariant distance to the boundary in the chosen representation |
+| hard-margin SVM | maximum-margin classifier with no training margin violations | requires separability in the chosen representation |
+| soft-margin SVM | SVM allowing slack variables for violations | trades margin/norm preference against violations via $C$ |
+| slack variable | $\xi_i\ge0$ measuring margin-constraint violation | not identical to misclassification |
+| support vector | training example with nonzero dual coefficient | hard-margin support vectors lie on active margin constraints |
+| primal problem | optimization in original variables such as $w,b,\xi$ | expresses geometry and constraints directly |
+| dual problem | optimization in Lagrange multipliers such as $\alpha_i$ | exposes inner products and support-vector structure |
+| Lagrangian | objective plus multiplier-weighted constraints | bridge from constrained primal to dual |
+| KKT conditions | feasibility, stationarity, and complementary slackness conditions | characterize convex SVM optima under standard regularity |
+| complementary slackness | product of multiplier and constraint residual equals zero | explains why inactive constraints have zero multipliers |
+| hinge loss | $\max(0,1-yf(x))$ | margin-aware surrogate loss; not log loss |
+| kernel | function $K(x,z)=\langle\Phi(x),\Phi(z)\rangle$ | similarity-like inner-product function, not arbitrary similarity |
+| kernel trick | using $K(x,z)$ without explicitly forming $\Phi(x)$ | relies on algorithms depending on inner products |
+| Gram matrix | finite matrix $K_{ij}=K(x_i,x_j)$ | valid kernels yield PSD Gram matrices on finite samples |
+| positive semidefinite | $c^\top Kc\ge0$ for all finite $c$ | finite-sample signature of inner-product behavior |
+| feature space | represented space containing $\Phi(x)$ | geometry is defined there, not necessarily in raw input space |
+| RKHS | reproducing-kernel Hilbert space | preview only; full RKHS theory is deferred |
+| radial basis function | localized basis response based on distance to a center | common Gaussian form uses $\exp(-\|x-c\|^2/(2\sigma^2))$ |
+| RBF center | point $c_k$ around which a basis unit is localized | may be fixed, selected from data, clustered, or learned |
+| RBF width | scale $\sigma_k$ controlling spatial spread | smaller/larger widths have contextual effects, not universal laws |
+| locality | assumption that nearby points or centers should have related behavior | depends on metric and representation |
+| Occam's razor | prefer simpler explanations when fit is adequate | simplicity may mean count, VC dimension, norm, margin, compression, prior, or algorithmic preference |
+| sampling bias | sample fails to represent the intended target population | more biased samples do not repair the mechanism by themselves |
+| data snooping | unaccounted data use influences final evidence or selection | broader than direct test leakage |
+| prior | pre-data assumption over hypotheses or parameters | Bayesian methods are not assumption-free |
+| likelihood | probability of observed data under a hypothesis/model | connects data to hypotheses |
+| posterior | updated distribution $p(h\mid D)$ | proportional to likelihood times prior |
+| posterior predictive | predictive distribution integrating over posterior hypotheses | does not automatically guarantee calibration |
+| aggregation | combining multiple hypotheses or predictors | may reduce variance or alter bias depending on correlation and errors |
+| bagging | resample, fit multiple learners, aggregate | targets dataset-induced variance for unstable learners |
+| boosting | sequentially fit learners with changed emphasis on prior errors | not merely independent averaging |
+| blending / stacking | learn a combination layer over existing models | introduces another selection/evaluation layer |
+
+Required distinctions:
+
+```text
+margin
+!=
+probability confidence
+```
+
+An SVM score or margin is geometric unless a separate calibration model/evidence justifies probability interpretation.
+
+```text
+kernel
+!=
+feature map
+```
+
+The feature map $\Phi$ defines a represented space. The kernel computes inner products corresponding to that representation.
+
+```text
+RBF basis function
+!=
+RBF kernel
+```
+
+An RBF basis function is an explicit localized feature around a center. A Gaussian/RBF kernel is a pairwise inner-product function used inside kernel methods.
+
 [← Back to Learning From Data Theory Notebook](../README.md)
