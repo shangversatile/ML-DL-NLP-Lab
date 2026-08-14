@@ -10,7 +10,7 @@ Figure 1: multiplying the parameters by a positive constant leaves the separatin
 
 ![Maximum-margin support vectors](../assets/svm_maximum_margin_support_vectors.png)
 
-Figure 2: the maximum-margin separator is controlled by the active margin constraints. These active points become support vectors in the dual representation.
+Figure 2: the maximum-margin separator is controlled through margin constraints and dual coefficients. Points with nonzero optimal dual coefficients are support vectors.
 
 ![Primal-dual SVM structure](../assets/svm_primal_dual_structure.png)
 
@@ -600,13 +600,15 @@ The bracket is positive, so the product can be zero only if
 \alpha_i=0.
 ```
 
-If $\alpha_i>0$, then the bracket must be zero:
+If $\alpha_i>0$, then complementary slackness forces the bracket to be zero:
 
 ```math
 y_i(w^\top x_i+b)=1.
 ```
 
-The point lies exactly on an active margin constraint. These active points are the support vectors.
+A support vector in the dual solution is a training point with nonzero optimal dual coefficient $\alpha_i>0$. Therefore every such support vector lies on an active margin constraint in the hard-margin problem.
+
+Do not read the converse as automatic. In a degenerate optimum, an active margin constraint can in principle have zero multiplier. Thus "active constraint" and "nonzero support coefficient" should not be treated as logically equivalent without qualification.
 
 This answers the structural question:
 
@@ -626,7 +628,7 @@ w
 \sum_i\alpha_i y_i x_i
 ```
 
-and $\alpha_i=0$ for non-support vectors, the solution can be written as
+and support vectors are defined by nonzero optimal coefficients, the solution can be written as
 
 ```math
 w
@@ -648,7 +650,7 @@ w^\top x+b
 b.
 ```
 
-This is a compression-like structure: the final classifier can depend directly only on support vectors in the dual representation.
+This is a sparse dual-expansion structure: the final classifier can depend directly only on training points with nonzero optimal dual coefficients.
 
 ### What This Does NOT Imply
 
@@ -658,7 +660,7 @@ few support vectors
 automatic generalization guarantee
 ```
 
-is not valid as a universal statement. The number and arrangement of support vectors, margin size, data distribution, feature scaling, kernel choice, regularization, and sampling process all affect what can be claimed.
+is not valid as a universal statement. Support-vector sparsity is structural information about the solution. It becomes a generalization-control argument only when tied to a specific compression, margin, stability, or related theorem. The number and arrangement of support vectors, margin size, data distribution, feature scaling, kernel choice, regularization, and sampling process all affect what can be claimed.
 
 ## 10. Research Lens
 

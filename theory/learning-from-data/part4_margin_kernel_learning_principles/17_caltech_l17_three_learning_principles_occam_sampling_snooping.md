@@ -161,7 +161,7 @@ parameter count is the universal complexity measure
 
 is false. T2 already separated raw parameterization from effective capacity. T4 adds a concrete example: an infinite-dimensional kernel representation can still be paired with norm/margin control.
 
-## 4. Principle 2 - Sampling Bias
+## 4. Principle 2 - Population / Distribution Mismatch
 
 Every generalization claim has a target population or distribution. Let
 
@@ -171,17 +171,71 @@ Every generalization claim has a target population or distribution. Let
 
 represent the population about which the claim is intended.
 
-The sample must represent that target population under the assumptions used for inference. Sampling bias occurs when the sampling mechanism changes what the dataset represents.
+The data used for learning and evaluation must represent that target under the assumptions used for inference. The broad failure is:
 
-Important cases include:
+```text
+Population / Distribution Mismatch
+```
+
+This broad concept has two related but distinct forms.
+
+### Sampling / Selection Bias
+
+Sampling or selection bias occurs when the collection or inclusion mechanism makes the observed data unrepresentative of the intended target population.
+
+Examples:
 
 - random sampling, where the sample is designed to represent the target population;
-- covariate shift, where $P(X)$ changes between train and deployment;
-- temporal sampling, where old data may not represent future conditions;
-- spatial sampling, where one location or environment stands in for another;
-- selection bias, where inclusion depends on variables related to the outcome;
-- missingness, where absent data are not random with respect to the target;
-- user/self-selection, where participants choose whether to appear in the dataset.
+- self-selection, where participants choose whether to appear in the dataset;
+- selective labeling or selective inclusion;
+- missingness mechanisms;
+- nonrepresentative sampling across groups, times, or settings.
+
+### Distribution Shift
+
+Distribution shift occurs when the training/source distribution differs from the target/deployment distribution:
+
+```math
+P_{\mathrm{train}}
+\ne
+P_{\mathrm{target}}.
+```
+
+Examples:
+
+- covariate shift;
+- temporal drift;
+- spatial or domain shift.
+
+For covariate shift, a careful formal statement is:
+
+```math
+P_{\mathrm{train}}(X)
+\ne
+P_{\mathrm{target}}(X).
+```
+
+Under the standard covariate-shift assumption, the conditional relationship is unchanged:
+
+```math
+P_{\mathrm{train}}(Y\mid X)
+=
+P_{\mathrm{target}}(Y\mid X).
+```
+
+This assumption should not be silently generalized. Temporal or spatial change may also alter the conditional mechanism:
+
+```math
+P_{\mathrm{train}}(Y\mid X)
+\ne
+P_{\mathrm{target}}(Y\mid X).
+```
+
+In that case, the problem is not merely covariate shift.
+
+### Relationship between the Categories
+
+The categories may overlap, but they are not identical. Biased sampling may create train/deployment distribution mismatch, but not every distribution shift is caused by biased sampling. For example, a representative training sample from 2020 can still fail in 2026 if the environment has changed.
 
 This chapter does not become a causal-inference chapter. The point is more basic: a generalization theorem or held-out test speaks only about the population that the data-generating process supports.
 
@@ -221,7 +275,7 @@ distribution-shift generalization
 
 The Week 4 Canvas-Diagnostic-v1 work is an example: the issue was not only finite sample size, but a mismatch between the training distribution and real canvas inputs.
 
-## 6. Sampling Bias as World-Representation Failure
+## 6. Population Mismatch as World-Representation Failure
 
 T1 used the chain:
 
@@ -235,7 +289,7 @@ World
 -> Error / Noise
 ```
 
-Sampling bias inserts a missing step:
+Sampling and distribution mechanisms insert missing steps:
 
 ```text
 World
@@ -243,13 +297,31 @@ World
 -> Dataset
 ```
 
-Even a perfect learning algorithm cannot recover information systematically absent from the sample without extra assumptions. More data from the same biased mechanism can preserve the bias.
+and:
+
+```text
+Training environment
+-> Dataset
+-> Target / deployment environment
+```
+
+Even a perfect learning algorithm cannot recover information systematically absent from the sample without extra assumptions. More data from the same biased mechanism can preserve the bias. Separately, even representative source data can fail when the target environment changes.
 
 This is a fundamental research principle:
 
 ```text
 sample size does not repair a broken sampling mechanism by itself
 ```
+
+The failure taxonomy should keep these distinguishable:
+
+```text
+sampling failure
+!=
+distribution / environment shift
+```
+
+They can interact, but their diagnoses and evidence requirements differ.
 
 ## 7. Principle 3 - Data Snooping
 
@@ -339,8 +411,8 @@ The three principles form one evidence-control structure:
 Occam
 -> control what can be selected
 
-Sampling Bias
--> control what the data represent
+Population / Distribution Mismatch
+-> control what the data represent and which environment the claim concerns
 
 Data Snooping
 -> control how evidence enters selection
@@ -358,7 +430,8 @@ Together they unify T1-T3:
 For any ML result, ask:
 
 - What counts as the target population?
-- How was the sample obtained?
+- How was the sample obtained, and does the collection mechanism create sampling/selection bias?
+- Does the training/source distribution match the target/deployment distribution?
 - Which representation turns observations into model inputs?
 - Which candidate models or procedures could have been selected?
 - Which data influenced feature choices, preprocessing, hyperparameters, architecture, or reporting?

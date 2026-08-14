@@ -211,15 +211,42 @@ feature dimension
 effective statistical complexity
 ```
 
-A kernel may correspond to a high-dimensional or infinite-dimensional feature representation. But the selected learner can still be controlled by:
+A kernel may correspond to a high-dimensional or infinite-dimensional feature representation. But that fact alone does not determine the learner's effective behavior. Keep three categories separate.
 
-- margin;
-- norm;
-- regularization coefficient;
-- support-vector expansion;
-- sample size;
+### Structural / Generalization Control
+
+These are mechanisms that restrict or prefer solutions in a way that can support a generalization argument when the assumptions of the relevant theorem or analysis are met:
+
+- restricted hypothesis family;
+- norm control;
+- margin control;
+- explicit regularization;
 - algorithmic stability;
-- validation discipline.
+- compression only when a formal compression/generalization connection is actually invoked.
+
+Support-vector expansion is structural information about the dual solution. It should not be called capacity control merely because the expansion may be sparse. A support-vector count becomes a generalization-control argument only when a specific compression, margin, stability, or related theorem is being used.
+
+### Statistical Conditions
+
+These determine how sharply finite data can speak about the target population:
+
+- sample size;
+- i.i.d. or other sampling assumptions;
+- target distribution;
+- noise and population heterogeneity.
+
+Sample size affects estimation and generalization precision. It is not itself hypothesis capacity.
+
+### Selection / Evaluation Discipline
+
+These protect the credibility of evidence after choices have been made:
+
+- validation protocol;
+- hyperparameter search discipline;
+- benchmark feedback control;
+- held-out final evaluation.
+
+Validation discipline can keep evidence interpretable, but it is not a capacity-control mechanism. It controls information flow in the research process.
 
 Conversely, a low-dimensional feature space can overfit if the selection process is sufficiently adaptive or if the sample is biased.
 

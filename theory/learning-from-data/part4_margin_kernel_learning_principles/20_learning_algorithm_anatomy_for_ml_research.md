@@ -30,7 +30,7 @@ The tool synthesizes the full Caltech `Learning From Data` arc: learning problem
 
 ### Formal Derivation
 
-The matrix below uses the formal objects derived across T1-T4: representation, geometry, hypothesis family, objective, regularization/constraint, optimizer, locality, probabilistic interpretation, and capacity-control mechanism.
+The matrix below uses the formal objects derived across T1-T4: representation, geometry, hypothesis family, objective, regularization/constraint, optimizer, locality, probabilistic interpretation, structural/generalization control, statistical conditions, and selection/evaluation discipline.
 
 ### Stanford CS229 Extension
 
@@ -118,7 +118,6 @@ Ask what solutions are discouraged or excluded:
 - priors;
 - early stopping;
 - data augmentation;
-- support-vector sparsity;
 - aggregation weights.
 
 Regularization is a solution preference, not a magic guarantee.
@@ -156,7 +155,7 @@ Locality and margin are geometry-dependent. They should be interpreted only afte
 
 Ask what population the training data represent.
 
-Does the paper assume i.i.d. train/test sampling? Is there covariate shift, temporal shift, user self-selection, missingness, geographic bias, benchmark reuse, or label noise?
+Does the paper assume i.i.d. train/test sampling? Is there covariate shift, temporal drift, spatial/domain shift, user self-selection, missingness, selective labeling, benchmark reuse, or label noise?
 
 Sampling assumptions define the population to which evidence can generalize.
 
@@ -220,14 +219,16 @@ Examples:
 
 ## 12. Algorithm Analysis Matrix
 
-| Algorithm | Representation | Geometry | Hypothesis family | Objective | Regularization / constraint | Optimizer | Locality | Probabilistic interpretation | Capacity-control mechanism | Key failure modes |
-| --------- | -------------- | -------- | ----------------- | --------- | --------------------------- | --------- | -------- | ---------------------------- | -------------------------- | ----------------- |
-| Linear regression | Raw or engineered feature vector $x$ | Euclidean / inner-product geometry of features | Affine real-valued functions | Squared loss | Optional ridge/LASSO or constraints | Closed form or gradient methods | Global linear | Gaussian-noise likelihood under assumptions | Feature dimension, norm penalty, sample size | misspecified features, outliers, multicollinearity, shift |
-| Logistic regression | Raw or engineered feature vector $x$ | Linear score geometry | Affine log-odds with sigmoid | Bernoulli negative log likelihood / cross entropy | Optional norm penalty | Convex optimization / gradient methods | Global linear score | Conditional probability model if specified correctly | Norm penalty, feature design, sample size | separation pathology, poor calibration under shift, wrong link/features |
-| MLP | Learned hidden representation $\Phi_\theta(x)$ | Learned hidden-space geometry | Multilayer compositions | Usually empirical risk or likelihood surrogate | weight decay, augmentation, early stopping, architecture, implicit bias | SGD/Adam/backprop | Can learn local or global structure | Possible probabilistic output depending on loss/output layer | architecture, regularization, optimizer bias, data, validation | representation shortcut, overfitting, optimization instability, shift, calibration failure |
-| SVM | Explicit feature vector $x$ | Margin in feature-space norm | Linear separators | maximize margin / minimize $\frac12\|w\|^2$ with constraints | hard margin or soft-margin $C$ | Convex quadratic program / dual solver | Global margin | Not probabilistic by default | margin, norm, support-vector structure, $C$ | bad feature scaling, nonseparable/noisy data, uncalibrated scores, shift |
-| Kernel SVM | Implicit feature space via $K(x,z)$ | Kernel-induced inner product and margin | Linear separators in implicit feature space | kernelized hard/soft-margin dual | norm/margin control, box constraint $0\le\alpha_i\le C$ | Convex dual optimization | Depends on kernel; Gaussian is local | Not probabilistic by default | kernel choice, margin/norm, $C$, support vectors | invalid kernel, wrong similarity, hyperparameter snooping, scalability, shift |
-| RBF model | Explicit RBF basis responses $\phi_k(x)$ | distance to centers under chosen metric | finite weighted sum of local basis units | squared loss, classification surrogate, or task loss on basis features | number of centers, widths, weight penalty | linear solve if centers/widths fixed; nonconvex if learned | Explicit local center-based | Depends on output/loss choice | center count, width, weight norm, selection process | meaningless distance, poor center coverage, width misselection, high-dimensional locality failure |
+The old single "capacity-control mechanism" column is intentionally split. Structural control concerns the learner or solution class. Statistical conditions concern the data-generating setting and sample precision. Selection/evaluation discipline concerns whether the reported evidence remains credible after adaptive choices. Support-vector sparsity is treated as solution structure, not capacity control, unless a formal compression/generalization argument is invoked.
+
+| Algorithm | Representation | Geometry | Hypothesis family | Objective | Regularization / constraint | Optimizer | Locality | Probabilistic interpretation | Structural / generalization control | Statistical conditions | Selection / evaluation discipline | Key failure modes |
+| --------- | -------------- | -------- | ----------------- | --------- | --------------------------- | --------- | -------- | ---------------------------- | ---------------------------------- | ---------------------- | --------------------------------- | ----------------- |
+| Linear regression | Raw or engineered feature vector $x$ | Euclidean / inner-product geometry of features | Affine real-valued functions | Squared loss | Optional ridge/LASSO or constraints | Closed form or gradient methods | Global linear | Gaussian-noise likelihood under assumptions | restricted feature family; optional norm/sparsity penalty | sample size; noise model; target distribution; sampling assumptions | validation for feature/penalty choices; independent final test | misspecified features, outliers, multicollinearity, shift |
+| Logistic regression | Raw or engineered feature vector $x$ | Linear score geometry | Affine log-odds with sigmoid | Bernoulli negative log likelihood / cross entropy | Optional norm penalty | Convex optimization / gradient methods | Global linear score | Conditional probability model if specified correctly | restricted feature family; optional norm penalty | sample size; class balance; target distribution; i.i.d. or shift assumptions | validation for penalty/threshold; calibration and final held-out checks | separation pathology, poor calibration under shift, wrong link/features |
+| MLP | Learned hidden representation $\Phi_\theta(x)$ | Learned hidden-space geometry | Multilayer compositions | Usually empirical risk or likelihood surrogate | weight decay, augmentation, early stopping, architecture, implicit bias | SGD/Adam/backprop | Can learn local or global structure | Possible probabilistic output depending on loss/output layer | architecture; explicit regularization; stability or implicit-bias arguments when justified | sample size; data coverage; target/deployment distribution; label noise | validation for architecture/checkpoint/hyperparameters; benchmark-feedback audit | representation shortcut, overfitting, optimization instability, shift, calibration failure |
+| SVM | Explicit feature vector $x$ | Margin in feature-space norm | Linear separators | maximize margin / minimize $\frac12\|w\|^2$ with constraints | hard margin or soft-margin $C$ | Convex quadratic program / dual solver | Global margin | Not probabilistic by default | norm and margin control; soft-margin box constraint through $C$ | sample size; separability/noise assumptions; target distribution | validation for $C$ and scaling; independent final evaluation | bad feature scaling, nonseparable/noisy data, uncalibrated scores, shift, overreading support-vector count |
+| Kernel SVM | Implicit feature space via $K(x,z)$ | Kernel-induced inner product and margin | Linear separators in implicit feature space | kernelized hard/soft-margin dual | norm/margin control, box constraint $0\le\alpha_i\le C$ | Convex dual optimization | Depends on kernel; Gaussian is local | Not probabilistic by default | kernel-induced norm/margin control; $C$; valid PSD kernel | sample size; train/target similarity geometry; sampling assumptions | validation for kernel and hyperparameters; benchmark-feedback audit | invalid kernel, wrong similarity, hyperparameter snooping, scalability, shift |
+| RBF model | Explicit RBF basis responses $\phi_k(x)$ | distance to centers under chosen metric | finite weighted sum of local basis units | squared loss, classification surrogate, or task loss on basis features | number of centers, widths, weight penalty | linear solve if centers/widths fixed; nonconvex if learned | Explicit local center-based | Depends on output/loss choice | finite center family; width/locality choice; output-weight regularization | sample size; center coverage of target population; distance meaningfulness | validation for centers/widths/penalty; final held-out evaluation | meaningless distance, poor center coverage, width misselection, high-dimensional locality failure |
 
 ## 13. Use the Matrix on a New Paper
 
