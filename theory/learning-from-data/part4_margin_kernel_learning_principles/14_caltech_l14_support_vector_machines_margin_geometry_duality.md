@@ -2,69 +2,69 @@
 
 [Back to Learning From Data Theory Notebook](../README.md)
 
-This chapter corresponds to Caltech `Learning From Data` Lecture 14: Support Vector Machines. The goal is not to introduce one more classifier. The goal is to see SVM as a convergence point of geometry, optimization, regularization, capacity, and generalization.
+本章对应 Caltech `Learning From Data` Lecture 14: Support Vector Machines。这里的重点不是“多学一个 classifier”，而是把 SVM 看成 geometry、optimization、regularization、capacity 与 generalization 的交汇点。
 
 ![Functional versus geometric margin](../assets/svm_functional_vs_geometric_margin.png)
 
-Figure 1: multiplying the parameters by a positive constant leaves the separating boundary unchanged but changes the functional margin. The geometric margin divides out this arbitrary scale.
+图 1：把参数乘以正数不会改变 separating boundary，但会改变 functional margin。geometric margin 通过除以参数 norm 去掉这种任意 scale。
 
 ![Maximum-margin support vectors](../assets/svm_maximum_margin_support_vectors.png)
 
-Figure 2: the maximum-margin separator is controlled through margin constraints and dual coefficients. Points with nonzero optimal dual coefficients are support vectors.
+图 2：maximum-margin separator 由 margin constraints 和 dual coefficients 共同决定。optimal dual coefficient 非零的训练点称为 support vectors。
 
 ![Primal-dual SVM structure](../assets/svm_primal_dual_structure.png)
 
-Figure 3: the primal problem expresses geometry through $w,b$ and constraints. The dual expresses the solution through training examples and nonzero coefficients.
+图 3：primal problem 用 $w,b$ 和 constraints 表达几何；dual problem 用 training examples 与 nonzero coefficients 表达同一个解。
 
 ## 0. Source Separation
 
 ### Caltech Core
 
-Lecture 14 introduces the support-vector-machine idea through separating hyperplanes, margin maximization, support vectors, and the geometric reason a maximum-margin classifier is not just another linear separator.
+Lecture 14 通过 separating hyperplane、margin maximization、support vectors 说明：maximum-margin classifier 不是任意 linear separator，而是带有明确几何偏好的 separator。
 
 ### Formal Derivation
 
-This note gives the hard-margin primal, hyperplane distance, functional margin, geometric margin, Lagrangian dual, KKT conditions, and support-vector solution structure in a self-contained derivation.
+本章给出 hard-margin primal、hyperplane distance、functional margin、geometric margin、Lagrangian dual、KKT conditions 与 support-vector solution structure。
 
 ### Stanford CS229 Extension
 
-CS229 supplies the standard mathematical refinement: functional versus geometric margin, optimal-margin classifier, Lagrange duality, KKT conditions, and the support-vector interpretation. These derivations are not attributed to Caltech unless they are part of the Caltech lecture's conceptual core.
+CS229 提供 functional margin / geometric margin、optimal-margin classifier、Lagrange duality、KKT conditions 与 support-vector interpretation 的标准数学推导。这里不会把 CS229 推导标成 Caltech 内容。
 
 ### Stanford CS229M / Theory Extension
 
-The CS229M-style bridge appears only in the capacity discussion: modern generalization analysis often depends on the selected solution, norm, margin, stability, or compression, not only the nominal parameter count.
+CS229M 风格的连接只用于 capacity 讨论：modern generalization analysis 往往依赖 selected solution、norm、margin、stability 或 compression，而不只是 raw parameter count。
 
 ### Research Lens
 
-The research use of SVM is to ask which geometry the representation induces and what kind of simple solution the learning algorithm prefers.
+SVM 对研究阅读的价值在于追问：representation 诱导了什么 geometry？learning algorithm 偏好哪类 simple solution？
 
 ## 1. Start from the Separating Hyperplane
 
-For binary labels,
+binary labels 设为
 
 ```math
 y_i\in\{-1,+1\},
 ```
 
-start with the affine score
+affine score 为
 
 ```math
 f(x)=w^\top x+b
 ```
 
-and classifier
+classifier 为
 
 ```math
 g(x)=\mathrm{sign}(f(x)).
 ```
 
-The decision boundary is the set
+decision boundary 是集合
 
 ```math
 \{x:w^\top x+b=0\}.
 ```
 
-This set is a hyperplane when $w\ne 0$. The vector $w$ is normal to the hyperplane because any two points $x_a,x_b$ on the hyperplane satisfy
+当 $w\ne0$ 时，这是一个 hyperplane。$w$ 是 hyperplane 的 normal vector，因为任意两个边界上的点 $x_a,x_b$ 满足
 
 ```math
 w^\top x_a+b=0,
@@ -72,31 +72,31 @@ w^\top x_a+b=0,
 w^\top x_b+b=0.
 ```
 
-Subtracting gives
+相减得到
 
 ```math
 w^\top(x_a-x_b)=0.
 ```
 
-The displacement $x_a-x_b$ lies inside the hyperplane, so $w$ is orthogonal to every direction tangent to the hyperplane.
+$x_a-x_b$ 是 hyperplane 内部方向，因此 $w$ 与所有 tangent direction 正交。
 
 ### Derivation: Point-to-Hyperplane Distance
 
-#### Assumptions
+#### Assumptions / 假设
 
-- $w\ne 0$.
-- The hyperplane is $H=\{x:w^\top x+b=0\}$.
-- $x_0$ is any point in input space.
+- $w\ne 0$。
+- hyperplane 为 $H=\{x:w^\top x+b=0\}$。
+- $x_0$ 是任意输入点。
 
-#### Claim
+#### Claim / 结论
 
-The signed distance from $x_0$ to $H$ is
+$x_0$ 到 $H$ 的 signed distance 是
 
 ```math
 \frac{w^\top x_0+b}{\|w\|_2},
 ```
 
-and the unsigned distance is
+unsigned distance 是
 
 ```math
 \frac{|w^\top x_0+b|}{\|w\|_2}.
@@ -104,7 +104,7 @@ and the unsigned distance is
 
 #### Derivation / Proof Idea
 
-Move from $x_0$ along the normal direction until the hyperplane is reached. Let
+沿 normal direction 从 $x_0$ 移动到 hyperplane。令
 
 ```math
 x_\perp
@@ -114,13 +114,13 @@ x_0
 t w.
 ```
 
-We need $x_\perp$ to satisfy the hyperplane equation:
+要求 $x_\perp$ 满足 hyperplane equation：
 
 ```math
 w^\top(x_0-tw)+b=0.
 ```
 
-Therefore
+因此
 
 ```math
 w^\top x_0
@@ -132,7 +132,7 @@ b
 0,
 ```
 
-so
+得到
 
 ```math
 t
@@ -140,7 +140,7 @@ t
 \frac{w^\top x_0+b}{\|w\|_2^2}.
 ```
 
-The displacement length is
+位移长度为
 
 ```math
 \|x_0-x_\perp\|_2
@@ -150,21 +150,21 @@ The displacement length is
 \frac{|w^\top x_0+b|}{\|w\|_2}.
 ```
 
-#### Interpretation
+#### Interpretation / 解释
 
-The score $w^\top x_0+b$ is not a distance by itself. It becomes a geometric distance only after division by $\|w\|_2$.
+$w^\top x_0+b$ 本身不是 distance。只有除以 $\|w\|_2$ 后，它才成为当前 representation geometry 下的几何距离。
 
 #### What This Does NOT Imply
 
-The distance is meaningful only in the geometry of the current representation. If $x$ is a bad representation, Euclidean distance to a hyperplane may be a poor description of semantic or mechanistic similarity.
+这个距离只在当前 representation 的 geometry 中有意义。若 $x$ 本身是糟糕 representation，Euclidean hyperplane distance 不一定对应 semantic 或 mechanistic similarity。
 
 #### Research Use
 
-Whenever a paper invokes a margin, ask: margin in which representation, with which norm, and under which feature scaling?
+看到 margin claim 时要问：margin 在哪个 representation 中定义？用哪个 norm？feature scaling 是否改变结论？
 
 ## 2. Functional Margin
 
-For a labeled training example $(x_i,y_i)$, define the functional margin
+对 labeled example $(x_i,y_i)$，functional margin 定义为
 
 ```math
 \hat\gamma_i
@@ -172,15 +172,13 @@ For a labeled training example $(x_i,y_i)$, define the functional margin
 y_i(w^\top x_i+b).
 ```
 
-The sign determines correctness:
+它的 sign 表示分类是否正确：
 
-- if $\hat\gamma_i>0$, the example is classified correctly;
-- if $\hat\gamma_i=0$, the example lies on the decision boundary;
-- if $\hat\gamma_i<0$, the example is misclassified.
+- $\hat\gamma_i>0$：classified correctly；
+- $\hat\gamma_i=0$：点在 decision boundary 上；
+- $\hat\gamma_i<0$：misclassified。
 
-The magnitude records the signed numerical score after aligning the sign with the label. A larger value means the score is farther from zero in parameter units.
-
-The problem is scale dependence. For any $c>0$,
+它的 magnitude 是 label-aligned score 的数值大小。但问题是 scale dependence。对任意 $c>0$，
 
 ```math
 \mathrm{sign}(cw^\top x+cb)
@@ -188,7 +186,7 @@ The problem is scale dependence. For any $c>0$,
 \mathrm{sign}(w^\top x+b),
 ```
 
-so $(w,b)$ and $(cw,cb)$ define the same classifier. But the functional margin becomes
+所以 $(w,b)$ 和 $(cw,cb)$ 表示同一个 classifier。但 functional margin 变成
 
 ```math
 y_i((cw)^\top x_i+cb)
@@ -198,11 +196,11 @@ c\,y_i(w^\top x_i+b)
 c\hat\gamma_i.
 ```
 
-Thus functional margin alone cannot define the geometric quality of the classifier. It mixes boundary geometry with arbitrary parameter scale.
+因此 functional margin 不能单独刻画 classifier 的几何质量；它混入了任意 parameter scale。
 
 ## 3. Geometric Margin
 
-The geometric margin divides out parameter scale:
+geometric margin 用 $\|w\|_2$ 去掉参数 scale：
 
 ```math
 \gamma_i
@@ -210,7 +208,7 @@ The geometric margin divides out parameter scale:
 \frac{y_i(w^\top x_i+b)}{\|w\|_2}.
 ```
 
-For $c>0$,
+对 $c>0$，
 
 ```math
 \frac{y_i((cw)^\top x_i+cb)}{\|cw\|_2}
@@ -220,9 +218,9 @@ For $c>0$,
 \gamma_i.
 ```
 
-The geometric margin is therefore invariant to positive rescaling of $(w,b)$. It measures the signed distance from $x_i$ to the decision boundary in the represented Euclidean geometry.
+因此 geometric margin 对 positive rescaling 不变。它表示 $x_i$ 到 decision boundary 的 signed distance。
 
-The key distinction is:
+关键区别是：
 
 ```text
 parameter scale
@@ -230,11 +228,11 @@ parameter scale
 decision-boundary geometry
 ```
 
-Functional margin is about the numerical scale of the score. Geometric margin is about the location of the boundary relative to points after fixing the representation and norm.
+functional margin 是 score 数值尺度；geometric margin 是 representation 与 norm 固定后，boundary 与 data 的几何关系。
 
 ## 4. Maximum-Margin Principle
 
-For separable data, there exists $(w,b)$ such that
+separable data 意味着存在 $(w,b)$ 使得
 
 ```math
 y_i(w^\top x_i+b)>0
@@ -242,13 +240,13 @@ y_i(w^\top x_i+b)>0
 \text{for all } i.
 ```
 
-Because scaling is arbitrary, choose the canonical scale in which the smallest functional margin equals $1$:
+由于 scaling 任意，可以选择 canonical scale，使最小 functional margin 等于 $1$：
 
 ```math
 \min_i y_i(w^\top x_i+b)=1.
 ```
 
-Equivalently,
+等价地，
 
 ```math
 y_i(w^\top x_i+b)\ge 1
@@ -256,7 +254,7 @@ y_i(w^\top x_i+b)\ge 1
 \text{for all } i.
 ```
 
-Under this scale, the minimum geometric margin is
+在这个 scale 下，minimum geometric margin 是
 
 ```math
 \gamma
@@ -267,25 +265,25 @@ Under this scale, the minimum geometric margin is
 \frac{1}{\|w\|_2}.
 ```
 
-The distance between the two margin planes
+两个 margin planes
 
 ```math
 w^\top x+b=1
 ```
 
-and
+和
 
 ```math
 w^\top x+b=-1
 ```
 
-is
+之间的距离是
 
 ```math
 \frac{2}{\|w\|_2}.
 ```
 
-Therefore maximizing the geometric margin is equivalent to minimizing $\|w\|_2$. The standard hard-margin SVM writes this as
+因此 maximizing geometric margin 等价于 minimizing $\|w\|_2$。standard hard-margin SVM 写成
 
 ```math
 \min_{w,b}
@@ -300,26 +298,26 @@ y_i(w^\top x_i+b)\ge 1
 i=1,\ldots,N.
 ```
 
-The factor $1/2$ is computational: it makes the derivative of $\frac12\|w\|_2^2$ equal to $w$, avoiding an unnecessary factor of $2$ in stationarity equations. It does not change the optimizer.
+因子 $1/2$ 是 computational convention：它让 $\frac12\|w\|_2^2$ 的 derivative 等于 $w$，避免 stationarity equation 中多一个 $2$。它不改变 optimizer。
 
 ## 5. Why Margin Can Act as Complexity Control
 
-T2 showed that generalization is not secured by low training error alone. A learning procedure must control the effective set of solutions it can select.
+T2 说明：low training error 本身不能保证 generalization。learning procedure 必须控制它可能选择的 effective solution set。
 
-Large margin is not merely the claim that "farther points mean more confidence." SVM margin is a geometric constraint: among all separators that fit the data under the chosen representation, the algorithm prefers one with small $\|w\|_2$ under canonical scaling, equivalently large geometric separation from the closest training points.
+large margin 不只是“点离边界远，所以更 confident”。SVM margin 是 geometric constraint：在当前 representation 中，所有能分开 training data 的 separators 里，algorithm 偏好 canonical scaling 下 $\|w\|_2$ 小、geometric separation 大的 separator。
 
-This matters because many linear separators can classify the training set perfectly. Maximum margin selects a particular separator by imposing a norm/margin preference. In some settings, margin- or norm-controlled families can have better generalization analyses than raw parameter count would suggest. This connects to the T2 distinction between nominal class size and effective capacity, and to the T3 distinction between hypothesis family and solution-selection procedure.
+这很重要，因为许多 linear separators 都可以完美分类 training set。maximum margin 通过 norm/margin preference 选出特定 separator。在某些 setting 中，margin- 或 norm-controlled family 的 generalization analysis 比 raw parameter count 更有信息量。这连接 T2 的 nominal class size vs effective capacity，也连接 T3 的 hypothesis family vs solution-selection procedure。
 
 ### What This Does NOT Imply
 
-- Large SVM margin is not automatically a calibrated probability.
-- Margin alone does not universally determine generalization.
-- A large margin on training data does not by itself prove robustness under distribution shift.
-- The margin is measured in the chosen representation; feature scaling can change it.
+- large SVM margin 不自动等于 calibrated probability。
+- margin alone 不普遍决定 generalization。
+- training margin 大不自动证明 distribution shift 下 robust。
+- margin 在 chosen representation 中测量；feature scaling 会改变它。
 
 ## 6. Primal Optimization Problem
 
-The hard-margin primal is:
+hard-margin primal 是：
 
 ```math
 \begin{aligned}
@@ -334,28 +332,23 @@ y_i(w^\top x_i+b)\ge 1,
 \end{aligned}
 ```
 
-Variables:
+variables：
 
-- $w\in\mathbb{R}^d$ controls the normal direction and norm;
-- $b\in\mathbb{R}$ controls the offset;
-- the data $(x_i,y_i)$ are fixed observations.
+- $w\in\mathbb{R}^d$ 控制 normal direction 和 norm；
+- $b\in\mathbb{R}$ 控制 offset；
+- data $(x_i,y_i)$ 固定。
 
-Objective:
+objective：minimize squared norm，也就是 maximize canonical geometric margin。
 
-- minimize squared norm;
-- equivalently maximize the canonical geometric margin.
+constraints：每个 training point 都必须在正确一侧并满足 margin constraint。
 
-Constraints:
+convexity：
 
-- every training point must be on the correct side of its margin plane.
+- objective 对 $w$ 是 convex quadratic；
+- constraints 对 $(w,b)$ 是 affine inequalities；
+- 整体是 convex quadratic program。
 
-Convexity:
-
-- the objective is convex quadratic in $w$;
-- the constraints are affine inequalities in $(w,b)$;
-- the problem is a convex quadratic program.
-
-This differs from logistic regression:
+这不同于 logistic regression：
 
 ```text
 Logistic regression:
@@ -365,25 +358,25 @@ Hard-margin SVM:
 geometric separation + constrained optimization
 ```
 
-Logistic regression models $p(y\mid x)$ through a sigmoid score and optimizes likelihood or cross entropy. Hard-margin SVM does not output calibrated probabilities by default; it selects a separating boundary by maximizing margin. Neither is simply a better version of the other. They encode different modeling claims and different objective geometries.
+Logistic regression 用 sigmoid score 建模 $p(y\mid x)$，优化 likelihood / cross entropy。hard-margin SVM 默认不输出 calibrated probability；它通过 maximizing margin 选择 separating boundary。二者不是简单的“谁更好”，而是建模目标和 objective geometry 不同。
 
 ## 7. Lagrangian Dual
 
 ### Theorem: Hard-Margin SVM Dual
 
-#### Assumptions
+#### Assumptions / 假设
 
-- The data are linearly separable in the current representation.
-- The primal problem is the hard-margin SVM above.
-- Lagrange multipliers $\alpha_i\ge0$ correspond to the constraints
+- data 在当前 representation 中 linearly separable。
+- primal problem 是上面的 hard-margin SVM。
+- Lagrange multipliers $\alpha_i\ge0$ 对应 constraints
 
 ```math
 y_i(w^\top x_i+b)-1\ge0.
 ```
 
-#### Claim
+#### Claim / 结论
 
-The dual problem is
+dual problem 是
 
 ```math
 \begin{aligned}
@@ -404,7 +397,7 @@ The dual problem is
 \end{aligned}
 ```
 
-At optimality,
+optimality 下，
 
 ```math
 w
@@ -414,7 +407,7 @@ w
 
 #### Derivation / Proof Idea
 
-Start from the Lagrangian:
+从 Lagrangian 开始：
 
 ```math
 L(w,b,\alpha)
@@ -428,13 +421,13 @@ y_i(w^\top x_i+b)-1
 \right],
 ```
 
-with
+其中
 
 ```math
 \alpha_i\ge0.
 ```
 
-Expand:
+展开：
 
 ```math
 L(w,b,\alpha)
@@ -448,7 +441,7 @@ b\sum_i\alpha_i y_i
 \sum_i\alpha_i.
 ```
 
-Stationarity with respect to $w$ gives
+对 $w$ stationarity：
 
 ```math
 \nabla_w L
@@ -460,7 +453,7 @@ w
 0,
 ```
 
-so
+所以
 
 ```math
 w
@@ -469,7 +462,7 @@ w
 \alpha_i y_i x_i.
 ```
 
-Stationarity with respect to $b$ gives
+对 $b$ stationarity：
 
 ```math
 \frac{\partial L}{\partial b}
@@ -480,13 +473,13 @@ Stationarity with respect to $b$ gives
 0,
 ```
 
-so
+所以
 
 ```math
 \sum_i\alpha_i y_i=0.
 ```
 
-Substitute the stationarity relations back into the Lagrangian. Since
+把 stationarity relations 代回 Lagrangian。因为
 
 ```math
 \sum_i\alpha_i y_i w^\top x_i
@@ -499,7 +492,7 @@ w^\top w
 \|w\|_2^2
 ```
 
-and $b\sum_i\alpha_i y_i=0$, the minimized Lagrangian over $w,b$ becomes
+且 $b\sum_i\alpha_i y_i=0$，对 $w,b$ minimized 后的 Lagrangian 为
 
 ```math
 \sum_i\alpha_i
@@ -507,7 +500,7 @@ and $b\sum_i\alpha_i y_i=0$, the minimized Lagrangian over $w,b$ becomes
 \frac12\|w\|_2^2.
 ```
 
-Using
+再用
 
 ```math
 \|w\|_2^2
@@ -523,7 +516,7 @@ Using
 \alpha_i\alpha_j y_i y_j x_i^\top x_j,
 ```
 
-the dual objective is
+得到 dual objective：
 
 ```math
 \sum_i\alpha_i
@@ -533,23 +526,23 @@ the dual objective is
 \alpha_i\alpha_j y_i y_j x_i^\top x_j.
 ```
 
-#### Interpretation
+#### Interpretation / 解释
 
-The primal describes a geometric separator through $w$. The dual describes the same solution through coefficients on training examples and inner products between examples.
+primal 用 $w$ 描述 geometric separator；dual 用 training examples 的 coefficients 和 inner products 描述同一个 solution。
 
 #### What This Does NOT Imply
 
-The dual is not just algebraic ornamentation. It changes the representation of the learned classifier and makes kernelization possible in Lecture 15. But the dual also does not eliminate the need to choose a meaningful representation or control the learning procedure.
+dual 不是代数装饰。它改变了 learned classifier 的 representation，并让 Lecture 15 的 kernelization 成为可能。但 dual 不会取消 representation choice 和 learning-procedure control 的必要性。
 
 #### Research Use
 
-The dual asks which data points directly determine the final boundary and how the geometry enters through pairwise inner products.
+dual 让我们追问：哪些 data points 直接决定 boundary？geometry 如何通过 pairwise inner products 进入算法？
 
 ## 8. KKT Conditions
 
-For the hard-margin SVM, the Karush-Kuhn-Tucker conditions are:
+hard-margin SVM 的 Karush-Kuhn-Tucker conditions 包括：
 
-Primal feasibility:
+Primal feasibility：
 
 ```math
 y_i(w^\top x_i+b)-1\ge0
@@ -557,7 +550,7 @@ y_i(w^\top x_i+b)-1\ge0
 \text{for all } i.
 ```
 
-Dual feasibility:
+Dual feasibility：
 
 ```math
 \alpha_i\ge0
@@ -565,7 +558,7 @@ Dual feasibility:
 \text{for all } i.
 ```
 
-Stationarity:
+Stationarity：
 
 ```math
 w
@@ -575,7 +568,7 @@ w
 \sum_i\alpha_i y_i=0.
 ```
 
-Complementary slackness:
+Complementary slackness：
 
 ```math
 \alpha_i
@@ -588,39 +581,39 @@ y_i(w^\top x_i+b)-1
 \text{for all } i.
 ```
 
-Complementary slackness explains support vectors. If a point is strictly outside the margin, then
+complementary slackness 解释 support vectors。若某点严格在 margin 外：
 
 ```math
 y_i(w^\top x_i+b)>1.
 ```
 
-The bracket is positive, so the product can be zero only if
+bracket 为正，因此 product 为零只能有
 
 ```math
 \alpha_i=0.
 ```
 
-If $\alpha_i>0$, then complementary slackness forces the bracket to be zero:
+若 $\alpha_i>0$，则 complementary slackness 强制 bracket 为零：
 
 ```math
 y_i(w^\top x_i+b)=1.
 ```
 
-A support vector in the dual solution is a training point with nonzero optimal dual coefficient $\alpha_i>0$. Therefore every such support vector lies on an active margin constraint in the hard-margin problem.
+dual solution 中的 support vector 定义为 optimal dual coefficient 非零的 training point，即 $\alpha_i>0$。因此 hard-margin problem 中每个 support vector 都在 active margin constraint 上。
 
-Do not read the converse as automatic. In a degenerate optimum, an active margin constraint can in principle have zero multiplier. Thus "active constraint" and "nonzero support coefficient" should not be treated as logically equivalent without qualification.
+不要反向理解为自动成立。在 degenerate optimum 中，active margin constraint 原则上可能有 zero multiplier。因此 “active constraint” 与 “nonzero support coefficient” 不能不加限定地当成逻辑等价。
 
-This answers the structural question:
+这回答结构性问题：
 
 ```text
-Only training points with nonzero dual coefficients appear directly in w.
+只有 optimal dual coefficient 非零的 training points 会直接出现在 w 中。
 ```
 
-The other points still matter indirectly because they constrain the feasible optimization problem. But once the optimum is fixed, they do not appear in the dual expansion of $w$.
+其他 points 仍然通过 feasibility constraints 间接影响 optimum；但一旦 optimum 固定，它们不出现在 $w$ 的 dual expansion 中。
 
 ## 9. Support Vectors as Solution Structure
 
-Since
+因为
 
 ```math
 w
@@ -628,7 +621,7 @@ w
 \sum_i\alpha_i y_i x_i
 ```
 
-and support vectors are defined by nonzero optimal coefficients, the solution can be written as
+且 support vectors 按 nonzero optimal coefficients 定义，solution 可写为
 
 ```math
 w
@@ -637,7 +630,7 @@ w
 \alpha_i y_i x_i.
 ```
 
-The classifier is
+classifier 为
 
 ```math
 f(x)
@@ -650,9 +643,11 @@ w^\top x+b
 b.
 ```
 
-This is a sparse dual-expansion structure: the final classifier can depend directly only on training points with nonzero optimal dual coefficients.
+这是 sparse dual-expansion structure：final classifier 可以直接只依赖 optimal dual coefficient 非零的 training points。
 
 ### What This Does NOT Imply
+
+不能写成：
 
 ```text
 few support vectors
@@ -660,28 +655,28 @@ few support vectors
 automatic generalization guarantee
 ```
 
-is not valid as a universal statement. Support-vector sparsity is structural information about the solution. It becomes a generalization-control argument only when tied to a specific compression, margin, stability, or related theorem. The number and arrangement of support vectors, margin size, data distribution, feature scaling, kernel choice, regularization, and sampling process all affect what can be claimed.
+support-vector sparsity 是 solution structure。只有当它与具体 compression、margin、stability 或相关 theorem 连接时，才构成 generalization-control argument。support vector 的数量与位置、margin size、data distribution、feature scaling、kernel choice、regularization 和 sampling process 都影响能推出什么。
 
 ## 10. Research Lens
 
-When reading an SVM or margin-based paper, ask:
+阅读 SVM 或 margin-based paper 时，问：
 
-- What geometry does the representation induce?
-- Which norm defines the margin?
-- Which points determine the learned boundary?
-- What notion of simplicity is being preferred?
-- What happens if the representation changes?
-- What happens under feature rescaling?
-- Is the reported margin computed before or after hyperparameter selection?
-- Does large training margin imply deployment robustness, or only a statement in the training geometry?
-- Is confidence being treated as calibrated probability? If so, what calibration evidence supports that?
+- representation 诱导了什么 geometry？
+- 哪个 norm 定义 margin？
+- 哪些 points 决定 learned boundary？
+- algorithm 偏好什么 simplicity notion？
+- representation 改变后会怎样？
+- feature rescaling 后会怎样？
+- reported margin 是否在 hyperparameter selection 前后计算？
+- large training margin 是否说明 deployment robustness，还是只说明 training geometry？
+- confidence 是否被解释成 calibrated probability？若是，calibration evidence 是什么？
 
 ### Existing Repository Links
 
-- T1 Lecture 3 introduced nonlinear feature transforms: [feature transforms](../part1_learning_problem/03_caltech_l03_hypothesis_spaces_linear_models_feature_transforms.md).
-- T2 separated capacity from parameter count: [VC dimension and capacity](../part2_generalization_theory/07_caltech_l07_vc_dimension_capacity_and_sample_complexity.md).
-- T3 showed regularization as solution preference: [regularization](../part3_fitting_regularization_validation/12_caltech_l12_regularization_constraints_inductive_bias.md).
-- Week 2 logistic regression provides the contrast between probabilistic score modeling and geometric separation: [Week 2 report](../../../reports/week2_linear_logistic_regression.md).
-- Week 5 calibration explains why margin and probability reliability are separate claims: [calibration metrics](../../../reports/week5/02_calibration_metrics_and_reliability_diagrams.md).
+- T1 Lecture 3 引入 nonlinear feature transforms：[feature transforms](../part1_learning_problem/03_caltech_l03_hypothesis_spaces_linear_models_feature_transforms.md)。
+- T2 区分 capacity 与 parameter count：[VC dimension and capacity](../part2_generalization_theory/07_caltech_l07_vc_dimension_capacity_and_sample_complexity.md)。
+- T3 说明 regularization 是 solution preference：[regularization](../part3_fitting_regularization_validation/12_caltech_l12_regularization_constraints_inductive_bias.md)。
+- Week 2 logistic regression 提供 probabilistic score modeling 与 geometric separation 的对比：[Week 2 report](../../../reports/week2_linear_logistic_regression.md)。
+- Week 5 calibration 说明 margin 与 probability reliability 是不同 claim：[calibration metrics](../../../reports/week5/02_calibration_metrics_and_reliability_diagrams.md)。
 
 [Back to Learning From Data Theory Notebook](../README.md)

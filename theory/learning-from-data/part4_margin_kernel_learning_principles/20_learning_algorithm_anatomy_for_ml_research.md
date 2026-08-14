@@ -2,293 +2,316 @@
 
 [Back to Learning From Data Theory Notebook](../README.md)
 
-T2 asks:
+这是 T4 的可复用 paper-reading 工具。T2 问：
 
 ```text
-Is the generalization claim justified?
+generalization claim 是否被证据支持？
 ```
 
-T3 asks:
+T3 问：
 
 ```text
-What adaptive selection process produced the model/result?
+final model / result 是由什么 adaptive selection process 产生的？
 ```
 
-T4 asks:
+T4 继续追问：
 
 ```text
-What structural assumptions make this algorithm learn the way it does?
+哪些 structural assumptions 让这个 algorithm 以这种方式学习？
 ```
-
-This note is a reusable paper-reading tool.
 
 ## 0. Source Separation
 
 ### Caltech Core
 
-The tool synthesizes the full Caltech `Learning From Data` arc: learning problem, generalization, fitting, regularization, validation, margin, kernels, RBFs, learning principles, Bayesian learning, and aggregation.
+本工具来自 Caltech `Learning From Data` 的完整 classical arc：learning problem、generalization、regularization/validation、margin/kernel/RBF、learning principles 与 epilogue。
 
 ### Formal Derivation
 
-The matrix below uses the formal objects derived across T1-T4: representation, geometry, hypothesis family, objective, regularization/constraint, optimizer, locality, probabilistic interpretation, structural/generalization control, statistical conditions, and selection/evaluation discipline.
+本篇不新增推导；它把已有 derivations 转成 diagnostic checklist。
 
 ### Stanford CS229 Extension
 
-CS229 supports the logistic-regression, SVM, kernel, regularization, and validation entries.
+CS229 支撑 SVM、kernel 与 optimization vocabulary，如 primal/dual、KKT、kernel trick、soft margin。
 
 ### Stanford CS229M / Theory Extension
 
-CS229M supports the algorithm-dependent complexity framing used for modern and overparameterized learners.
+现代理论只作为解释 effective solution complexity 的背景。这里不展开 full modern theory。
 
 ### Research Lens
 
-The purpose is to audit what a paper's algorithm changes and what evidence would be needed to justify its claims.
+使用这份 anatomy 时，目标不是给 algorithm 贴标签，而是定位：
+
+```text
+representation：模型实际接收什么
+geometry：representation 诱导什么几何
+hypothesis structure：能表达哪些 functions
+objective：优化什么
+constraint：排除或惩罚什么 solutions
+optimizer：怎样选出一个 solution
+sampling / distribution relation：数据与目标环境怎样对应
+selection / evaluation discipline：evidence 怎样被保护
+```
 
 ## 1. Representation
 
-Ask what object the model actually receives:
+先问 model 实际收到什么对象：
 
 ```text
-raw observations?
-handcrafted features?
-kernel similarities?
-learned embeddings?
-local basis responses?
+raw observations？
+handcrafted features？
+kernel similarities？
+learned embeddings？
+local basis responses？
 ```
 
-Examples:
-
-- linear regression may receive raw feature vectors;
-- kernel SVM may receive only kernel evaluations;
-- an RBF model receives local basis activations;
-- an MLP learns hidden representations from data.
-
-Representation determines which distinctions are available to the learner.
+representation 决定信息入口。若 relevant information 没进入 representation，后续 optimizer 再好也无法无条件恢复。
 
 ## 2. Geometry
 
-Ask what mathematical geometry is assumed:
+再问 algorithm 假设什么 geometry：
 
-- Euclidean distance;
-- inner product;
-- cosine-like relation;
-- kernel-induced geometry;
-- graph geometry;
-- learned geometry.
+- Euclidean distance；
+- inner product；
+- cosine-like relation；
+- kernel-induced geometry；
+- graph geometry；
+- learned geometry。
 
-Geometry determines the meaning of distance, angle, margin, and locality. It is not independent of representation.
+geometry 不是自动来自 raw data；它由 representation 与 metric / kernel / architecture 共同决定。
 
 ## 3. Hypothesis Structure
 
-Ask what functions can be represented.
+问 model 能表达哪些 functions：
 
-Examples:
+- linear functions；
+- affine separators；
+- polynomial interactions；
+- local basis expansions；
+- kernel expansions；
+- multilayer compositional functions；
+- probabilistic graphical structure。
 
-- affine functions;
-- logistic scores passed through a sigmoid;
-- finite basis expansions;
-- kernel expansions;
-- multilayer compositions;
-- ensembles of base hypotheses.
-
-Distinguish the nominal function family from the set of solutions the algorithm is likely to select.
+这里分析的是 approximation / specification：即使 estimation 很好，hypothesis family 也可能 miss mechanism。
 
 ## 4. Objective
 
-Ask what is optimized:
+问被优化的目标是什么：
 
-- squared loss;
-- negative log likelihood;
-- hinge loss;
-- margin objective;
-- regularized empirical risk;
-- posterior probability or evidence objective;
-- validation-selected meta-objective.
+- squared loss；
+- logistic / cross-entropy loss；
+- hinge loss；
+- likelihood；
+- margin objective；
+- reconstruction objective；
+- contrastive objective；
+- combined multi-term objective。
 
-The objective is not the same object as the evaluation metric.
+objective 决定 fit 的含义。相同 hypothesis family，在不同 objective 下可能选择不同 solution。
 
 ## 5. Constraint / Regularization
 
-Ask what solutions are discouraged or excluded:
+问什么 solutions 被 discouraged 或 excluded：
 
-- hard norm constraints;
-- soft penalties;
-- margin constraints;
-- sparsity;
-- priors;
-- early stopping;
-- data augmentation;
-- aggregation weights.
+- norm penalty；
+- margin constraint；
+- sparsity penalty；
+- smoothness penalty；
+- early stopping；
+- architecture constraint；
+- prior in Bayesian model。
 
-Regularization is a solution preference, not a magic guarantee.
+这是 structural / generalization control 的主要入口。但要注意：regularization claim 需要说明 assumptions 和实际 selection process。
 
 ## 6. Optimization Algorithm
 
-Ask how one solution is selected among alternatives:
+问一个 solution 是怎样从 alternatives 中被选出的：
 
-- closed-form solve;
-- convex quadratic programming;
-- gradient descent;
-- stochastic gradient descent;
-- Adam or other adaptive optimizers;
-- coordinate descent;
-- sequential boosting;
-- approximate posterior inference.
+- closed-form solver；
+- convex optimization；
+- gradient descent / SGD；
+- coordinate descent；
+- dual solver；
+- alternating optimization；
+- nonconvex training with initialization choices。
 
-The optimizer can matter even when the nominal objective is fixed.
+optimizer 不是中性的实现细节。它可能引入 implicit bias，例如 minimum-norm preference、path dependence 或 sensitivity to initialization。
 
 ## 7. Local versus Global Structure
 
-Ask whether the model relies on:
+问 model 依赖哪类结构：
 
-- global linear structure;
-- global margin geometry;
-- local neighborhoods;
-- basis centers;
-- kernel similarity;
-- compositional learned representation;
-- aggregation of separate learners.
+- global linear relation；
+- margin geometry；
+- local neighborhoods；
+- basis centers；
+- kernel similarities；
+- compositional learned representation。
 
-Locality and margin are geometry-dependent. They should be interpreted only after identifying the representation.
+local structure 与 global structure 不是优劣排序，而是不同 inductive assumptions。
 
 ## 8. Sampling, Distribution, and Noise Conditions
 
-Separate three questions.
+这一节不能把所有 failure 都叫 sampling assumption。需要分三类。
 
 ### Sampling / Selection Mechanism
 
-Ask how the observed dataset was collected from a population:
+这些问题关心 observed dataset 是怎样从 population 中进入数据集的：
 
-- Were observations sampled representatively?
-- Was there self-selection?
-- Was there selective inclusion or selective labeling?
-- Was missingness non-random?
+- observations 是否 representative？
+- 是否存在 self-selection？
+- 是否存在 selective inclusion / selective labeling？
+- missingness 是否 non-random？
+- collection mechanism 是否排除了某些 subpopulation 或 condition？
+
+若 collection / inclusion mechanism 让 observed sample 不能代表 intended source 或 target population，这是 sampling / selection failure。
 
 ### Distribution / Environment Relation
 
-Ask whether the source distribution matches the target distribution:
+这些问题关心 source/train distribution 与 target/deployment distribution 的关系：
 
-- Does source/train distribution match target/deployment distribution?
-- Is there covariate shift?
-- Is there temporal drift?
-- Is there spatial or domain shift?
-- Could the conditional mechanism change?
+- source/train distribution 是否匹配 target/deployment distribution？
+- 是否存在 covariate shift？
+- 是否存在 temporal drift？
+- 是否存在 spatial / domain shift？
+- 是否存在 conditional / mechanism change？
+
+distribution / environment shift 不自动等于 sampling bias。training data 可能在收集时代表 source environment，但 deployment environment 后来改变。
 
 ### Target / Observation Noise
 
-Label noise and irreducible target stochasticity are not sampling assumptions. They belong to the noise/uncertainty part of the failure taxonomy.
+label noise、measurement noise 与 irreducible target stochasticity 不应列为 sampling assumption。它们属于 noise / uncertainty category，并影响 attainable error 与 evaluation interpretation。
+
+adaptive evaluation 也不属于 sampling assumption。benchmark reuse、validation reuse 与 test inspection 应放在 selection / evaluation discipline 中。
 
 ## 9. Selection Process
 
-Ask what validation or research feedback shaped the final algorithm:
+问 final algorithm 或 result 是怎样通过 feedback 被塑造的：
 
-- feature engineering;
-- preprocessing;
-- architecture choice;
-- optimizer tuning;
-- regularization tuning;
-- kernel/width/center choice;
-- checkpoint selection;
-- threshold selection;
-- benchmark-driven revisions.
+- feature engineering 是否看过 validation/test behavior？
+- hyperparameters 如何搜索？
+- architecture revisions 是否受 benchmark 反馈影响？
+- preprocessing 是否在 full dataset 上 fit？
+- validation set 是否被反复使用？
+- test set 是否被检查后继续修改 method？
 
-The final reported model is a product of the whole selection process, not only the last training run.
+这对应 T3 的 adaptive selection。它保护的不是 capacity 本身，而是 final evidence 的 credibility。
 
 ## 10. Evaluation Claim
 
-Ask what exact population or distribution the evidence speaks about.
+问 evidence 实际支持哪个 claim：
 
-Possible claims:
+- 同一 distribution 下的 expected performance？
+- 特定 target population 上的 performance？
+- robustness under distribution shift？
+- calibrated probability？
+- subgroup performance？
+- deployment decision utility？
 
-- same-distribution test performance;
-- shifted-distribution robustness;
-- subgroup reliability;
-- calibration;
-- abstention/selective-risk reliability;
-- computational efficiency;
-- sample efficiency;
-- stability across seeds;
-- interpretability or mechanism.
-
-Each claim requires evidence matched to that claim.
+评价指标、data split、sampling process 与 selection history 必须与 claim 对齐。
 
 ## 11. Failure Diagnosis
 
-Map failures to:
+把 failure 映射到不同来源：
 
 ```text
 information / representation
 approximation / specification
 estimation / generalization
 optimization / computation
-sampling
+sampling / selection mechanism
 distribution / environment shift
 adaptive selection / evaluation
 irreducible stochastic uncertainty
 ```
 
-Examples:
+对应解释：
 
-- If relevant information is absent from the input, the failure is information/representation.
-- If the representation is available but the hypothesis family cannot express the target, the failure is approximation/specification.
-- If the class can express the target but finite data select the wrong function, the failure is estimation/generalization.
-- If the objective is appropriate but the optimizer fails, the failure is optimization/computation.
-- If the collection or inclusion mechanism makes the observed sample unrepresentative of the intended source or target population, the failure is sampling / selection mechanism.
-- If source data may have been representative when collected but the target or deployment environment differs, the failure is distribution / environment shift.
-- If benchmark feedback shaped the final procedure, the failure is adaptive selection/evaluation.
-- If labels or targets are inherently stochastic, irreducible stochastic uncertainty remains.
+- information / representation：relevant information 没有进入 features、kernel similarities 或 embeddings；
+- approximation / specification：hypothesis family 不能表达 target mechanism；
+- estimation / generalization：finite data 不足以稳定估计 selected solution；
+- optimization / computation：solver 没有找到目标要求的 solution，或训练过程不稳定；
+- sampling / selection mechanism：collection / inclusion mechanism 让 observed sample 不能代表 intended source / target population；
+- distribution / environment shift：training/source data 收集时可能有代表性，但 target/deployment environment 后来不同；
+- adaptive selection / evaluation：validation reuse、test inspection、benchmark feedback 污染 final evidence；
+- irreducible stochastic uncertainty：即使 representation 与 algorithm 合理，target 本身仍有不可消除的不确定性。
+
+不要写成：
+
+```text
+train data do not represent deployment = sampling failure
+```
+
+除非明确指出原因是 collection / inclusion mechanism。若原因是 deployment environment 改变，应归为 distribution / environment shift。
 
 ## 12. Algorithm Analysis Matrix
 
-The old single "capacity-control mechanism" column is intentionally split. Structural control concerns the learner or solution class. Statistical conditions concern the data-generating setting and sample precision. Selection/evaluation discipline concerns whether the reported evidence remains credible after adaptive choices. Support-vector sparsity is treated as solution structure, not capacity control, unless a formal compression/generalization argument is invoked.
+下面的 matrix 用于快速比较算法。重点是把 structural control 与 selection/evaluation discipline 分开。
 
-| Algorithm | Representation | Geometry | Hypothesis family | Objective | Regularization / constraint | Optimizer | Locality | Probabilistic interpretation | Structural / generalization control | Statistical conditions | Selection / evaluation discipline | Key failure modes |
-| --------- | -------------- | -------- | ----------------- | --------- | --------------------------- | --------- | -------- | ---------------------------- | ---------------------------------- | ---------------------- | --------------------------------- | ----------------- |
-| Linear regression | Raw or engineered feature vector $x$ | Euclidean / inner-product geometry of features | Affine real-valued functions | Squared loss | Optional ridge/LASSO or constraints | Closed form or gradient methods | Global linear | Gaussian-noise likelihood under assumptions | restricted feature family; optional norm/sparsity penalty | sample size; noise model; target distribution; sampling assumptions | validation for feature/penalty choices; independent final test | misspecified features, outliers, multicollinearity, shift |
-| Logistic regression | Raw or engineered feature vector $x$ | Linear score geometry | Affine log-odds with sigmoid | Bernoulli negative log likelihood / cross entropy | Optional norm penalty | Convex optimization / gradient methods | Global linear score | Conditional probability model if specified correctly | restricted feature family; optional norm penalty | sample size; class balance; target distribution; i.i.d. or shift assumptions | validation for penalty/threshold; calibration and final held-out checks | separation pathology, poor calibration under shift, wrong link/features |
-| MLP | Learned hidden representation $\Phi_\theta(x)$ | Learned hidden-space geometry | Multilayer compositions | Usually empirical risk or likelihood surrogate | weight decay, augmentation, early stopping, architecture, implicit bias | SGD/Adam/backprop | Can learn local or global structure | Possible probabilistic output depending on loss/output layer | architecture; explicit regularization; stability or implicit-bias arguments when justified | sample size; data coverage; target/deployment distribution; label noise | validation for architecture/checkpoint/hyperparameters; benchmark-feedback audit | representation shortcut, overfitting, optimization instability, shift, calibration failure |
-| SVM | Explicit feature vector $x$ | Margin in feature-space norm | Linear separators | maximize margin / minimize $\frac12\|w\|^2$ with constraints | hard margin or soft-margin $C$ | Convex quadratic program / dual solver | Global margin | Not probabilistic by default | norm and margin control; soft-margin box constraint through $C$ | sample size; separability/noise assumptions; target distribution | validation for $C$ and scaling; independent final evaluation | bad feature scaling, nonseparable/noisy data, uncalibrated scores, shift, overreading support-vector count |
-| Kernel SVM | Implicit feature space via $K(x,z)$ | Kernel-induced inner product and margin | Linear separators in implicit feature space | kernelized hard/soft-margin dual | norm/margin control, box constraint $0\le\alpha_i\le C$ | Convex dual optimization | Depends on kernel; Gaussian is local | Not probabilistic by default | kernel-induced norm/margin control; $C$; valid PSD kernel | sample size; train/target similarity geometry; sampling assumptions | validation for kernel and hyperparameters; benchmark-feedback audit | invalid kernel, wrong similarity, hyperparameter snooping, scalability, shift |
-| RBF model | Explicit RBF basis responses $\phi_k(x)$ | distance to centers under chosen metric | finite weighted sum of local basis units | squared loss, classification surrogate, or task loss on basis features | number of centers, widths, weight penalty | linear solve if centers/widths fixed; nonconvex if learned | Explicit local center-based | Depends on output/loss choice | finite center family; width/locality choice; output-weight regularization | sample size; center coverage of target population; distance meaningfulness | validation for centers/widths/penalty; final held-out evaluation | meaningless distance, poor center coverage, width misselection, high-dimensional locality failure |
+| Algorithm | Representation | Geometry | Hypothesis family | Objective | Structural / generalization control | Optimizer | Locality | Probabilistic interpretation | Selection / evaluation issues | Key failure modes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Linear regression | raw / engineered numeric features | feature space 中的 Euclidean / inner-product geometry | affine real-valued functions | squared loss | restricted linear family；可加 ridge/lasso | closed form 或 convex optimization | global | assumptions 成立时有 Gaussian-noise interpretation | feature choice、regularization tuning、validation split | misspecification、outliers、collinearity、shift |
+| Logistic regression | raw / engineered features | linear score geometry | sigmoid/softmax 上的 affine decision boundary | conditional likelihood / cross-entropy | restricted linear score；可加 norm penalty | standard form 下是 convex optimization | global | conditional probability model，但 calibration 仍需验证 | threshold choice、regularization tuning、calibration evaluation | nonlinear mechanism missed、imbalance、calibration failure |
+| MLP | learned hidden representation | hidden layers 中的 learned geometry | compositional nonlinear functions | task loss，常见为 cross-entropy | architecture、explicit regularization、implicit optimizer bias | nonconvex gradient-based training | learned local/global mix | 只在 output/loss assumptions 下有 probabilistic interpretation | architecture search、early stopping、benchmark feedback | spurious features、instability、overfit、shift |
+| SVM | explicit features | hyperplane margin geometry | affine separators | maximum margin / hinge variant | margin 与 norm control | convex primal/dual optimization | chosen features 中 global | 默认不是 probability model | $C$ 或 feature scaling selection；若声称概率需 calibration evidence | wrong geometry、uncalibrated scores、shift |
+| Kernel SVM | kernel 给出的 implicit feature space | kernel-induced inner product | implicit feature space 中的 linear separator | margin objective / hinge loss | feature-space norm、margin control、soft-margin regularization | convex dual optimization | 取决于 kernel | 默认不是 calibrated probability model | kernel choice、kernel hyperparameters、validation reuse | invalid similarity assumptions、kernel sensitivity、shift |
+| RBF model | explicit local basis responses | distance-to-centers geometry | finite basis expansion + linear output | basis features 上的 output loss | finite centers；可加 output-weight regularization | centers/widths 固定时 linear solver；若学习 centers 则可能 nonconvex | explicit locality | 取决于 output loss / model | center/width selection、clustering choices、validation loops | meaningless metric、bad centers、curse of dimensionality |
+
+sample size 不在 structural-control column 中，因为它影响 estimation/generalization precision，而不是 hypothesis capacity 本身。held-out evaluation 也不在该列中，因为它保护 evidence credibility，而不是限制 hypothesis family。
 
 ## 13. Use the Matrix on a New Paper
 
-For a new algorithm, fill in the matrix before reading the results section too closely. Then ask:
+读新论文时按顺序填：
 
-- Which row entries are genuinely new?
-- Which are inherited from a standard model?
-- Which assumptions are stated?
-- Which assumptions are only implied by implementation?
-- Which hyperparameters were selected?
-- Which data influenced selection?
-- Which evaluation population is supported?
-- Which failure modes were tested directly?
+1. model 实际接收什么 representation？
+2. 这个 representation 诱导什么 geometry？
+3. hypothesis family 能表达哪些 functions？
+4. objective 优化什么？
+5. 哪些 constraints 或 regularizers 塑造 solution？
+6. optimizer 怎样从 alternatives 中选出一个 solution？
+7. 哪些 sampling / distribution assumptions 让 evidence 与 claim 相关？
+8. 哪些 adaptive selection 塑造了 final reported result？
+9. claim 面向哪个 target population 或 deployment condition？
+10. failure 可能从链条的哪一环进入？
+
+这比只写 “the paper proposes a new model” 更可审计。
 
 ## 14. Relation to T1-T4
 
-The full research audit is:
+T1 给出 learning ontology：
 
 ```text
-T1:
-What is the learning problem and representation?
-
-T2:
-Is the generalization claim justified?
-
-T3:
-What adaptive selection process produced the result?
-
-T4:
-What geometry, similarity, locality, margin, prior, or aggregation structure
-makes the learner prefer this solution?
+World
+-> Observations
+-> Representation
+-> Hypothesis Set
+-> Learning Algorithm
+-> Learned Hypothesis
+-> Error / Noise
 ```
 
-This tool is not a substitute for detailed proof or experiment. It is a disciplined first pass that prevents category mistakes.
+T2 问 selected hypothesis 是否有 generalization support。
+
+T3 问 validation / adaptive selection 是否污染 final evidence。
+
+T4 问 structural assumptions 如何决定 learning behavior：
+
+```text
+Representation
+-> Geometry
+-> Similarity / Distance / Margin / Locality
+-> Objective + Constraint
+-> Selected Solution
+-> Evidence Claim
+```
+
+这份 anatomy 的核心用途是：把 algorithm name 拆成可检查的 assumptions。
 
 ### Existing Repository Links
 
-- T2 generalization audit: [generalization claim audit](../part2_generalization_theory/10_generalization_claim_audit_for_ml_research.md).
-- T3 selection protocol: [selection-aware research protocol](../part3_fitting_regularization_validation/15_selection_aware_ml_research_protocol.md).
-- T4 unified lens: [geometry representation capacity lens](19_geometry_representation_capacity_unified_lens.md).
+- T1 ontology：[world-data-generalization lens](../00_learning_theory_ontology_world_data_generalization_research_lens.md)。
+- T2 selection/generalization：[finite data and selection](../part2_generalization_theory/06_caltech_l06_generalization_theory_growth_function_uniform_control.md)。
+- T3 validation/adaptive selection：[validation and data contamination](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md)。
+- T4 unified lens：[geometry representation capacity](19_geometry_representation_capacity_unified_lens.md)。
 
 [Back to Learning From Data Theory Notebook](../README.md)

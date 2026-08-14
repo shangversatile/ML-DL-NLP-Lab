@@ -2,87 +2,87 @@
 
 [Back to Learning From Data Theory Notebook](../README.md)
 
-This chapter corresponds to Caltech `Learning From Data` Lecture 18: Epilogue. Its job is to close the classical course arc, not to become a full Bayesian ML, ensemble theory, or modern deep-learning theory course.
+本章对应 Caltech `Learning From Data` Lecture 18: Epilogue。它关闭 classical `Learning From Data` 主线，但不把 T4 扩展成完整 Bayesian ML、ensemble learning 或 modern deep-learning theory 课程。
 
 ![Bayesian prior likelihood posterior](../assets/bayesian_prior_likelihood_posterior.png)
 
-Figure 1: Bayesian learning combines a prior assumption with a likelihood from observed data to form a posterior over hypotheses.
+图 1：Bayesian learning 把 prior assumptions 与 data likelihood 结合成 posterior；posterior 不是 assumption-free object。
 
 ![Aggregation variance correlation](../assets/aggregation_variance_correlation.png)
 
-Figure 2: averaging reduces variance most when model errors are weakly correlated. Correlation limits the variance reduction available from adding more predictors.
+图 2：averaging 是否降低 variance，取决于 individual variance、number of learners 与 pairwise correlation。高度相关的 learners 很难靠简单平均获得大幅 variance reduction。
 
 ## 0. Source Separation
 
 ### Caltech Core
 
-Lecture 18 closes the course with a map of machine learning, Bayesian learning, aggregation, and final perspective on the learning problem.
+Lecture 18 作为 epilogue，回看 machine-learning map，并介绍 Bayesian learning、aggregation、bagging、boosting、blending 等思想。
 
 ### Formal Derivation
 
-This note derives Bayes rule for posterior inference, introduces the posterior predictive, and derives the variance of an equally weighted average under equal variance and pairwise correlation assumptions.
+本章给出 Bayes rule、posterior predictive concept，以及 equal variance / pairwise correlation 假设下 aggregation variance 的推导。
 
 ### Stanford CS229 Extension
 
-CS229 probabilistic-modeling and regularization material supports the likelihood/MAP contrast. CS229 methodology supports the validation discipline needed for stacking and blending.
+CS229 只作为 probability notation 与 supervised-learning background 的辅助来源；Lecture 18 的叙事主线仍是 Caltech。
 
 ### Stanford CS229M / Theory Extension
 
-The theory bridge is limited to the idea that aggregation, priors, and algorithmic selection are additional ways of encoding inductive bias and controlling effective solution behavior.
+现代理论桥接只用于提醒：aggregation、priors、regularization 与 representation 都是 inductive bias 的不同表达。完整 PAC-Bayes、boosting theory、Gaussian processes 不在 T4 展开。
 
 ### Modern Perspective
 
-Modern ensemble and Bayesian language is used only for conceptual precision. Calibration, uncertainty quality, PAC-Bayes, Gaussian processes, and boosting theory are deferred.
+现代视角用于避免过度表述：Bayesian 不等于 assumption-free；ensemble 不保证 error 一定降低；benchmark-driven blending 仍可能产生 data snooping。
 
 ## 1. Reconstruct the Machine-Learning Map
 
-Machine learning concepts should not be collapsed into one axis. A model can be described along several dimensions.
+不要把 machine learning 的多个维度压成一个列表。一个算法至少可以从以下维度看：
 
 ### Paradigm
 
-- supervised learning;
-- unsupervised learning;
-- reinforcement learning;
-- online learning;
-- active learning.
+- supervised；
+- unsupervised；
+- reinforcement；
+- online；
+- active。
 
-Paradigm describes the data/feedback structure.
+这些描述的是 data / feedback 的结构，不是具体 model family。
 
 ### Representation / Model
 
-- linear model;
-- neural network;
-- RBF model;
-- kernel method;
-- graphical/probabilistic model.
+- linear；
+- neural network；
+- RBF；
+- kernel；
+- graphical / probabilistic。
 
-Representation/model describes the function family and input geometry.
+这些描述的是 hypothesis structure 或 representation form。
 
 ### Learning / Selection Method
 
-- empirical risk minimization;
-- maximum likelihood;
-- regularization;
-- margin optimization;
-- Bayesian inference;
-- aggregation.
+- ERM；
+- maximum likelihood；
+- regularization；
+- margin optimization；
+- Bayesian inference；
+- aggregation。
 
-Learning/selection describes how the final hypothesis or predictive rule is chosen.
+这些描述的是 solution 如何从 candidates 中被选出。
 
 ### Theory / Evaluation
 
-- VC/generalization theory;
-- bias-variance;
-- validation;
-- learning principles.
+- VC / generalization；
+- bias-variance；
+- validation；
+- learning principles。
 
-Theory/evaluation describes what evidence supports the claim.
+这些描述的是 evidence 如何支持 claim。
 
-These categories should not be collapsed. For example, a neural network can be trained by maximum likelihood, regularized by weight decay, selected by validation, aggregated in an ensemble, and evaluated under distribution shift. Each layer answers a different question.
+这些 categories 不能合并。例如，logistic regression 是 supervised paradigm 下的 probabilistic conditional model，通常用 likelihood / regularization 学习；SVM 是 supervised paradigm 下的 margin-based geometric method；kernel SVM 又把 margin optimization 放在 implicit feature geometry 中。
 
 ## 2. Bayesian Learning
 
-Bayesian learning starts with Bayes rule:
+Bayesian learning 用 Bayes rule 更新 hypotheses 的可信度：
 
 ```math
 p(h\mid D)
@@ -90,26 +90,24 @@ p(h\mid D)
 p(D\mid h)p(h).
 ```
 
-Definitions:
+其中：
 
-- $h$ is a hypothesis, model, or parameterized explanation, depending on context;
-- $p(h)$ is the prior;
-- $p(D\mid h)$ is the likelihood;
-- $p(h\mid D)$ is the posterior.
-
-The prior is an assumption. It encodes which hypotheses are plausible before observing the dataset.
+- $p(h)$ 是 prior，表示观察 dataset 前对 hypotheses 的假设；
+- $p(D\mid h)$ 是 likelihood，表示 hypothesis $h$ 下数据出现的概率；
+- $p(h\mid D)$ 是 posterior，表示看见 data 后对 hypotheses 的更新分布。
 
 ### Theorem: Bayes Rule for Hypotheses
 
 #### Assumptions
 
-- There is a hypothesis space with prior density or mass $p(h)$.
-- The likelihood $p(D\mid h)$ is defined.
-- The marginal probability $p(D)$ is positive and finite.
+- hypotheses $h$ 构成可求和或可积分的 hypothesis space；
+- prior $p(h)$ 已定义；
+- likelihood $p(D\mid h)$ 已定义；
+- evidence $p(D)$ 非零。
 
 #### Claim
 
-The posterior is
+posterior 满足
 
 ```math
 p(h\mid D)
@@ -117,109 +115,82 @@ p(h\mid D)
 \frac{p(D\mid h)p(h)}{p(D)}.
 ```
 
-Equivalently,
+其中
 
 ```math
-p(h\mid D)
-\propto
-p(D\mid h)p(h)
+p(D)
+=
+\int p(D\mid h)p(h)\,dh
 ```
 
-as a function of $h$.
+或在离散 hypothesis space 中写成求和。
 
 #### Derivation / Proof Idea
 
-By the product rule,
+由 joint probability 的两种分解：
 
 ```math
 p(h,D)
 =
-p(D\mid h)p(h)
-```
-
-and also
-
-```math
-p(h,D)
-=
-p(h\mid D)p(D).
-```
-
-Equating the two expressions gives
-
-```math
 p(h\mid D)p(D)
 =
 p(D\mid h)p(h).
 ```
 
-Divide by $p(D)$:
-
-```math
-p(h\mid D)
-=
-\frac{p(D\mid h)p(h)}{p(D)}.
-```
-
-Since $p(D)$ does not depend on $h$, posterior comparison across hypotheses uses proportionality:
-
-```math
-p(h\mid D)
-\propto
-p(D\mid h)p(h).
-```
+两边相等并除以 $p(D)$，得到 Bayes rule。
 
 #### Interpretation
 
-Bayesian learning updates assumptions using data. The posterior is not just the best single hypothesis; it is a distribution over hypotheses.
+posterior 是 prior assumptions 与 data likelihood 的结合。data 并不是在 vacuum 中说话；它通过 model class 与 likelihood 被解释。
 
 #### What This Does NOT Imply
 
-Bayesian learning is not objective or assumption-free. The prior, likelihood, model class, and data-generation assumptions all matter.
+Bayesian 不等于 objective-free 或 assumption-free。prior 与 likelihood 都是 modeling assumptions。
 
 #### Research Use
 
-When a paper is Bayesian, ask what prior was used, what likelihood was assumed, whether inference was exact or approximate, and what population the data represent.
+读 Bayesian paper 时问：prior 编码了什么 domain belief？likelihood 是否对应真实 data-generating process？posterior uncertainty 是否真正传到 prediction 与 decision？
 
 ## 3. MAP versus Full Posterior Inference
 
-Maximum a posteriori estimation chooses one hypothesis:
+MAP estimate 选择 posterior 最大的一个 hypothesis：
 
 ```math
 h_{\mathrm{MAP}}
-\in
-\arg\max_h
-p(h\mid D).
+=
+\arg\max_h p(h\mid D).
 ```
 
-Using Bayes rule, this is equivalent to
+等价地，
 
 ```math
 h_{\mathrm{MAP}}
-\in
+=
 \arg\max_h
 \left[
-\log p(D\mid h)
-+
-\log p(h)
+\log p(D\mid h)+\log p(h)
 \right].
 ```
 
-This connects to T3 regularization. For some likelihood-prior pairs, MAP estimation becomes a regularized optimization problem.
+这与 T3 regularization 有直接联系：在许多模型中，negative log prior 会表现为 regularization penalty。
 
-But:
+但必须区分：
 
 ```text
-MAP point estimate
-!=
-full posterior inference
+MAP point estimate：只选一个 posterior 最大的 hypothesis
 ```
 
-MAP returns one selected hypothesis. Full Bayesian inference keeps uncertainty over hypotheses, at least conceptually.
+和
+
+```text
+full posterior inference：保留 hypotheses 上的 posterior uncertainty
+```
+
+MAP 只保留一个点估计；full posterior 保留 hypotheses 上的不确定性结构。两者不是同一件事。
 
 ## 4. Posterior Predictive Idea
 
-The posterior predictive distribution is
+posterior predictive 把 hypothesis uncertainty 传播到 prediction：
 
 ```math
 p(y\mid x,D)
@@ -230,63 +201,50 @@ p(h\mid D)
 \,dh.
 ```
 
-For a discrete hypothesis set, the integral becomes a sum:
-
-```math
-p(y\mid x,D)
-=
-\sum_h
-p(y\mid x,h)
-p(h\mid D).
-```
-
-This propagates uncertainty over hypotheses into predictions.
+这表示：不是先选一个 hypothesis 再预测，而是对 posterior 下的 hypotheses 做加权平均。
 
 ### What This Does NOT Imply
 
-Posterior predictive form does not automatically guarantee practical calibration. Calibration depends on model specification, prior, likelihood, approximate inference, sample representativeness, and evaluation.
+posterior predictive 不自动保证 practical calibration。若 prior、likelihood、approximation method 或 data assumptions 错误，posterior uncertainty 也可能失真。
 
 ## 5. Bayesian Learning and Inductive Bias
 
-Prior information changes which hypotheses are plausible before observing the dataset. This is another formal expression of inductive bias.
+prior information 改变观察 dataset 之前哪些 hypotheses 更 plausible。这是 inductive bias 的一种形式化表达。
 
-Examples:
+因此 Bayesian learning 与 T1-T3 相连：
 
-- a Gaussian prior over weights prefers smaller-norm weights in a MAP setting;
-- a smoothness prior prefers functions that vary smoothly;
-- a hierarchical prior shares statistical strength across related groups;
-- a sparsity prior prefers solutions using fewer active components.
+```text
+representation / hypothesis space
+-> prior
+-> likelihood
+-> posterior
+-> prediction / decision
+```
 
-The prior is not automatically correct just because the method is Bayesian. It is an assumption that must be matched against domain knowledge and empirical evidence.
+prior 不是因为写成 probability 就自动正确。它必须被解释、检验，并与 target problem 的 evidence discipline 一起理解。
 
 ## 6. Aggregation
 
-Let
+aggregation 从多个 hypotheses
 
 ```math
 h_1,\ldots,h_T
 ```
 
-be fitted predictors.
+构造 combined predictor。
 
-For regression, an aggregated predictor can be written as
+regression 中的常见形式是
 
 ```math
 g(x)
 =
 \sum_{t=1}^{T}
-\alpha_t h_t(x),
+\alpha_t h_t(x).
 ```
 
-where the weights often satisfy
+classification 中可以使用 unweighted vote 或 weighted vote。
 
-```math
-\sum_{t=1}^{T}\alpha_t=1.
-```
-
-For classification, aggregation can use an unweighted vote, weighted vote, or averaged class score/probability followed by a decision rule.
-
-Combining models can alter both bias and variance. It can reduce dataset-induced variability if individual predictors make partly independent errors. It can also preserve or amplify systematic bias if all predictors share the same wrong assumption.
+aggregation 改变的是 selected solution 的结构：final predictor 不再是单个 learned hypothesis，而是多个 hypotheses 的组合。它可能改变 bias 与 variance，但不能保证一定降低 error。
 
 ## 7. Variance Reduction through Averaging
 
@@ -294,44 +252,32 @@ Combining models can alter both bias and variance. It can reduce dataset-induced
 
 #### Assumptions
 
-- $h_1(x),\ldots,h_T(x)$ are random predictors at a fixed input $x$, where randomness comes from data sampling, resampling, initialization, or training variation.
-- Each has equal variance:
+- predictors $h_1,\ldots,h_T$ 对同一 input 的 prediction 被看作随机变量；
+- 每个 predictor 的 variance 相同：
 
 ```math
-\mathrm{Var}(h_t)=\sigma^2.
+\mathrm{Var}(h_t)=\sigma^2;
 ```
 
-- Each pair has the same correlation:
+- 任意两个不同 predictors 的 pairwise correlation 相同：
 
 ```math
 \mathrm{Corr}(h_s,h_t)=\rho
 \quad
-\text{for } s\ne t.
-```
-
-Thus
-
-```math
-\mathrm{Cov}(h_s,h_t)
-=
-\rho\sigma^2
-\quad
-\text{for } s\ne t.
+s\ne t.
 ```
 
 #### Claim
 
-For the average
+equally weighted average
 
 ```math
 \bar h
 =
-\frac1T
-\sum_{t=1}^{T}
-h_t,
+\frac1T\sum_{t=1}^{T}h_t
 ```
 
-the variance is
+的 variance 为
 
 ```math
 \mathrm{Var}(\bar h)
@@ -346,23 +292,24 @@ the variance is
 
 #### Derivation / Proof Idea
 
-Start with
+从 variance of sum 开始：
 
 ```math
+\mathrm{Var}(\bar h)
+=
 \mathrm{Var}
 \left(
-\frac1T
-\sum_t h_t
+\frac1T\sum_t h_t
 \right)
 =
-\frac{1}{T^2}
+\frac1{T^2}
 \mathrm{Var}
 \left(
 \sum_t h_t
 \right).
 ```
 
-Expand the variance of a sum:
+展开：
 
 ```math
 \mathrm{Var}
@@ -370,36 +317,49 @@ Expand the variance of a sum:
 \sum_t h_t
 \right)
 =
-\sum_t
-\mathrm{Var}(h_t)
+\sum_t\mathrm{Var}(h_t)
 +
-2
-\sum_{s<t}
-\mathrm{Cov}(h_s,h_t).
+2\sum_{s<t}\mathrm{Cov}(h_s,h_t).
 ```
 
-There are $T$ variance terms and $T(T-1)/2$ covariance pairs, so
+由 equal variance 得到
 
 ```math
-\mathrm{Var}
-\left(
-\sum_t h_t
-\right)
+\sum_t\mathrm{Var}(h_t)
 =
-T\sigma^2
-+
+T\sigma^2.
+```
+
+由 pairwise correlation 得到
+
+```math
+\mathrm{Cov}(h_s,h_t)
+=
+\rho\sigma^2.
+```
+
+共有 $T(T-1)/2$ 个 pairs，因此
+
+```math
+2\sum_{s<t}\mathrm{Cov}(h_s,h_t)
+=
 T(T-1)\rho\sigma^2.
 ```
 
-Divide by $T^2$:
+代回：
 
 ```math
 \mathrm{Var}(\bar h)
 =
-\frac{T\sigma^2+T(T-1)\rho\sigma^2}{T^2}.
+\frac1{T^2}
+\left[
+T\sigma^2
++
+T(T-1)\rho\sigma^2
+\right].
 ```
 
-Simplify:
+化简：
 
 ```math
 \mathrm{Var}(\bar h)
@@ -408,7 +368,7 @@ Simplify:
 \left[
 \frac1T
 +
-\rho\frac{T-1}{T}
+\frac{T-1}{T}\rho
 \right]
 =
 \sigma^2
@@ -421,19 +381,19 @@ Simplify:
 
 #### Interpretation
 
-Averaging independent predictors has $\rho=0$, giving variance $\sigma^2/T$. If predictors are highly correlated, the limiting variance is approximately $\rho\sigma^2$. Diversity matters because correlation limits the benefit of aggregation.
+若 $\rho=0$，variance 随 $1/T$ 下降。若 $\rho=1$，averaging 不降低 variance。因而 diversity / decorrelation 是 averaging 有效的关键。
 
 #### What This Does NOT Imply
 
-Ensembles do not always reduce error. If predictors are systematically biased, poorly calibrated, trained on biased data, or highly correlated, aggregation may have limited benefit or may preserve the same failure.
+ensemble 不总是降低 error。若 learners 有共同 systematic bias，或错误高度相关，aggregation 可能帮助有限，甚至可能掩盖 failure mode。
 
 #### Research Use
 
-When an ensemble improves performance, ask whether the gain comes from variance reduction, bias change, different representation coverage, stronger selection, more computation, or data leakage through the aggregation protocol.
+读 ensemble 结果时问：多个 learners 的错误是否独立或 decorrelated？diversity 从哪里来？validation 是否只是在 benchmark 上挑了一个 lucky mixture？
 
 ## 8. Bagging
 
-Bagging follows the pattern:
+bagging 的基本流程是：
 
 ```text
 resample data
@@ -441,70 +401,68 @@ resample data
 -> aggregate predictions
 ```
 
-The goal is to reduce dataset-induced variance by fitting predictors on different bootstrap samples. This links to T2's view of a learned hypothesis as a random object depending on the training dataset.
+它试图利用 dataset-induced variability：对 unstable learner，用不同 bootstrap samples 训练多个版本，再通过 averaging / voting 降低 variance。
 
-Bagging is most useful when the base learner is unstable enough that resampling creates useful diversity. It is less useful when all resampled learners produce nearly identical predictions or share the same systematic bias.
+这连接 T2：finite data 会让 learned hypothesis 随 sample 波动。bagging 的目标不是改变 true mechanism，而是降低 sample-induced solution variance。
 
 ## 9. Boosting
 
-Boosting constructs learners sequentially, changing emphasis according to previous errors. Later learners focus on cases that earlier learners handled poorly.
-
-This differs from simple independent averaging:
+boosting 顺序构造 learners，并根据之前的 errors 改变后续训练的 emphasis。它与 simple independent averaging 不同：
 
 ```text
 bagging:
-parallel or independent resampling-style variation
+parallel / resampled learners
 
 boosting:
-sequentially shaped fitting process
+由 previous errors 逐步塑造的 sequential learners
 ```
 
-Boosting can be interpreted through margins, additive modeling, reweighting, optimization, and regularization depending on the formal treatment. This note does not reduce boosting generalization to one slogan.
+boosting 的 generalization 有多种解释，包括 margin、regularization、optimization path 等。T4 不把它压成单一原因。
 
 ## 10. Blending / Stacking
 
-Blending or stacking combines existing models through another learned layer. For example, a meta-model may learn weights over candidate predictors.
+blending / stacking 把已有 models 的 predictions 作为新的 inputs，再学习一个 combiner。
 
-That extra layer is itself a selection or learning process. Therefore the aggregation data must have a clearly defined role:
+这意味着 aggregation 本身又引入一层 learning / selection：
 
-- data for training base models;
-- data for training the blender/stacker;
-- data for selecting aggregation weights;
-- data for final evaluation.
+```text
+base models
+-> predictions
+-> combiner
+-> final predictor
+```
 
-If the same validation or test feedback repeatedly shapes the stack, T3 data-snooping concerns apply.
+因此，用来训练 combiner 的 data 必须有明确角色。若同一 validation evidence 同时用于选择 base models、调 combiner、报告 final performance，就会回到 T3 的 data snooping 问题。
 
 ## 11. Aggregation versus Joint Representation Learning
 
-Preserve the distinction:
+需要保留 Caltech 的重要区别：
 
 ```text
 ensemble:
-learn solutions and combine them
+先学习多个 solutions，再组合它们
 
 multilayer model:
-components are learned jointly as one model
+components 作为一个 model 被 joint learning
 ```
 
-An ensemble combines multiple fitted hypotheses or prediction rules. A multilayer neural network learns internal components jointly through one training objective. Both can contain many parts, but their learning structures are not the same.
-
-This distinction matters for evidence. An ensemble's diversity, data reuse, and meta-selection can be audited separately. A jointly trained model's internal representation and optimizer trajectory must be analyzed as one coupled learning system.
+ensemble 先学出多个 solutions，再组合它们。multilayer model 的 intermediate representations 与 output rule 通常一起通过一个 objective 联合学习。两者都可能产生 complex predictor，但 learning structure 不同。
 
 ## 12. Final Caltech Synthesis
 
-The course arc can now be reconstructed as one question:
+整个 `Learning From Data` 主线可以重新写成一组问题：
 
 ```text
-What is learning?
-Can learning generalize?
-How do we fit models?
-Why do they fail?
-How do we control selection?
-How do geometry and representation matter?
-How should evidence be interpreted?
+什么是 learning？
+learning 为什么可能 generalize？
+我们怎样 fit models？
+models 为什么会失败？
+怎样控制 selection？
+geometry 与 representation 为什么重要？
+evidence 应该怎样解释？
 ```
 
-T1 built the ontology:
+T1 建立 learning problem：
 
 ```text
 World
@@ -516,18 +474,19 @@ World
 -> Error / Noise
 ```
 
-T2 added the finite-data generalization discipline:
+T2 建立 generalization discipline：
 
 ```text
 Finite Data
 -> Data-dependent Selection
 -> Capacity
 -> Uniform Control
+-> VC Dimension
 -> Generalization
 -> Research Claim Discipline
 ```
 
-T3 added the fitting and selection discipline:
+T3 建立 fitting / selection discipline：
 
 ```text
 Objective
@@ -540,7 +499,7 @@ Objective
 -> Credible Final Evaluation
 ```
 
-T4 closes the classical spine with:
+T4 把具体算法放回 geometry：
 
 ```text
 Input Geometry
@@ -555,13 +514,13 @@ Input Geometry
 -> Credible Learning
 ```
 
-The final lesson is not that one algorithm is supreme. It is that a credible learning claim must identify the representation, geometry, hypothesis structure, objective, regularization, sampling process, and evaluation discipline that make the learned prediction meaningful.
+Lecture 18 的 closure 是：machine learning 不是一组孤立 algorithms，而是一套关于 representation、hypothesis、objective、evidence 与 world assumptions 的系统。
 
 ### Existing Repository Links
 
-- T3 regularization/MAP boundary: [regularization](../part3_fitting_regularization_validation/12_caltech_l12_regularization_constraints_inductive_bias.md).
-- T3 validation and stacking discipline: [validation](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md).
-- T2 bias-variance and dataset-induced variability: [bias-variance](../part2_generalization_theory/08_caltech_l08_bias_variance_learning_curves.md).
-- Week 5 calibration is a reminder that predictive probabilities and uncertainty claims require direct evaluation: [calibration metrics](../../../reports/week5/02_calibration_metrics_and_reliability_diagrams.md).
+- T1 ontology map：[world-data-generalization lens](../00_learning_theory_ontology_world_data_generalization_research_lens.md)。
+- T2 generalization theory：[VC and capacity](../part2_generalization_theory/07_caltech_l07_vc_dimension_capacity_and_sample_complexity.md)。
+- T3 validation and contamination：[validation](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md)。
+- T4 unified lens：[geometry representation capacity lens](19_geometry_representation_capacity_unified_lens.md)。
 
 [Back to Learning From Data Theory Notebook](../README.md)

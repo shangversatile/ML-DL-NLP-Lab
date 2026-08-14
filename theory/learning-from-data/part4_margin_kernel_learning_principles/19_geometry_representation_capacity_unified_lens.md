@@ -2,134 +2,168 @@
 
 [Back to Learning From Data Theory Notebook](../README.md)
 
-This note does not summarize Lectures 14-18 mechanically. It answers a deeper question:
+这篇 note 不是机械总结 Lectures 14-18。它回答一个更高层问题：
 
 ```text
-Why do apparently different algorithms often differ mainly in how they encode
-representation, geometry, similarity, and solution preference?
+为什么许多看似不同的 algorithms，
+实际上主要区别在于它们怎样编码 representation、geometry、similarity 与 solution preference？
 ```
 
 ![T4 geometry representation capacity map](../assets/t4_geometry_representation_capacity_map.png)
 
-Figure 1: T4 links representation to induced geometry, margin/locality, objective/constraint, selected solution, and evidence discipline.
+图 1：T4 的统一链条。representation 诱导 geometry；geometry 定义 distance、inner product、margin 与 locality；learning algorithm 再通过 objective、constraint 与 selection process 选出 solution。
 
 ## 0. Source Separation
 
 ### Caltech Core
 
-The Caltech arc supplies the central ingredients: feature transformations, margin, kernels, RBF locality, learning principles, Bayesian learning, and aggregation.
+Caltech Lectures 14-18 提供 classical arc：margin geometry、kernel representation、RBF locality、learning principles、Bayesian learning 与 aggregation。
 
 ### Formal Derivation
 
-The derivations in Lectures 14-18 show how geometry becomes algebra: margins divide by norms, kernels become Gram matrices, RBFs become design matrices, Bayesian learning becomes posterior updating, and aggregation variance depends on covariance.
+本篇不新增 theorem，而是重组前面已经推导过的 SVM margin/dual、kernel PSD、RBF design matrix、Bayesian posterior 与 aggregation variance。
 
 ### Stanford CS229 Extension
 
-CS229 supplies the SVM/kernel derivational backbone and the probabilistic/MAP contrast.
+CS229 的作用是支撑 SVM 与 kernel 的数学结构。这里把这些结构作为 unified lens 的部件，而不是重新推导。
 
 ### Stanford CS229M / Theory Extension
 
-The bridge is algorithm-dependent complexity: capacity cannot be read only from representation dimension or parameter count.
+现代桥接只用于一个原则：effective complexity 与 selected solution 有关，不能由 ambient dimension 或 raw parameter count 单独决定。
 
 ### Research Lens
 
-This note turns T4 into a long-term paper-reading question:
+读新论文时，不要只问“用了什么模型名”。要问：这篇论文实际改变的是哪个 arrow？
 
 ```text
-Which arrow does a new ML paper actually modify?
+World
+-> Observation
+-> Representation
+-> Geometry
+-> Hypothesis Structure
+-> Objective + Constraint
+-> Selected Solution
+-> Evaluation Claim
 ```
 
 ## 1. One Prediction Problem, Different Structures
 
-Consider one supervised prediction problem. Different algorithms often differ less in the final input-output goal than in the structure they impose between inputs and predictions.
+同一个 supervised prediction problem 可以被多种结构表达。
 
 ### Logistic Regression
 
-Logistic regression builds a probabilistic score model:
+logistic regression 使用 probabilistic score model：
 
-```math
-p(y=1\mid x)
-=
-\sigma(w^\top x+b).
+```text
+linear score
+-> sigmoid / softmax
+-> conditional probability model
 ```
 
-Its core commitments are conditional probability modeling, likelihood/cross-entropy fitting, and a decision threshold possibly chosen later.
+它的核心语言是 likelihood、conditional probability 与 calibration-oriented evidence，而不是 margin geometry 本身。
 
 ### SVM
 
-SVM builds margin geometry:
+SVM 使用 margin geometry：
 
-```math
-f(x)=w^\top x+b,
-\qquad
-g(x)=\mathrm{sign}(f(x)).
+```text
+separating hyperplane
+-> geometric margin
+-> norm-constrained maximum-margin solution
 ```
 
-Its core commitment is geometric separation with norm/margin control. It does not natively produce calibrated probability.
+它的核心偏好是 large margin / small norm，而不是 probability likelihood。
 
 ### Kernel SVM
 
-Kernel SVM keeps linear margin geometry but moves it to an implicit feature space:
+kernel SVM 使用 implicit feature-space geometry：
 
-```math
-f(x)
-=
-\sum_{i\in SV}
-\alpha_i y_i K(x_i,x)+b.
+```text
+kernel
+-> feature space 中的 inner product
+-> 不显式构造 Phi 的 margin optimization
 ```
 
-Its core commitment is a kernel-defined similarity geometry plus margin-regularized solution selection.
+它可以在原始 input space 中产生 nonlinear decision boundary，但 algorithm 仍在 feature geometry 中做 linear separation。
 
 ### RBF Model
 
-An RBF model builds an explicit local basis representation:
+RBF model 使用 explicit local basis representation：
 
-```math
-g(x)
-=
-\sum_{k=1}^{K}
-w_k\phi_k(x)+b.
+```text
+centers
+-> localized basis responses
+-> linear output fitting
 ```
 
-Its core commitment is that local responses around centers can support prediction.
+它把 locality 假设写进 basis functions 与 metric。
 
 ### Neural Network
 
-A neural network learns a representation:
+neural network 学习 data-dependent hierarchical representation：
 
 ```math
-z
-=
 \Phi_\theta(x).
 ```
 
-Its core commitment is that the representation itself can be selected from data through a joint optimization process.
+因此 geometry 本身也被 data、objective、optimizer 与 regularization 共同塑造。
 
 ## 2. Representation Determines Geometry
 
-Given a representation
+给定 representation
 
 ```math
 z=\Phi(x),
 ```
 
-geometric concepts are defined in represented space:
+以下对象都在 represented space 中定义：
 
-- distance;
-- angle;
-- inner product;
-- margin;
-- locality.
+- distance；
+- angle；
+- inner product；
+- margin；
+- locality。
 
-For example, an SVM margin is not an abstract property of the raw world. It is a property of the transformed data and the norm used in that space:
+因此 geometry 不是独立于 representation 的客观背景。换一个 $\Phi$，同一对 raw inputs 的 distance、angle、similarity 与 margin 都可能改变。
 
-```math
-\gamma_i
-=
-\frac{y_i(w^\top\Phi(x_i)+b)}{\|w\|}.
+这个点对 T4 至关重要：
+
+```text
+raw observation
+!=
+learner 实际使用的 geometry
 ```
 
-An RBF unit is local only after a metric and representation have been chosen:
+例如，SVM 的 geometric margin 是 $\Phi(x)$ 空间中的 hyperplane distance；Gaussian kernel 的 locality 是输入 metric 通过 kernel 诱导的 similarity；neural network 的 hidden representation 会让几何关系变成 learned object。
+
+## 3. Kernel as Explicit Assumption about Similarity
+
+kernel 声明了：
+
+```text
+哪些 examples 应该被视为 similar
+```
+
+更精确地说，valid kernel 定义了某个 feature-space inner product：
+
+```math
+K(x,z)
+=
+\langle\Phi(x),\Phi(z)\rangle.
+```
+
+因此 kernel method 并没有逃离 representation assumptions。它只是把 representation 通过 kernel function 隐式表达。
+
+研究上要问：
+
+- kernel 是否表达了 domain 中合理的 invariance？
+- distance 或 dot product 是否受 feature scaling 支配？
+- distribution shift 后，相同 kernel geometry 是否仍然合理？
+- kernel hyperparameters 是否通过 adaptive benchmark feedback 选出？
+
+## 4. RBF as Explicit Locality Assumption
+
+RBF model 假设 predictive structure 可以通过围绕 centers 的 localized responses 表示：
 
 ```math
 \phi_k(x)
@@ -137,256 +171,211 @@ An RBF unit is local only after a metric and representation have been chosen:
 \exp
 \left(
 -
-\frac{\|\Phi(x)-c_k\|^2}{2\sigma_k^2}
+\frac{\|x-c_k\|^2}{2\sigma_k^2}
 \right).
 ```
 
-Therefore:
+这不是中性的技术选择。它要求：
 
 ```text
-geometry is representation-dependent
+在 chosen metric 下 nearby
+-> basis activation 相似
+-> 共享某些 predictive structure
 ```
 
-This is a major conceptual point. A paper that claims a model uses locality, similarity, or margin must identify where that geometry comes from.
-
-## 3. Kernel as Explicit Assumption about Similarity
-
-A kernel effectively declares:
-
-```text
-which examples should appear similar
-```
-
-under the induced feature geometry.
-
-The kernel is not merely a computational shortcut. It encodes inductive bias. A Gaussian kernel assumes distance-based smooth similarity. A polynomial kernel assumes useful coordinate interactions. A string or graph kernel would encode structure specific to sequences or graphs.
-
-Kernel choice therefore belongs to the representation layer and the selection layer:
-
-- the kernel defines geometry;
-- its hyperparameters define the scale of that geometry;
-- validation or benchmark tuning selects among geometries.
-
-## 4. RBF as Explicit Locality Assumption
-
-An RBF model says predictive structure can be represented through localized responses around centers:
-
-```text
-center
--> neighborhood of influence
--> weighted contribution to prediction
-```
-
-This is another inductive bias. It asserts that prediction can be assembled from local basis responses.
-
-The key audit question is:
-
-```text
-Are local neighborhoods meaningful for the target mechanism?
-```
-
-If nearby raw images differ only by benign stroke style, locality may help. If nearby points differ in hidden causal mechanism, locality can mislead.
+若 metric 不表达 prediction-relevant mechanism，locality 就可能失效。尤其在 high-dimensional raw inputs 中，Euclidean distance 不应被默认当成有意义的 similarity。
 
 ## 5. Neural Representation as Learned Geometry
 
-T1 separated observation from representation. T3 showed that neural networks can learn hidden representations. Combining those ideas:
+连接 T1 与 T3：neural network 学习
 
 ```math
-\Phi_\theta(x)
+\Phi_\theta(x),
 ```
 
-means the geometry itself becomes data-dependent.
+所以 learner 不只是在 fixed feature space 中选 boundary；它也在用 data 形成 feature space。
 
-Distances, angles, margins, and local neighborhoods in hidden space are no longer fixed assumptions alone. They are selected by architecture, objective, optimizer, data, regularization, augmentation, and validation feedback.
+这会带来两面性：
 
-This is why modern representation analysis is important. A neural network may generalize or fail because it learned a geometry that aligns or fails to align with the deployment mechanism.
+- 好处：model 可能学习比 handcrafted features 更适合任务的 geometry；
+- 风险：geometry 也可能吸收 sampling artifacts、spurious correlations、label noise 或 validation feedback。
+
+因此 modern representation analysis 重要，不是因为“deep model 神秘”，而是因为 model 的 similarity structure 本身变成 data-dependent selected object。
 
 ## 6. Capacity Cannot Be Read from Dimension Alone
 
-Kernels provide the key counterexample:
+kernel methods 是关键反例：
 
 ```text
-feature dimension
-!=
-effective statistical complexity
+very high-dimensional / infinite-dimensional feature space
 ```
 
-A kernel may correspond to a high-dimensional or infinite-dimensional feature representation. But that fact alone does not determine the learner's effective behavior. Keep three categories separate.
+不等于
+
+```text
+uncontrolled effective complexity
+```
+
+需要分清三类概念。
 
 ### Structural / Generalization Control
 
-These are mechanisms that restrict or prefer solutions in a way that can support a generalization argument when the assumptions of the relevant theorem or analysis are met:
+这些机制直接限制或偏好某些 solutions：
 
-- restricted hypothesis family;
-- norm control;
-- margin control;
-- explicit regularization;
-- algorithmic stability;
-- compression only when a formal compression/generalization connection is actually invoked.
+- restricted hypothesis family；
+- norm control；
+- margin control；
+- explicit regularization；
+- algorithmic stability；
+- compression，只有在明确调用 compression/generalization theorem 时才作为 argument；
+- optimizer 或 learning rule 对 selected solution 的偏好。
 
-Support-vector expansion is structural information about the dual solution. It should not be called capacity control merely because the expansion may be sparse. A support-vector count becomes a generalization-control argument only when a specific compression, margin, stability, or related theorem is being used.
+这些可以构成 generalization-control story，但仍需要对应 assumptions。
 
 ### Statistical Conditions
 
-These determine how sharply finite data can speak about the target population:
+这些条件决定 evidence 的统计精度和适用目标：
 
-- sample size;
-- i.i.d. or other sampling assumptions;
-- target distribution;
-- noise and population heterogeneity.
+- sample size；
+- i.i.d. / sampling assumptions；
+- source distribution；
+- target distribution。
 
-Sample size affects estimation and generalization precision. It is not itself hypothesis capacity.
+sample size 会影响 estimation error 与 generalization precision，但它不是 hypothesis capacity 本身。
 
 ### Selection / Evaluation Discipline
 
-These protect the credibility of evidence after choices have been made:
+这些机制保护最终 evidence 的可信度：
 
-- validation protocol;
-- hyperparameter search discipline;
-- benchmark feedback control;
-- held-out final evaluation.
+- validation protocol；
+- hyperparameter search accounting；
+- benchmark feedback control；
+- held-out final evaluation。
 
-Validation discipline can keep evidence interpretable, but it is not a capacity-control mechanism. It controls information flow in the research process.
+validation discipline 不是 capacity-control mechanism；它是防止 adaptive selection 污染 final claim 的 evidence discipline。
 
-Conversely, a low-dimensional feature space can overfit if the selection process is sufficiently adaptive or if the sample is biased.
-
-The correct object is not dimension alone. It is the full learning system:
-
-```text
-representation
-+ hypothesis family
-+ objective
-+ constraint
-+ optimizer
-+ sample
-+ selection process
-```
+同理，support-vector sparsity 是 solution structure。除非明确连接到 formal compression/generalization argument，否则不要把 “support vectors 少” 直接叫作 capacity control。
 
 ## 7. Three Axes of Inductive Bias
 
+为了读论文，可以把 inductive bias 分成三条轴。
+
 ### Representation Bias
 
-What distinctions are available to the learner?
+模型实际看见什么对象？
 
-Examples:
+```text
+raw observations
+handcrafted features
+kernel similarities
+learned embeddings
+local basis responses
+```
 
-- raw pixels;
-- handcrafted features;
-- polynomial transforms;
-- kernel-induced feature space;
-- RBF basis responses;
-- learned embeddings.
-
-Representation bias determines which information is preserved, suppressed, or amplified.
+representation bias 决定哪些 distinctions 可被表达，哪些 distinctions 可能被压掉。
 
 ### Geometric / Similarity Bias
 
-What counts as nearby, aligned, similar, or separated?
+什么算 nearby、aligned、similar？
 
-Examples:
+```text
+distance
+inner product
+angle
+kernel geometry
+graph neighborhood
+learned embedding geometry
+```
 
-- Euclidean distance;
-- dot product;
-- cosine-like relation;
-- kernel similarity;
-- local neighborhoods;
-- graph adjacency;
-- hidden-space distance.
-
-This bias determines how examples influence each other.
+这决定 model 如何在 examples 之间共享 evidence。
 
 ### Algorithmic Solution-Selection Bias
 
-Which fitting solution is preferred?
+learning algorithm 在多个可拟合 solutions 中偏好哪一个？
 
-Examples:
+```text
+minimum norm
+maximum margin
+regularized optimum
+early-stopped solution
+stable solution
+compressed solution
+```
 
-- maximum likelihood;
-- minimum norm;
-- maximum margin;
-- sparsity;
-- early stopping;
-- optimizer implicit bias;
-- ensemble averaging;
-- prior-posterior updating.
-
-The phrase "selection bias" is avoided here because it can be confused with statistical sampling-selection bias. The intended meaning is algorithmic solution-selection bias: the learning procedure prefers some solutions over others among those compatible with data.
+这里使用 `algorithmic solution-selection bias`，避免与 statistical sampling-selection bias 混淆。
 
 ## 8. Reliability Perspective
 
-When a model fails, ask where the failure entered.
+当 model 失败时，不要只问“模型是不是太小/太大”。沿着链条定位 failure：
 
-Did representation collapse relevant distinctions?
+- representation 是否压掉了 relevant distinctions？
+- similarity geometry 是否在 deployment 中失效？
+- hypothesis class 是否 misspecified，无法表达 mechanism？
+- optimizer 是否选了 unstable solution？
+- collection / sampling mechanism 是否偏置了进入 dataset 的 observations？
+- deployment environment / distribution 是否相对 source environment 改变？
+- evaluation 是否被 validation reuse、test inspection 或 benchmark feedback 污染？
+- error 是否来自 irreducible stochastic uncertainty？
 
-Did similarity geometry become invalid?
-
-Did the hypothesis class miss the mechanism?
-
-Did the objective optimize the wrong surrogate?
-
-Did the optimizer select an unstable solution?
-
-Did the collection or sampling mechanism bias which observations entered the dataset?
-
-Did the deployment environment or distribution change relative to the source environment?
-
-Did validation or benchmark feedback contaminate evaluation?
-
-Did irreducible uncertainty make the target unreliable?
-
-These are different failure modes. Treating all of them as "overfitting" hides the diagnosis.
+这里要保持 Lecture 17 的区分：sampling / selection mechanism failure 与 distribution / environment shift 可以重叠，但不是同一个概念。
 
 ## 9. Full T4 Chain
 
-The classical theory system now has the following chain:
+T4 的完整 research chain 是：
 
 ```text
 World
-down
+↓
 Observation
-down
+↓
 Representation Phi
-down
+↓
 Induced Geometry
-down
+↓
 Similarity / Distance / Margin / Locality
-down
+↓
 Hypothesis Structure
-down
+↓
 Objective + Constraint
-down
+↓
 Learning Algorithm
-down
+↓
 Selected Solution
-down
+↓
 Generalization under sampling assumptions
-down
+↓
 Evaluation under selection discipline
 ```
 
-The long-term research question is:
+读新 ML paper 时，长线问题是：
 
 ```text
-Which arrow does a new ML paper actually modify?
+这篇 paper 实际修改的是哪一个 arrow？
 ```
 
-Examples:
+可能答案包括：
 
-- A new architecture may modify the representation arrow.
-- A new kernel modifies induced similarity geometry.
-- A new regularizer modifies objective/constraint and solution preference.
-- A new optimizer may modify the selected solution without changing the nominal objective.
-- A new dataset modifies the sampling/evidence layer.
-- A new benchmark protocol modifies evaluation discipline.
+- 改 observation process；
+- 改 representation $\Phi$；
+- 改 geometry / similarity；
+- 改 hypothesis structure；
+- 改 objective 或 constraint；
+- 改 optimizer；
+- 改 sampling assumption；
+- 改 validation / evaluation protocol；
+- 改 final claim 的 target population。
+
+这个问题能防止把 method name 当成解释本身。
 
 ## 10. Cross-Links to the Existing Theory Map
 
-- T1: representation and nonlinear transforms: [Lecture 3](../part1_learning_problem/03_caltech_l03_hypothesis_spaces_linear_models_feature_transforms.md).
-- T2: capacity and generalization: [VC dimension](../part2_generalization_theory/07_caltech_l07_vc_dimension_capacity_and_sample_complexity.md), [modern capacity control](../part2_generalization_theory/09_modern_uniform_convergence_and_capacity_control.md).
-- T3: regularization and adaptive selection: [regularization](../part3_fitting_regularization_validation/12_caltech_l12_regularization_constraints_inductive_bias.md), [validation](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md).
-- Week 2: linear/logistic model contrast: [Week 2 report](../../../reports/week2_linear_logistic_regression.md).
-- Week 3: MLP and optimizer solution selection: [MLP forward/backprop](../../../reports/week3/03_mlp_forward_and_backprop.md), [optimization algorithms](../../../reports/week3/01_optimization_algorithms.md).
-- Week 4: distribution shift and canvas diagnostics: [Canvas diagnostic](../../../reports/week4/15_canvas_diagnostic_v1_inventory_and_failure_taxonomy.md).
-- Week 5: calibration and abstention separate score geometry from probability reliability: [calibration](../../../reports/week5/02_calibration_metrics_and_reliability_diagrams.md), [abstention](../../../reports/week5/03_confidence_thresholding_and_abstention_policy.md).
+- T1 建立 world、observation、representation、hypothesis 与 learning algorithm 的基本 ontology：[theory ontology](../00_learning_theory_ontology_world_data_generalization_research_lens.md)。
+- T2 说明 finite data、capacity 与 selected hypothesis 的关系：[generalization theory](../part2_generalization_theory/06_caltech_l06_generalization_theory_growth_function_uniform_control.md)。
+- T3 说明 objective、regularization、validation 与 adaptive selection：[validation and model selection](../part3_fitting_regularization_validation/13_caltech_l13_validation_model_selection_data_contamination.md)。
+- Lecture 14 给出 SVM margin geometry：[SVM margin geometry](14_caltech_l14_support_vector_machines_margin_geometry_duality.md)。
+- Lecture 15 给出 kernel-induced geometry：[kernel methods](15_caltech_l15_kernel_methods_feature_spaces_soft_margins.md)。
+- Lecture 16 给出 locality as representation assumption：[RBF local representation](16_caltech_l16_radial_basis_functions_local_representation.md)。
+- Lecture 17 给出 learning principles and evidence discipline：[three learning principles](17_caltech_l17_three_learning_principles_occam_sampling_snooping.md)。
+- Week 4 与 Week 5 分别提供 shift 与 calibration 的应用语境：[Canvas diagnostic](../../../reports/week4/15_canvas_diagnostic_v1_inventory_and_failure_taxonomy.md)，[calibration metrics](../../../reports/week5/02_calibration_metrics_and_reliability_diagrams.md)。
 
 [Back to Learning From Data Theory Notebook](../README.md)
