@@ -151,13 +151,32 @@ Ask whether the model relies on:
 
 Locality and margin are geometry-dependent. They should be interpreted only after identifying the representation.
 
-## 8. Sampling Assumption
+## 8. Sampling, Distribution, and Noise Conditions
 
-Ask what population the training data represent.
+Separate three questions.
 
-Does the paper assume i.i.d. train/test sampling? Is there covariate shift, temporal drift, spatial/domain shift, user self-selection, missingness, selective labeling, benchmark reuse, or label noise?
+### Sampling / Selection Mechanism
 
-Sampling assumptions define the population to which evidence can generalize.
+Ask how the observed dataset was collected from a population:
+
+- Were observations sampled representatively?
+- Was there self-selection?
+- Was there selective inclusion or selective labeling?
+- Was missingness non-random?
+
+### Distribution / Environment Relation
+
+Ask whether the source distribution matches the target distribution:
+
+- Does source/train distribution match target/deployment distribution?
+- Is there covariate shift?
+- Is there temporal drift?
+- Is there spatial or domain shift?
+- Could the conditional mechanism change?
+
+### Target / Observation Noise
+
+Label noise and irreducible target stochasticity are not sampling assumptions. They belong to the noise/uncertainty part of the failure taxonomy.
 
 ## 9. Selection Process
 
@@ -203,8 +222,9 @@ approximation / specification
 estimation / generalization
 optimization / computation
 sampling
+distribution / environment shift
 adaptive selection / evaluation
-irreducible uncertainty
+irreducible stochastic uncertainty
 ```
 
 Examples:
@@ -213,9 +233,10 @@ Examples:
 - If the representation is available but the hypothesis family cannot express the target, the failure is approximation/specification.
 - If the class can express the target but finite data select the wrong function, the failure is estimation/generalization.
 - If the objective is appropriate but the optimizer fails, the failure is optimization/computation.
-- If train data do not represent deployment, the failure is sampling.
+- If the collection or inclusion mechanism makes the observed sample unrepresentative of the intended source or target population, the failure is sampling / selection mechanism.
+- If source data may have been representative when collected but the target or deployment environment differs, the failure is distribution / environment shift.
 - If benchmark feedback shaped the final procedure, the failure is adaptive selection/evaluation.
-- If labels are inherently stochastic, irreducible uncertainty remains.
+- If labels or targets are inherently stochastic, irreducible stochastic uncertainty remains.
 
 ## 12. Algorithm Analysis Matrix
 

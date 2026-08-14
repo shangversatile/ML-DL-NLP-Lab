@@ -326,7 +326,9 @@ Did the objective optimize the wrong surrogate?
 
 Did the optimizer select an unstable solution?
 
-Did the sample fail to represent deployment?
+Did the collection or sampling mechanism bias which observations entered the dataset?
+
+Did the deployment environment or distribution change relative to the source environment?
 
 Did validation or benchmark feedback contaminate evaluation?
 
