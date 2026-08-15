@@ -6,7 +6,7 @@
 
 这套笔记研究一个核心问题：learner 如何从有限 observations 中得到一个在 unseen samples 上仍然可靠的 prediction 或 decision。
 
-T1 先建立 learning problem 的基础 ontology。T2 建立 generalization theory 的核心推理链。T3 研究 fitting、regularization、validation 与 adaptive model selection 如何改变 final learned hypothesis 的含义。后续 T4-T5 会继续展开 kernels、SVM、learning principles，以及 modern ML theory bridges。
+T1 先建立 learning problem 的基础 ontology。T2 建立 generalization theory 的核心推理链。T3 研究 fitting、regularization、validation 与 adaptive model selection 如何改变 final learned hypothesis 的含义。T4 完成 margin、kernel、locality 与 classical learning principles 的 synthesis。T5 进一步把 classical generalization framework 扩展到 data-dependent、algorithm-dependent、optimization-dependent 与 environment-dependent analysis。
 
 本目录长期关注：
 
@@ -24,6 +24,8 @@ T1 先建立 learning problem 的基础 ontology。T2 建立 generalization theo
 
 **Stanford CS229 Extension**：CS229 官方 notes 用于补充 logistic regression、neural networks、backpropagation、regularization、model selection 与 cross-validation 的标准推导。它是 derivational / methodological support，不与 CS229M 混用。
 
+**Modern Theory Bridge**：T5 以 Stanford STATS214 / CS229M 为 course spine，并使用 algorithmic stability、Rademacher complexity、deep margin/norm bounds、overparameterization、implicit bias、NTK 与 domain adaptation 的 primary papers。T5 是 bridge，不是声称 modern learning theory 已经完整统一。
+
 **Modern Perspective**：现代研究解释与工程联系会被显式标出，不与原课程内容混在一起。现代部分用于连接 representation learning、distribution shift、calibration、abstention、deep learning 与 evaluation methodology。
 
 ## 五阶段路线图
@@ -36,7 +38,7 @@ T3：logistic regression、neural networks、overfitting、regularization、vali
 
 T4：SVM、kernels、RBF、learning principles、epilogue。
 
-T5：modern theory bridges 与 research synthesis。
+T5：modern generalization theory bridge：stability、data-dependent complexity、overparameterization、implicit bias、NTK、distribution shift 与 claim audit。
 
 ## 阅读方法
 
@@ -166,6 +168,30 @@ Input Geometry
 - [Lecture 18: Bayesian learning, aggregation, and the ML map](part4_margin_kernel_learning_principles/18_caltech_l18_epilogue_bayesian_learning_aggregation_ml_map.md)
 - [Unified lens: geometry, representation, capacity, and inductive bias](part4_margin_kernel_learning_principles/19_geometry_representation_capacity_unified_lens.md)
 - [Research tool: anatomy of a learning algorithm](part4_margin_kernel_learning_principles/20_learning_algorithm_anatomy_for_ml_research.md)
+
+## T5 Notes
+
+T5 extends the classical generalization framework from worst-case hypothesis-class control toward data-dependent, algorithm-dependent, optimization-dependent, representation-dependent, and environment-dependent analysis.
+
+T5 的核心问题是：
+
+```text
+Which solution does A select from H,
+on which data geometry,
+under which representation,
+and why should that selected solution generalize?
+```
+
+T5 不是声称 modern ML theory 已经完成统一解释。它把多个 scoped theoretical lenses 放在同一张 research map 上。
+
+- [Classical theory meets modern deep learning](part5_modern_learning_theory_bridge/21_classical_theory_meets_modern_deep_learning.md)
+- [Algorithmic stability and algorithm-dependent generalization](part5_modern_learning_theory_bridge/22_algorithmic_stability_and_algorithm_dependent_generalization.md)
+- [Data-dependent complexity, Rademacher complexity, margin, and norm](part5_modern_learning_theory_bridge/23_data_dependent_complexity_rademacher_margin_norm.md)
+- [Overparameterization, interpolation, double descent, and benign overfitting](part5_modern_learning_theory_bridge/24_overparameterization_interpolation_double_descent_benign_overfitting.md)
+- [Implicit bias, optimization dynamics, and Neural Tangent Kernels](part5_modern_learning_theory_bridge/25_implicit_bias_optimization_dynamics_and_ntk.md)
+- [Distribution shift, domain adaptation, and representation](part5_modern_learning_theory_bridge/26_distribution_shift_domain_adaptation_and_representation.md)
+- [Unified map of modern generalization theory](part5_modern_learning_theory_bridge/27_modern_generalization_theory_unified_map.md)
+- [Modern ML theory claim audit](part5_modern_learning_theory_bridge/28_modern_ml_theory_claim_audit.md)
 
 ## Sources and notation
 

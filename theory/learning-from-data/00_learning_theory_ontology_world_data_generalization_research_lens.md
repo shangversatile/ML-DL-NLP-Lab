@@ -478,7 +478,77 @@ Technically, this means a learning claim should identify:
 - whether the sampling process makes that geometry valid for the target population;
 - whether evaluation tests geometry/similarity failure, not only average accuracy.
 
-## 8. Research lens
+## 8. Modern Generalization Lens
+
+T5 在 T4 的 geometry layer 上再加一层：modern learner 不只是在 fixed $\mathcal H$ 中选 hypothesis，它还通过 algorithm、optimization trajectory 与 learned representation 共同产生最终 predictor。
+
+核心对象是：
+
+```text
+Hypothesis family H
++
+Data S
++
+Learning algorithm A
++
+Optimization trajectory
++
+Representation dynamics
+down
+Selected predictor
+```
+
+这意味着 modern generalization claim 不能只问一个 scalar complexity。至少要区分四个问题：
+
+```text
+Can H represent?
+Can A find?
+Why does selected g generalize?
+Does it remain valid under environment change?
+```
+
+对应到 learned representation，T4 的链条：
+
+```text
+World
+down
+Observation
+down
+Representation Phi
+down
+Geometry
+down
+Learning
+```
+
+在 modern setting 中变成：
+
+```text
+World
+down
+Observation
+down
+Learned representation Phi_theta
+up/down
+optimization trajectory
+down
+selected geometry
+down
+prediction
+```
+
+这不是说 classical theory 被推翻。更准确地说，T5 把 classical class-dependent control 扩展成一组 scoped lenses：
+
+- data-dependent complexity：在当前 sample / geometry 上控制 richness；
+- algorithmic stability：控制 $A(S)$ 对 neighboring datasets 的 sensitivity；
+- margin/norm：控制 selected solution 的 geometric / functional complexity；
+- implicit bias：研究 optimizer 和 parameterization 偏向哪个 solution；
+- NTK：刻画 lazy / tangent-kernel training regime；
+- domain adaptation：把 source generalization 与 target-environment reliability 分开。
+
+这些 lenses 回答不同问题，不应被合并成一个 universal complexity number。
+
+## 9. Research lens
 
 这个 ontology 可以直接用于阅读 ML paper。对每篇论文，至少追问：
 
@@ -498,7 +568,7 @@ Technically, this means a learning claim should identify:
 
 这些问题能把“模型效果好不好”变成可审计的研究判断。例如在 digit canvas 项目中，`load_digits` test performance 回答的是 sklearn digits distribution 上的 out-of-sample behavior；real canvas diagnostics 回答的是另一个 observation mechanism 下的 behavior；calibration notes 回答的是 confidence 是否可解释为 probability-like evidence；abstention notes 回答的是在允许拒答时 selective risk 如何变化。它们不是同一个问题，因此不能用一个 scalar metric 混合解释。
 
-## 9. Conceptual conclusion
+## 10. Conceptual conclusion
 
 T1 的核心地图可以压缩成一句话：
 

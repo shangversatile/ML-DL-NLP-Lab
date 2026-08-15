@@ -133,7 +133,33 @@ CS229M is used only as a light theory bridge for algorithm-dependent complexity,
 
 These sources support labeled modern or canonical clarification only. T4 does not become full RKHS theory, PAC-Bayes, Gaussian processes, boosting theory, NTK theory, or deep margin theory.
 
-## 5. T1 note mapping
+## 5. Sources verified for T5
+
+### Stanford CS229M / primary course spine
+
+- Official STATS214 / CS229M Machine Learning Theory page: <https://web.stanford.edu/class/stats214/>
+- Official page-linked public notes repository: <https://github.com/tengyuma/cs229m_notes/blob/main/master.pdf>
+
+T5 uses Stanford STATS214 / CS229M as a topic spine for modern generalization, deep-learning theory, non-convex optimization, implicit / algorithmic regularization, NTK-style regimes, and domain adaptation. T5 does not reproduce the course; it organizes repository-level synthesis around source-scoped primary papers.
+
+### Primary modern theory papers and scope
+
+| Source | Topic/theorem used | Mathematical regime | Notes using it | Directly sourced | Repository synthesis / limitation |
+| --- | --- | --- | --- | --- | --- |
+| Bousquet and Elisseeff, `Stability and Generalization`: <https://www.jmlr.org/papers/v2/bousquet02a.html> | uniform stability definition and stability-generalization theorem | bounded loss, i.i.d. source sampling, abstract learning algorithms | 22, 27, 28 | stability convention, high-probability bound structure, stability intuition | Used only for training-sample perturbation sensitivity; not adversarial or distributional robustness |
+| Hardt, Recht, and Singer, `Train faster, generalize better`: <https://proceedings.mlr.press/v48/hardt16.html> | SGD stability dependence on learning rates, steps, smoothness | convex/smooth and nonconvex/smooth SGD settings under theorem assumptions | 22, 27, 28 | trajectory-stability framing and convex smooth bound scaling | Does not imply SGD always generalizes or that every neural-network training run is stable |
+| Bartlett and Mendelson, `Rademacher and Gaussian Complexities`: <https://www.jmlr.org/papers/v3/bartlett02a.html> | Rademacher complexity and risk bounds | bounded/Lipschitz function or loss classes under i.i.d. source sampling | 23, 27, 28 | empirical complexity definition, symmetrization lens, source-generalization bound family | Constants depend on convention; not a distribution-shift theorem |
+| Bartlett, Foster, and Telgarsky, `Spectrally-normalized margin bounds for neural networks`: <https://arxiv.org/abs/1706.08498> | neural-network margin/norm structural message | specified feedforward networks, margin loss, spectral/Frobenius norm quantities | 23, 27, 28 | margin/norm dependence beyond parameter count | Used as scoped example; not a claim that all trained networks have small non-vacuous bounds |
+| Zhang et al., `Understanding deep learning requires rethinking generalization`: <https://arxiv.org/abs/1611.03530> | random-label experiment and modern generalization puzzle | empirical deep-network training experiments | 21, 24, 27, 28 | distinction between expressive/memorization capacity and generalization explanation | Does not prove VC theory false or regularization/data structure irrelevant |
+| Belkin et al., `Reconciling modern machine-learning practice and the classical bias-variance trade-off`: <https://arxiv.org/abs/1812.11118> | interpolation/double-descent motivation | modern interpolation regimes across model families | 24, 27, 28 | conceptual role of interpolation threshold and bias-variance revision | Not used as universal law that larger models always improve |
+| Nakkiran et al., `Deep Double Descent`: <https://arxiv.org/abs/1912.02292> | model-wise, sample-wise, and epoch-wise double descent phenomena | empirical and conceptual deep-learning settings | 24, 27, 28 | double-descent taxonomy and caution around interpolation threshold | Not treated as theorem for every architecture or dataset |
+| Bartlett, Long, Lugosi, and Tsigler, `Benign Overfitting in Linear Regression`: <https://www.pnas.org/doi/10.1073/pnas.1907378117> | benign overfitting in minimum-norm linear regression | high-dimensional linear regression with covariance/noise spectral assumptions | 24, 27, 28 | minimum-norm interpolation can have small population risk under conditions | Used only for linear-regression regime; not generalized directly to arbitrary deep networks |
+| Soudry et al., `The Implicit Bias of Gradient Descent on Separable Data`: <https://www.jmlr.org/papers/v19/18-188.html> | directional convergence to max-margin separator | separable linear classification, logistic/exponential-tail losses, gradient descent | 25, 27, 28 | $w_t/\|w_t\|\to w_{\mathrm{SVM}}/\|w_{\mathrm{SVM}}\|$ | Used only for separable linear logistic-regression directional implicit-bias result |
+| Jacot, Gabriel, and Hongler, `Neural Tangent Kernel`: <https://arxiv.org/abs/1806.07572> | NTK definition and kernel-like dynamics | infinite-width / appropriate scaling regimes, tangent-kernel analysis | 25, 27, 28 | tangent feature kernel, $K=JJ^\top$, function-space dynamics | NTK is a regime, not all neural-network training or feature learning |
+| Ben-David et al., `A Theory of Learning from Different Domains`: <https://link.springer.com/article/10.1007/s10994-009-5152-4> | $\mathcal H\Delta\mathcal H$ divergence and target-risk bound | binary classification domain adaptation | 26, 27, 28 | source risk + domain discrepancy + joint error bound structure | Does not solve arbitrary mechanism shift or calibration |
+| Zhao et al., `On Learning Invariant Representations for Domain Adaptation`: <https://proceedings.mlr.press/v97/zhao19a.html> | limits of domain-invariant representation | domain adaptation / representation alignment settings | 26, 27, 28 | invariance can conflict with joint predictive performance under conditions | Does not say invariance is always harmful; says invariance alone is insufficient |
+
+## 6. T1 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -144,7 +170,7 @@ These sources support labeled modern or canonical clarification only. T4 does no
 | [04 Error, Noise, and Target Distribution](../part1_learning_problem/04_caltech_l04_error_measures_noise_target_distribution.md) | Lecture 4: Error and Noise; Lecture 4 slides; video-library Error Measures and Noisy Targets topics | STATS214 statistical-learning framing of population risk and loss | error measure as part of learning problem; noisy targets; target distribution | conditional distribution interpretation; Bayes classifier and conditional mean derivations; loss-likelihood connection; calibration/abstention/distribution-shift implications |
 | [Terminology and Notation](t1_terminology_notation_learning_problem_generalization.md) | Lecture 1-4 notation conventions | STATS214 population/empirical risk vocabulary | symbols for target, hypothesis, algorithm, dataset, in/out error | explicit distinctions among parameter/function, representation/hypothesis, empirical/population, random/realized |
 
-## 6. T2 note mapping
+## 7. T2 note mapping
 
 | Note | Primary Caltech source | Stanford extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ------------------------- | -------------------- | ---------------------------------------- |
@@ -155,7 +181,7 @@ These sources support labeled modern or canonical clarification only. T4 does no
 | [09 Modern Uniform Convergence](../part2_generalization_theory/09_modern_uniform_convergence_and_capacity_control.md) | Lecture 5-7 concepts synthesized | STATS214 / CS229M official page and linked notes | fixed-to-uniform logic; ERM consequence | excess-risk decomposition variants; PAC vocabulary; beyond-VC capacity preview; limits of worst-case class control |
 | [10 Generalization Claim Audit](../part2_generalization_theory/10_generalization_claim_audit_for_ml_research.md) | Lecture 5-8 generalization chain | STATS214 research-level generalization vocabulary | training/testing distinction; capacity control; sample complexity; bias-variance caveats | original research audit framework for population, sampling, selection, evidence, assumptions, and non-implications |
 
-## 7. T3 note mapping
+## 8. T3 note mapping
 
 | Note | Primary Caltech source | Stanford / modern extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ---------------------------------- | -------------------- | ---------------------------------------- |
@@ -167,7 +193,7 @@ These sources support labeled modern or canonical clarification only. T4 does no
 | [14 Modern Explicit/Implicit Regularization](../part3_fitting_regularization_validation/14_modern_explicit_implicit_regularization_and_solution_selection.md) | Lecture 12 synthesized | CS229M official page/topics; Soudry et al.; Jacot et al.; Zhang/Belkin/Nakkiran caveats | explicit regularization picture | implicit / algorithmic bias boundary; separable logistic-regression example; NTK preview; architecture vs full learner distinction |
 | [15 Selection-Aware Research Protocol](../part3_fitting_regularization_validation/15_selection_aware_ml_research_protocol.md) | Lecture 13 synthesized | Stanford CS229 methodology; Dwork et al. adaptive data-analysis papers | validation and contamination principles | selection ledger; dataset-role ledger; researcher as adaptive loop; freeze point; credibility levels; Canvas protocol connection |
 
-## 8. T4 note mapping
+## 9. T4 note mapping
 
 | Note | Primary Caltech source | Stanford / modern extension source | Caltech Core in note | Extension / modern / original reflection |
 | ---- | ---------------------- | ---------------------------------- | -------------------- | ---------------------------------------- |
@@ -179,7 +205,20 @@ These sources support labeled modern or canonical clarification only. T4 does no
 | [19 Unified Lens](../part4_margin_kernel_learning_principles/19_geometry_representation_capacity_unified_lens.md) | Lecture 14-18 synthesis | CS229/CS229M support across SVM, kernel, and capacity | representation, geometry, similarity, margin, locality, principles | original unified chain and paper-reading question: which arrow does a new ML paper modify |
 | [20 Learning Algorithm Anatomy](../part4_margin_kernel_learning_principles/20_learning_algorithm_anatomy_for_ml_research.md) | Full Learning From Data arc | CS229 and CS229M support for formal categories | map of model, representation, learning, and evidence | original analysis matrix comparing linear regression, logistic regression, MLP, SVM, kernel SVM, and RBF models |
 
-## 9. What is original in this repository
+## 10. T5 note mapping
+
+| Note | Primary source families | Mathematical regime | Directly sourced in note | Repository synthesis |
+| ---- | ----------------------- | ------------------- | ------------------------ | ------------------- |
+| [21 Classical Theory Meets Modern Deep Learning](../part5_modern_learning_theory_bridge/21_classical_theory_meets_modern_deep_learning.md) | Stanford CS229M; Zhang et al. | empirical random-label deep-network experiments plus classical capacity framing | random-label phenomenon and non-implications | nominal $H$ versus $A(S)$ selected-solution bridge |
+| [22 Algorithmic Stability](../part5_modern_learning_theory_bridge/22_algorithmic_stability_and_algorithm_dependent_generalization.md) | Bousquet-Elisseeff; Hardt-Recht-Singer | bounded-loss stable algorithms; convex/smooth SGD stability regimes | uniform stability definition, stability theorem structure, SGD stability scaling | class-dependent versus algorithm-dependent distinction and Week 3 optimizer connection |
+| [23 Data-Dependent Complexity](../part5_modern_learning_theory_bridge/23_data_dependent_complexity_rademacher_margin_norm.md) | Bartlett-Mendelson; Bartlett-Foster-Telgarsky | bounded/Lipschitz loss classes; linear norm-bounded classes; scoped neural margin/norm bounds | empirical Rademacher definition, source-generalization bound family, spectral margin/norm structural message | full $BR/\sqrt n$ derivation and T4 representation-geometry connection |
+| [24 Overparameterization](../part5_modern_learning_theory_bridge/24_overparameterization_interpolation_double_descent_benign_overfitting.md) | Belkin et al.; Nakkiran et al.; Bartlett-Long-Lugosi-Tsigler | interpolation phenomena; minimum-norm linear regression; benign overfitting under spectral assumptions | double-descent phenomena, benign-overfitting formal scope | minimum-norm interpolator derivation and bias-variance reinterpretation |
+| [25 Implicit Bias and NTK](../part5_modern_learning_theory_bridge/25_implicit_bias_optimization_dynamics_and_ntk.md) | Soudry et al.; Jacot-Gabriel-Hongler | separable linear logistic regression; NTK/lazy infinite-width regimes | directional max-margin convergence, tangent kernel definition | optimization-geometry bridge and lazy versus feature-learning distinction |
+| [26 Distribution Shift](../part5_modern_learning_theory_bridge/26_distribution_shift_domain_adaptation_and_representation.md) | Ben-David et al.; Zhao et al. | binary domain adaptation; invariant representation limitations | $\mathcal H\Delta\mathcal H$ divergence, target-risk bound, invariance limitation | Week 4 Canvas / source-target research taxonomy |
+| [27 Unified Map](../part5_modern_learning_theory_bridge/27_modern_generalization_theory_unified_map.md) | all T5 source families | synthesis across regimes | no new theorem | matrix of explanatory lenses and explanation-versus-bound distinction |
+| [28 Claim Audit](../part5_modern_learning_theory_bridge/28_modern_ml_theory_claim_audit.md) | all T5 source families | research-audit framework | no new theorem | theorem-evidence ladder and conceptual-trap audit |
+
+## 11. What is original in this repository
 
 The following T1 content is original synthesis for this repository, not copied from course slides:
 
@@ -217,7 +256,16 @@ The following T4 content is original synthesis for this repository:
 - cross-links to T1-T3 and Week 2-5 reports;
 - all T4 PNG figures and the reproducible T4 figure-generation script under `theory/learning-from-data/assets/`.
 
-## 10. Source-use boundaries
+The following T5 content is original synthesis for this repository:
+
+- the modern-theory master chain from class-level capacity through data-dependent complexity, algorithm-dependent behavior, implicit bias, representation regime, source generalization, and distribution shift;
+- the class-dependent versus algorithm-dependent generalization distinction as a reusable research lens;
+- the explanation-versus-bound distinction separating valid upper bounds, tight bounds, predictive theories, and mechanistic explanations;
+- the T5 theorem-evidence ladder and modern ML theory claim-audit framework;
+- the source-versus-target reliability distinction connected to Week 4 Canvas diagnostics and Week 5 calibration/abstention;
+- the reproducible T5 figures and figure-generation script under `theory/learning-from-data/assets/`.
+
+## 12. Source-use boundaries
 
 No copyrighted slide screenshots were copied. Notes use original wording, diagrams, and derivations. Formulae such as Hoeffding inequality, least-squares normal equations, empirical/population risk, Bayes classifier under 0/1 loss, and likelihood-derived cross entropy are standard mathematical material and are written here in original explanatory context.
 
@@ -226,6 +274,8 @@ Formulae such as finite-class union bounds, Sauer-type growth control, VC-style 
 Formulae such as Bernoulli likelihood, logistic negative log likelihood, binary cross entropy, logistic gradient/Hessian, chain-rule backpropagation, constrained/penalized regularization, L2 gradient, MAP/L2 correspondence, and hold-out validation selection are standard mathematical material. T3 writes original derivations and distinguishes objective, optimizer, model selection, and evaluation roles.
 
 Formulae such as hyperplane distance, functional margin, geometric margin, hard-margin SVM primal/dual, KKT complementary slackness, support-vector expansions, soft-margin slack variables, hinge loss, kernelized dual objectives, PSD Gram-matrix derivations, RBF design matrices, Bayes rule, posterior predictive distributions, and variance of an averaged ensemble are standard mathematical material. T4 writes original explanatory derivations and source-separated interpretation.
+
+Formulae such as uniform stability, expected ghost-sample stability arguments, strongly convex regularized-ERM stability scaling, empirical Rademacher complexity, the $BR/\sqrt n$ norm-bounded linear-class derivation, minimum-norm interpolation via Lagrange multipliers, separable logistic-regression directional max-margin convergence, NTK first-order linearization, $K=JJ^\top$, squared-loss function-space dynamics, $\mathcal H\Delta\mathcal H$ divergence, and Ben-David-style target-risk bounds are standard or source-attributed mathematical material. T5 writes original explanatory derivations and explicitly records model-regime boundaries.
 
 Unresolved source issue: direct video transcript-level attribution is not recorded section by section. The official lecture page, official slides, and official/linked theory notes were used for mapping, while the notes synthesize the concepts rather than quote lecture speech.
 

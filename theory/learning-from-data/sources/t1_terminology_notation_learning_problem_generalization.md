@@ -600,4 +600,84 @@ RBF kernel
 
 An RBF basis function is an explicit localized feature around a center. A Gaussian/RBF kernel is a pairwise inner-product function used inside kernel methods.
 
+## 20. T5 modern generalization terminology
+
+| Term | Meaning | Notes |
+| ---- | ------- | ----- |
+| algorithmic stability | learning algorithm 对 training-sample perturbation 的 sensitivity control | 研究 $A(S)$ 变不变，不是研究 input perturbation |
+| neighboring datasets | 只差一个 observation 的 datasets | 可分 remove-one 与 replace-one convention；theorem 常数依赖 convention |
+| uniform stability | 对所有 sample、index 与 test point 都控制 loss change | 典型形式是 $\sup_z|\ell(h_S,z)-\ell(h_{S'},z)|\le\beta$ |
+| data-dependent complexity | 依赖 realized sample 或 selected/localized region 的 complexity measure | Rademacher complexity 是核心例子之一 |
+| Rademacher variable | 取值为 $-1$ 或 $+1$ 的 independent random sign | 常用于 symmetrization 和 random-sign complexity |
+| empirical Rademacher complexity | function class 在当前 sample 上关联 random signs 的能力 | convention 不同会改变常数 |
+| interpolation | training data 被 exact fit | zero training error alone 不等于 benign overfitting |
+| interpolation threshold | model 第一次具备 exact fit training set 能力的 regime boundary | threshold 附近常伴随 conditioning/sensitivity 问题，但不是 universal law |
+| minimum-norm interpolator | 在所有 exact-fitting solutions 中 norm 最小的 solution | norm 的含义依赖 representation 和 parameterization |
+| overparameterization | parameterization 维度或 flexibility 超过 classical sample-size intuition | 不自动意味着 good 或 bad generalization |
+| double descent | risk 可能先降、在 interpolation 附近升、再在某些 overparameterized regimes 中降 | 不是 larger always better |
+| benign overfitting | exact fit training data while population prediction remains small / near optimal | 需要 population-risk condition，不只是 interpolation |
+| implicit bias | optimizer / parameterization / trajectory 在无显式 penalty 时产生 solution preference | 不应与 explicit regularization 混同 |
+| implicit regularization | 当 implicit bias 可被 formalized 为 regularization-like preference 时使用 | 没有 formal equivalence 时优先写 implicit bias |
+| tangent feature | $\nabla_\theta f_\theta(x)$ 作为 local parameter-space feature | NTK 的基本对象 |
+| Jacobian feature | training-set Jacobian 行向量形成的 feature representation | finite sample 上 $K=JJ^\top$ |
+| Neural Tangent Kernel | tangent features 的 inner-product kernel | $K_\theta(x,x')=\nabla_\theta f_\theta(x)^\top\nabla_\theta f_\theta(x')$ |
+| lazy training | tangent/kernel geometry 在 training 中变化很小的 regime | 不等于所有 neural-network training |
+| feature learning | internal representation 在 training 中 materially changes | 一般理论刻画更难 |
+| source domain | training / development evidence 所来自的 distribution 或 environment | source generalization 通常估计 $R_S$ |
+| target domain | deployment / transfer 关心的 distribution 或 environment | target reliability 需要 source-target argument |
+| domain adaptation | 利用 source 和某种 target information / assumption 控制 target risk | 不等于 ordinary i.i.d. generalization |
+| $\mathcal H\Delta\mathcal H$ divergence | hypotheses disagreement 在 source 与 target marginals 上的差异 | 依赖 hypothesis class，不是 generic Euclidean distance |
+| joint source-target error | source 和 target 上同一 hypothesis 可同时达到的最低 combined error | Ben-David-style bound 中常记为 $\lambda$ |
+| invariant representation | 让 source/target representation marginals 相似或不可区分的 representation | 不自动保留 predictive mechanism |
+
+Required T5 distinctions:
+
+```text
+implicit bias
+!=
+explicit regularization
+```
+
+explicit regularization 写在 objective 或 constraint 中。implicit bias 来自 optimizer、parameterization 与 trajectory 的 solution preference。
+
+```text
+interpolation
+!=
+overfitting
+```
+
+interpolation 是 training data 被 exact fit。overfitting 是 selected procedure exploit sample-specific structure，使 population behavior 变差。
+
+```text
+stability
+!=
+robustness
+```
+
+algorithmic stability 改变 training examples；robustness 改变 input、environment 或 distribution。
+
+```text
+data-dependent complexity
+!=
+algorithm-dependent analysis
+```
+
+data-dependent complexity 通常控制 class 或 region 在 sample 上的 richness。algorithm-dependent analysis 直接研究 $h=A(S)$ 或 training trajectory。两者可结合，但对象不同。
+
+```text
+source generalization
+!=
+target-domain adaptation
+```
+
+source generalization 控制 $\hat R_S$ 与 $R_S$。target-domain adaptation 还要控制 $R_S$ 与 $R_T$ 的关系。
+
+```text
+domain invariance
+!=
+predictive / mechanistic invariance
+```
+
+representation marginals aligned 不代表 conditional mechanism preserved。若 predictive information 被丢掉，target performance 仍会失败。
+
 [← Back to Learning From Data Theory Notebook](../README.md)
