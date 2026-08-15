@@ -108,6 +108,8 @@ generalization gap can be controlled
 - $S=(z_1,\ldots,z_n)$ i.i.d. drawn from source distribution $P$。
 - loss bounded：$0\le \ell(h,z)\le M$。
 - $A$ has remove-one uniform stability $\beta$。
+- displayed bound 使用 Bousquet-Elisseeff 原文的 classical setup：learning algorithm 是 deterministic，并且对 sample ordering symmetric。
+- 原文的 sample-size convention 需要能比较 size-$n$ 与 size-$(n-1)$ samples 的 stability；通常用 paper 中对应的 sample-size stability sequence 或 common upper bound 统一记为 $\beta$。
 
 ### Objects and Randomness
 
@@ -140,7 +142,7 @@ R(h_S)
 \sqrt{\frac{\log(1/\delta)}{2n}}.
 ```
 
-常数依赖 bounded-loss 与 remove-one stability convention。不要在不同 convention 之间混用常数。
+这组常数来自 Bousquet-Elisseeff 原始 setup：i.i.d. sample、bounded loss、remove-one uniform stability、deterministic symmetric algorithm，以及上述 sample-size stability convention。不要在不同 convention 之间混用常数。
 
 ### Derivation / Proof Idea
 
@@ -160,7 +162,9 @@ uniform stability 先控制 expected generalization gap。然后用 bounded-diff
 
 ### Model-Regime Boundary
 
-这是 bounded loss、i.i.d. source sampling、abstract stable algorithm 的 theorem。它本身不是 arbitrary deep-network theorem。
+这是 bounded loss、i.i.d. source sampling、remove-one stability、deterministic symmetric algorithm 的 classical theorem。它本身不是 arbitrary deep-network theorem。
+
+这不表示所有 modern stability theorem 都要求 deterministic algorithms。randomized algorithms，包括 SGD stability analyses，通常使用各自的 stability definition，并显式或隐式地对 algorithmic randomness 取 expectation 或 high-probability control。
 
 ## 4. Expected Generalization Skeleton
 

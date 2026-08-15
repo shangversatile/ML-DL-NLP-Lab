@@ -132,7 +132,21 @@ X^\top(XX^\top)^{-1}y.
 Xv=0.
 ```
 
-minimum-norm rule 选择 nullspace 正交方向上的 component。这直接连接 implicit bias：当 fitting solutions 无限多时，algorithm 仍会选出其中一个。
+上述 constrained-optimization derivation 只证明了一件事：在许多 interpolators 中，minimum-norm criterion 定义出一个 distinguished solution。它本身还没有证明某个 optimizer 会选择这个 solution。
+
+概念桥梁应写成：
+
+```text
+many interpolators exist
+down
+minimum-norm criterion defines one distinguished solution
+down
+implicit-bias question:
+does a specific optimizer / initialization / trajectory
+select this solution without an explicit minimum-norm constraint?
+```
+
+因此，要把 minimum-norm selection 称为 optimizer implicit-bias result，还需要单独的 algorithmic argument。仅有上面的 constrained minimum-norm derivation 不够。
 
 ## 3. Why Interpolation Can Be Harmful
 

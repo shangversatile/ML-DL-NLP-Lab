@@ -206,11 +206,21 @@ R_S(h)+R_T(h)
 
 它表示是否存在一个 shared hypothesis 同时适合 source 与 target。
 
+更精确地说，$\lambda$ 衡量的是相对于当前 $\mathcal H$ 的 shared-hypothesis / joint-predictive feasibility。
+
 因此，即使 representation 被做成 domain-invariant，使 discrepancy 很小，target prediction 仍可能失败：如果 no shared hypothesis performs well on both domains，$\lambda$ 会很大。
 
-这是从 domain adaptation 到 mechanism change 的关键桥梁。
+但 $\lambda$ 不诊断 shared feasibility 为什么失败。large $\lambda$ 可以与多种情况一致：
 
-## 6. Covariate Shift Versus Conditional / Mechanism Shift
+- observational conditional relationship 改变；
+- hypothesis-class misspecification；
+- representation information loss；
+- source / target labeling incompatibility；
+- 其他 source-target structural mismatch。
+
+它暴露的是 distribution alignment 的限制：small domain discrepancy 不足以保证 target performance，当 chosen representation / hypothesis family 缺少 jointly good predictor 时仍会失败。至于原因是否是 underlying mechanism change，需要单独的 structural argument。
+
+## 6. Covariate Shift, Conditional Shift, and Mechanism Change
 
 沿用 T4 的 taxonomy。
 
@@ -230,7 +240,7 @@ P_S(Y|X)=P_T(Y|X)
 
 在相关区域成立。
 
-### Conditional / Concept / Mechanism Change
+### Conditional / Concept Shift
 
 更困难的情况是：
 
@@ -242,7 +252,23 @@ P_T(Y|X)
 
 在重要区域发生改变。
 
-不能假设适用于 covariate shift 的 method 自动解决 mechanism shift。
+这是关于 observational conditional relationship 的 statistical statement。它说明 prediction-relevant conditional behavior 在 source 和 target 之间不同，但它本身不识别原因。
+
+### Structural / Causal / Dynamical Mechanism Change
+
+mechanism-change claim 更强。它声称 underlying data-generating structural mechanism 发生改变，例如 causal equation、dynamical law、intervention target、measurement process 或 structural relation 改变。
+
+必须明确：
+
+```text
+P_S(Y|X) != P_T(Y|X)
+does not by itself identify or prove
+a change in the underlying causal/dynamical mechanism.
+```
+
+要提出 mechanism-change claim，需要 explicit structural model 和额外 assumptions。反过来，observed conditional behavior 改变也可能来自多种原因：latent-variable distribution 改变、measurement / selection process 改变、conditioning structure 改变、label definition 改变，或 underlying mechanism 改变。
+
+本章不展开 causal inference；这里只要求不要把 conditional shift 与 structural mechanism change 混为一谈。
 
 ## 7. Representation Adaptation
 
@@ -277,9 +303,19 @@ P_T(Z)
 
 ## 8. Limits of Invariant Representation
 
-Zhao et al. 的核心提醒是：domain invariance alone can be insufficient。特别是在 source 与 target 的 label-distribution 或 conditional structure 不匹配时，强制 marginal representation alignment 可能与 good joint prediction 冲突。
+Zhao et al. 的核心提醒是：domain invariance alone can be insufficient。它们的 analysis / counterexamples 表明，在 source-target incompatibility 下，representation alignment 加上 low source error 仍可能与 large target or joint error 共存；相关条件包括 label-distribution relationships。
 
 这不是说 invariant representation 永远没用，而是说：
+
+```text
+domain-invariant representation
+!=
+guaranteed target accuracy
+```
+
+除非有更强 assumptions 说明被保留的 representation 同时保留了 target-relevant predictive information。
+
+作为 repository synthesis，还要进一步区分：
 
 ```text
 invariant representation
@@ -287,11 +323,11 @@ invariant representation
 mechanism-preserving representation
 ```
 
-除非有更强 assumptions 说明被保留的 representation 同时保留了 target-relevant predictive mechanism。
+这个 distinction 不是 Zhao et al. 的 arbitrary mechanism-shift theorem，而是本仓库用来审计 marginal representation alignment claims 的概念边界。
 
 ### Model-Regime Boundary
 
-Zhao et al. 的结果针对 domain adaptation 中的 representation alignment 设置。不要把它泛化成所有 invariance methods 都失败；也不要把 domain invariance 当作 target accuracy 的充分条件。
+Zhao et al. 的结果针对 domain adaptation 中的 representation alignment 设置。不要把它泛化成所有 invariance methods 都失败；也不要把它升级成 arbitrary mechanism shift theorem；也不要把 domain invariance 当作 target accuracy 的充分条件。
 
 ## 9. Connection to Real-World Dynamic Systems
 
@@ -301,11 +337,12 @@ real-world shift 可以分成几个 diagnostic axes：
 Observation mechanism change
 State-distribution change
 Spatial interaction change
-Conditional prediction mechanism change
+Conditional prediction relationship change
+Structural / causal / dynamical mechanism change
 Label / target-definition change
 ```
 
-Week 4 Canvas shift 更接近 observation mechanism change：模型在 sklearn digits source 上的 behavior，不自动说明真实 canvas 输入下的 behavior。若 label meaning 或 conditional mechanism 也改变，则问题更强。
+Week 4 Canvas shift 更接近 observation mechanism change：模型在 sklearn digits source 上的 behavior，不自动说明真实 canvas 输入下的 behavior。若 label meaning、observational conditional relationship 或 structural mechanism 也改变，则问题更强，但这些需要分别论证。
 
 existing domain-adaptation theory 不解决所有这些变化。它提供的是可审计的 formal decomposition。
 
@@ -318,7 +355,8 @@ existing domain-adaptation theory 不解决所有这些变化。它提供的是�
 - representation alignment 是否足够？
 - 是否有 target-domain information？
 - claim 是 adaptation、robustness、invariance，还是 shift detection？
-- 如果 conditional mechanism 改变，会发生什么？
+- 如果 observed conditional relationship 改变，会发生什么？
+- 如果 claim 涉及 structural mechanism change，structural model 和 assumptions 是什么？
 
 ## 11. Cross-Links
 

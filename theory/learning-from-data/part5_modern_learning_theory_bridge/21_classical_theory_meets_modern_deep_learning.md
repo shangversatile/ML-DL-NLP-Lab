@@ -110,28 +110,62 @@ classical theory 仍然是 foundation，因为它定义了 learning claim 必须
 
 ## 2. Nominal Capacity Versus Observed Behavior
 
-modern architecture 往往定义非常大的 nominal family：
+需要区分 fixed architecture 与 architecture / model-family selection 两层。
+
+对一个固定 architecture，nominal family 是：
 
 ```math
-\mathcal H=\{h_\theta:\theta\in\Theta\}.
+\mathcal H_{\mathrm{arch}}
+=
+\{h_\theta:\theta\in\Theta_{\mathrm{arch}}\}.
 ```
 
-但 trained predictor 不是 $\mathcal H$ 中任意一个元素，而是：
-
-```math
-g=A(S).
-```
-
-这里 $A$ 包含 initialization、optimizer、learning-rate schedule、batch sampling、early stopping、regularization、architecture、numerical details 与 model-selection choices。
-
-T5 因此固定两个对象：
+training algorithm 可以写成：
 
 ```text
-H = nominal function family
-A(S) = actual data- and algorithm-dependent selected solution
+A_train(S; arch)
+= initialization + optimizer + trajectory + stopping + other training choices
 ```
 
-同一个 architecture 可以在 random labels 上 memorize，也可以在 structured data 上选出 low-norm / large-margin / kernel-like / feature-learning solution。仅写出 $\mathcal H$ 不足以说明最终学到的 function。
+它的输出是：
+
+```math
+g=A_{\mathrm{train}}(S;\mathrm{arch}).
+```
+
+在这一层，architecture 已经固定，$A_{\mathrm{train}}$ 不再同时负责选择 architecture。
+
+如果 architecture、preprocessing、model family 或 hyperparameters 也由 data / validation feedback / researcher loop 选择，那么分析对象必须上升到 meta level：
+
+```text
+H_meta
+= candidate collection across architecture or model choices
+```
+
+这里不要求 candidate families 一定能被干净写成 disjoint union。重要的是：只要 architecture 或 model-family choice 是 data-dependent 的，admissible candidate space 就必须覆盖这些可能被选择的 families。
+
+整体 adaptive procedure 可以写成：
+
+```text
+A_meta(S)
+= architecture/model selection
++ training procedure
++ parameter selection
+```
+
+这保留了 T3 的 insight：architecture、preprocessing、hyperparameters、checkpoint choice 与 validation feedback 都可能成为 overall adaptive research procedure 的一部分。
+
+T5 因此固定两个层次的对象：
+
+```text
+fixed architecture:
+H_arch and A_train(S; arch)
+
+adaptive model-family selection:
+H_meta and A_meta(S)
+```
+
+同一个 fixed architecture 可以在 random labels 上 memorize，也可以在 structured data 上选出 low-norm / large-margin / kernel-like / feature-learning solution。若 architecture 本身也被选择，仅写出单个 $\mathcal H_{\mathrm{arch}}$ 更不足以说明最终学到的 function。
 
 ## 3. Random-Label Experiment
 
@@ -168,7 +202,7 @@ randomized labels
 - deep learning 没有 inductive bias；
 - random-label behavior 预测 deployment robustness。
 
-它证明的是：简单的 architecture-size 或 parameter-count story 不足以解释 observed source-distribution generalization。
+该实验支持的结论是：简单的 architecture-size 或 parameter-count story 不足以解释 observed source-distribution generalization。
 
 ## 4. Four Different Questions
 

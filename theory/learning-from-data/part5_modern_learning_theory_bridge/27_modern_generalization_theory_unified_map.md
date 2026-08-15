@@ -27,8 +27,20 @@ H
 问题是：
 
 ```text
-Can every allowed hypothesis generalize?
+Can the empirical-to-population risk gap be controlled
+simultaneously for every h in H?
 ```
+
+也就是控制：
+
+```math
+\sup_{h\in\mathcal H}
+\left|
+R(h)-\hat R_S(h)
+\right|.
+```
+
+uniform convergence 不声称 every hypothesis has low population risk。它说的是：在 theorem assumptions 下，empirical quantities 可以同时近似 population quantities。若某个 $h$ 的 empirical risk 本来就高，uniform convergence 不会把它变成 low-risk predictor。
 
 它适合控制 class-wide selection risk，但在巨大 overparameterized family 中可能过粗或 vacuous。
 
@@ -152,12 +164,12 @@ source generalization 与 shift reliability 必须永久分开。
 | --- | --- | --- | --- | --- | --- | --- |
 | VC / uniform convergence | all $h\in\mathcal H$ | i.i.d. source sampling, finite VC/growth control | high-probability uniform gap | class-wide selection validity | optimizer path, learned representation, shift | T2 capacity spine |
 | Rademacher complexity | class behavior on sample | bounded/Lipschitz losses, defined class | sample-dependent uniform gap | richness on observed geometry | algorithm output sensitivity, target shift | T2 refined by T4 geometry |
-| Algorithmic stability | $A(S)$ sensitivity | neighboring datasets, loss bounded/smoothness | generalization gap via stability | algorithm-dependent generalization | adversarial robustness, domain shift | T3 optimizer/regularization |
+| Algorithmic stability | $A(S)$ sensitivity to neighboring datasets | theorem-dependent：Bousquet-Elisseeff high-probability control uses bounded loss and deterministic symmetric setup; Hardt-style SGD uses Lipschitz/smoothness/step-size assumptions | generalization gap via stability | algorithm-dependent generalization | adversarial robustness, domain shift | T3 optimizer/regularization |
 | Margin/norm | selected region or restricted class | norm/margin bounds, representation geometry | complexity bound for low-norm/high-margin predictors | why huge family can contain simple solutions | why optimizer selected them unless added argument | T4 margin/kernel |
 | Implicit bias | optimizer-selected solution | specific optimizer, loss, separability/geometry | asymptotic solution preference | which interpolator/direction is selected | arbitrary architectures without bridge | T3 optimization + T4 margin |
 | Benign-overfitting models | minimum-norm interpolator | linear model, covariance/noise spectrum | population risk despite interpolation | when interpolation can be harmless | universal deep-learning explanation | T2 bias-variance revised |
 | NTK | tangent-kernel dynamics | infinite-width or lazy regime | kernel-like training dynamics | one regime of neural training | feature learning in general finite networks | T4 kernel + T3 neural nets |
-| Domain adaptation | source-target relation | $\mathcal H\Delta\mathcal H$ discrepancy, joint feasibility | target-risk upper bound | why source risk alone is insufficient | mechanism shift without assumptions | T1 distribution + T4 shift |
+| Domain adaptation | source-target relation | $\mathcal H\Delta\mathcal H$ discrepancy, joint feasibility | target-risk upper bound | why source risk alone is insufficient | structural mechanism change without additional assumptions | T1 distribution + T4 shift |
 
 ## 11. Class-Dependent Versus Algorithm-Dependent Generalization
 
