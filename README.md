@@ -18,7 +18,7 @@ Week 1, Week 2, and Week 3 foundations are complete through the binary NumPy MLP
 | Week 4 | Multiclass MLP and Handwritten-Digit Recognition Capstone  | complete, tagged `week4-mlp-digits-diagnostic-capstone` |
 | Week 5 | Evaluation, Technical Debt, and Trustworthy ML Diagnostics | in progress                             |
 
-Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md), [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md), [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](reports/week5_evaluation_technical_debt.md), the new [Learning From Data 理论笔记](theory/learning-from-data/README.md), and the [AI / ML / DL / CS / Math Knowledge System Roadmap](AI-ML-DL-CS-Math-Knowledge-System.md).
+Current notes are tracked in [Week 3 Optimization and MLP Notes](reports/week3_optimization_and_mlp.md), [Week 4 Multiclass MLP and Handwritten-Digit Recognition Capstone](reports/week4_multiclass_digits_capstone.md), [Week 5 Evaluation, Technical Debt, and Trustworthy ML Diagnostics](reports/week5_evaluation_technical_debt.md), the new [Learning From Data 理论笔记](theory/learning-from-data/README.md), and the [人工智能 / 机器学习 / 数学 / 计算机科学知识体系路线图](AI-ML-DL-CS-Math-Knowledge-System.md).
 
 ## Implemented Components
 
